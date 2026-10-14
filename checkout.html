@@ -13,104 +13,11 @@
 <link rel="stylesheet" href="css/rtl.css" />
 <link rel="stylesheet" href="css/mobile.css" />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
-</head>
-<body>
-<canvas id="aurora"></canvas>
-<div id="grain"></div>
-
-<main class="container">
-  <h1 class="page-title" data-i18n="checkout.title"></h1>
-  <form id="checkoutForm" class="checkout-grid">
-    <section class="form-col reveal">
-      <label><span data-i18n="checkout.name"></span><input name="name" required minlength="2" /></label>
-      <label><span data-i18n="checkout.email"></span><input name="email" type="email" required /></label>
-      <label><span data-i18n="checkout.phone"></span><input name="phone" required minlength="7" /></label>
-      <label><span data-i18n="checkout.city"></span>
-        <select name="city" id="citySelect" required></select>
-      </label>
-      <label><span data-i18n="checkout.address"></span><textarea name="address" required minlength="5"></textarea></label>
-      <label><span data-i18n="checkout.notes"></span><textarea name="notes"></textarea></label>
-
-      <fieldset class="pay">
-        <legend data-i18n="checkout.payment"></legend>
-        <label class="radio"><input type="radio" name="pay" value="COD" checked /><span data-i18n="checkout.cod"></span></label>
-        <label class="radio"><input type="radio" name="pay" value="CLIQ" /><span data-i18n="checkout.cliq"></span></label>
-      </fieldset>
-
-      <div id="cliqSummary" class="cliq-summary hidden">
-        <div class="cs-row">
-          <span class="cs-label">✓ دفع Cliq</span>
-          <button type="button" class="cs-edit" id="cliqEdit">تعديل</button>
-        </div>
-        <div class="cs-file" id="cliqFileName">— لم يتم رفع إشعار —</div>
-      </div>
-
-      <label class="points-box">
-        <input type="checkbox" id="usePoints" />
-        <span data-i18n="checkout.points"></span>
-        <small data-i18n="checkout.pointsHint"></small>
-        <em id="pointsBalance"></em>
-      </label>
-    </section>
-
-    <aside class="summary-col reveal">
-      <h3 data-i18n="cart.title"></h3>
-      <div id="summaryItems"></div>
-
-      <div class="coupon-row">
-        <input type="text" id="couponInput" placeholder="كود الخصم" />
-        <button type="button" class="btn ghost" id="couponApply">تطبيق</button>
-      </div>
-      <div id="couponStatus"></div>
-
-      <div class="row"><span data-i18n="cart.subtotal"></span><span id="sumSub"></span></div>
-      <div class="row" id="discountRow" style="display:none"><span data-i18n="checkout.points"></span><span id="sumDisc"></span></div>
-      <div class="row" id="couponRow" style="display:none"><span>كود الخصم</span><span id="sumCoupon"></span></div>
-      <div class="row"><span data-i18n="cart.shipping"></span><span id="sumShip"></span></div>
-      <div class="row total"><span data-i18n="cart.total"></span><span id="sumTotal"></span></div>
-      <button class="btn primary full" data-i18n="checkout.placeOrder" type="submit" style="margin-top:16px"></button>
-    </aside>
-  </form>
-
-  <div id="successBox" class="success-box hidden"></div>
-</main>
-
-<!-- ============ CLIQ POPUP ============ -->
-<div id="cliqModal" class="modal-backdrop hidden">
-  <div class="modal-card" style="max-width:520px;text-align:start">
-    <h3>دفع Cliq</h3>
-
-    <div class="cliq-info">
-      <div class="cliq-row">
-        <span>معرّف Cliq</span>
-        <code id="cliqCode" class="font-en">SAWWA1</code>
-      </div>
-      <div class="cliq-row">
-        <span>المبلغ المطلوب</span>
-        <strong id="cliqAmount" class="font-en">0.00 JOD</strong>
-      </div>
-    </div>
-
-    <p class="cliq-hint">حوّل المبلغ إلى المعرّف أعلاه من تطبيق بنكك، ثم ارفع صورة إشعار التحويل ليتم تأكيد طلبك.</p>
-
-    <label class="cliq-file-label">
-      <span>صورة إشعار التحويل</span>
-      <input type="file" id="cliqFileInput" accept="image/*" hidden />
-      <div class="cliq-file-box" id="cliqFileBox">
-        <span class="cfb-icon">📷</span>
-        <span class="cfb-text" id="cliqFileText">اضغط لاختيار صورة</span>
-      </div>
-    </label>
-
-    <div class="modal-actions">
-      <button type="button" class="btn primary" id="cliqConfirm">تأكيد الدفع</button>
-      <button type="button" class="btn ghost" id="cliqCancel">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<!-- ============ CLIQ STYLES ============ -->
 <style>
+  /* Bulletproof hidden */
+  [hidden] { display: none !important; }
+
+  /* Cliq summary chip (يظهر في النموذج فقط بعد التأكيد) */
   .cliq-summary {
     background: color-mix(in srgb, var(--brand) 8%, transparent);
     border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent);
@@ -137,17 +44,102 @@
     font-size: 13px;
     font-weight: 600;
     text-decoration: underline;
+    font-family: inherit;
   }
   .cs-file {
     font-size: 13px;
     color: var(--text-2);
   }
 
+  /* Cliq Modal */
+  #cliqModal {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: cliqFade .2s ease-out;
+  }
+  #cliqModal[hidden] { display: none !important; }
+
+  @keyframes cliqFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .cliq-modal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 32px 28px 26px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: cliqPop .3s cubic-bezier(.34, 1.56, .64, 1);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    text-align: start;
+  }
+  html.dark .cliq-modal-card {
+    background: var(--surface-2);
+  }
+
+  @keyframes cliqPop {
+    0% { transform: scale(0.92); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* X button */
+  .cliq-x {
+    position: absolute;
+    top: 14px;
+    inset-inline-end: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    transition: all .15s;
+    font-family: inherit;
+    padding: 0;
+    z-index: 2;
+  }
+  .cliq-x:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  html.dark .cliq-x {
+    background: var(--surface-3);
+  }
+
+  .cliq-modal-card h3 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+    padding-inline-end: 44px;
+  }
+
   .cliq-info {
     background: var(--surface-2);
     border-radius: var(--r-sm);
     padding: 16px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -182,7 +174,7 @@
     font-size: 14px;
     color: var(--text-2);
     line-height: 1.7;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
 
   .cliq-file-label > span {
@@ -195,10 +187,10 @@
   .cliq-file-box {
     border: 2px dashed var(--border-2);
     border-radius: var(--r-sm);
-    padding: 24px 16px;
+    padding: 22px 16px;
     text-align: center;
     cursor: pointer;
-    transition: all .15s var(--ease);
+    transition: all .15s;
     background: var(--surface-2);
   }
   .cliq-file-box:hover {
@@ -211,23 +203,144 @@
     background: color-mix(in srgb, var(--brand) 8%, transparent);
   }
   .cfb-icon {
-    font-size: 32px;
+    font-size: 30px;
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .cfb-text {
     font-size: 14px;
     color: var(--text-2);
     font-weight: 600;
+    word-break: break-all;
   }
   .cliq-file-box.has-file .cfb-text {
     color: var(--brand);
   }
 
-  #cliqModal .modal-card {
-    text-align: start;
+  .cliq-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .cliq-modal-actions .btn {
+    flex: 1;
+  }
+
+  @media (max-width: 640px) {
+    .cliq-modal-card {
+      padding: 26px 20px 20px;
+      border-radius: var(--r-md);
+    }
+    .cliq-modal-card h3 { font-size: 18px; }
+    .cliq-modal-actions { flex-direction: column-reverse; }
   }
 </style>
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container">
+  <h1 class="page-title" data-i18n="checkout.title"></h1>
+  <form id="checkoutForm" class="checkout-grid">
+    <section class="form-col reveal">
+      <label><span data-i18n="checkout.name"></span><input name="name" required minlength="2" /></label>
+      <label><span data-i18n="checkout.email"></span><input name="email" type="email" required /></label>
+      <label><span data-i18n="checkout.phone"></span><input name="phone" required minlength="7" /></label>
+      <label><span data-i18n="checkout.city"></span>
+        <select name="city" id="citySelect" required></select>
+      </label>
+      <label><span data-i18n="checkout.address"></span><textarea name="address" required minlength="5"></textarea></label>
+      <label><span data-i18n="checkout.notes"></span><textarea name="notes"></textarea></label>
+
+      <fieldset class="pay">
+        <legend data-i18n="checkout.payment"></legend>
+        <label class="radio">
+          <input type="radio" name="pay" value="COD" checked />
+          <span data-i18n="checkout.cod"></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="pay" value="CLIQ" />
+          <span data-i18n="checkout.cliq"></span>
+        </label>
+      </fieldset>
+
+      <!-- ملخص Cliq — يظهر فقط بعد التأكيد -->
+      <div id="cliqSummary" class="cliq-summary" hidden>
+        <div class="cs-row">
+          <span class="cs-label">✓ دفع Cliq مُفعّل</span>
+          <button type="button" class="cs-edit" id="cliqEdit">تعديل</button>
+        </div>
+        <div class="cs-file" id="cliqFileName">— لم يتم رفع إشعار —</div>
+      </div>
+
+      <label class="points-box">
+        <input type="checkbox" id="usePoints" />
+        <span data-i18n="checkout.points"></span>
+        <small data-i18n="checkout.pointsHint"></small>
+        <em id="pointsBalance"></em>
+      </label>
+    </section>
+
+    <aside class="summary-col reveal">
+      <h3 data-i18n="cart.title"></h3>
+      <div id="summaryItems"></div>
+
+      <div class="coupon-row">
+        <input type="text" id="couponInput" placeholder="كود الخصم" />
+        <button type="button" class="btn ghost" id="couponApply">تطبيق</button>
+      </div>
+      <div id="couponStatus"></div>
+
+      <div class="row"><span data-i18n="cart.subtotal"></span><span id="sumSub"></span></div>
+      <div class="row" id="discountRow" style="display:none"><span data-i18n="checkout.points"></span><span id="sumDisc"></span></div>
+      <div class="row" id="couponRow" style="display:none"><span>كود الخصم</span><span id="sumCoupon"></span></div>
+      <div class="row"><span data-i18n="cart.shipping"></span><span id="sumShip"></span></div>
+      <div class="row total"><span data-i18n="cart.total"></span><span id="sumTotal"></span></div>
+      <button class="btn primary full" data-i18n="checkout.placeOrder" type="submit" style="margin-top:16px"></button>
+    </aside>
+  </form>
+
+  <div id="successBox" class="success-box" hidden></div>
+</main>
+
+<!-- ============ CLIQ POPUP (hidden by default) ============ -->
+<div id="cliqModal" hidden>
+  <div class="cliq-modal-card">
+    <button type="button" class="cliq-x" id="cliqX" aria-label="close">×</button>
+
+    <h3>دفع Cliq</h3>
+
+    <div class="cliq-info">
+      <div class="cliq-row">
+        <span>معرّف Cliq</span>
+        <code id="cliqCode" class="font-en">SAWWA1</code>
+      </div>
+      <div class="cliq-row">
+        <span>المبلغ المطلوب</span>
+        <strong id="cliqAmount" class="font-en">0.00 JOD</strong>
+      </div>
+    </div>
+
+    <p class="cliq-hint">حوّل المبلغ إلى المعرّف أعلاه من تطبيق بنكك، ثم ارفع صورة إشعار التحويل.</p>
+
+    <label class="cliq-file-label">
+      <span>صورة إشعار التحويل</span>
+      <input type="file" id="cliqFileInput" accept="image/*" hidden />
+      <div class="cliq-file-box" id="cliqFileBox">
+        <span class="cfb-icon">📷</span>
+        <span class="cfb-text" id="cliqFileText">اضغط لاختيار صورة</span>
+      </div>
+    </label>
+
+    <div class="cliq-modal-actions">
+      <button type="button" class="btn primary" id="cliqConfirm">تأكيد الدفع</button>
+      <button type="button" class="btn ghost" id="cliqCancel">إلغاء</button>
+    </div>
+  </div>
+</div>
 
 <script src="js/design-tokens.js"></script>
 <script src="js/config.js"></script>
@@ -246,15 +359,111 @@ UI.init({
   after: () => {
     const lang = window.SAWWA.lang;
 
-    /* ============ INIT ============ */
-    const cliqCode = document.getElementById("cliqCode");
-    if (cliqCode) cliqCode.textContent = window.SAWWA.cliqId || "SAWWA1";
+    /* ============ REFS ============ */
+    const cliqModal      = document.getElementById("cliqModal");
+    const cliqSummary    = document.getElementById("cliqSummary");
+    const cliqFileName   = document.getElementById("cliqFileName");
+    const cliqFileInput  = document.getElementById("cliqFileInput");
+    const cliqFileBox    = document.getElementById("cliqFileBox");
+    const cliqFileText   = document.getElementById("cliqFileText");
+    const cliqCode       = document.getElementById("cliqCode");
+    const cliqAmount     = document.getElementById("cliqAmount");
+    const codRadio       = document.querySelector('input[name=pay][value="COD"]');
+    const cliqRadio      = document.querySelector('input[name=pay][value="CLIQ"]');
+    const citySel        = document.getElementById("citySelect");
 
-    const citySel = document.getElementById("citySelect");
+    if (cliqCode) cliqCode.textContent = window.SAWWA.cliqId || "SAWWA1";
     citySel.innerHTML = `<option value="">--</option>` + Shipping.list().map((c) => `<option>${c}</option>`).join("");
 
     let appliedCoupon = null;
     let cliqProofFile = null;
+
+    /* ============ MODAL ============ */
+    const openCliqModal = () => {
+      sum();
+      cliqModal.hidden = false;
+      document.body.style.overflow = "hidden";
+    };
+    const closeCliqModal = () => {
+      cliqModal.hidden = true;
+      document.body.style.overflow = "";
+    };
+
+    // أي ضغط على زر Cliq → افتح المودال
+    cliqRadio.addEventListener("change", () => {
+      if (cliqRadio.checked) openCliqModal();
+    });
+    // لو رجع المستخدم لـ COD → أغلق
+    codRadio.addEventListener("change", () => {
+      if (codRadio.checked) {
+        cliqSummary.hidden = true;
+      }
+    });
+
+    // زر "تعديل" → أعد فتح المودال
+    document.getElementById("cliqEdit").onclick = () => openCliqModal();
+
+    // X → أغلق فقط
+    document.getElementById("cliqX").onclick = () => {
+      if (!cliqProofFile) {
+        codRadio.checked = true;
+        cliqSummary.hidden = true;
+      }
+      closeCliqModal();
+    };
+
+    // زر "إلغاء" → أغلق + ارجع COD
+    document.getElementById("cliqCancel").onclick = () => {
+      if (!cliqProofFile) {
+        codRadio.checked = true;
+        cliqSummary.hidden = true;
+      }
+      closeCliqModal();
+    };
+
+    // زر "تأكيد الدفع" → تحقق + احفظ
+    document.getElementById("cliqConfirm").onclick = () => {
+      if (!cliqProofFile) {
+        if (window.UI?.toast) UI.toast(lang === "ar" ? "ارفع صورة الإشعار أولاً" : "Upload receipt first", "warn");
+        return;
+      }
+      cliqRadio.checked = true;
+      cliqSummary.hidden = false;
+      cliqFileName.textContent = cliqProofFile.name || "صورة";
+      closeCliqModal();
+    };
+
+    // ضغط خارج البطاقة → نفس سلوك X
+    cliqModal.addEventListener("click", (e) => {
+      if (e.target === cliqModal) {
+        if (!cliqProofFile) {
+          codRadio.checked = true;
+          cliqSummary.hidden = true;
+        }
+        closeCliqModal();
+      }
+    });
+
+    // ESC
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !cliqModal.hidden) {
+        if (!cliqProofFile) {
+          codRadio.checked = true;
+          cliqSummary.hidden = true;
+        }
+        closeCliqModal();
+      }
+    });
+
+    // رفع ملف
+    cliqFileBox.onclick = () => cliqFileInput.click();
+    cliqFileInput.onchange = (e) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+      cliqProofFile = f;
+      cliqFileBox.classList.add("has-file");
+      cliqFileText.textContent = f.name;
+    };
 
     /* ============ SUM ============ */
     const sum = () => {
@@ -280,9 +489,6 @@ UI.init({
       else cRow.style.display = "none";
 
       document.getElementById("pointsBalance").textContent = `${pts} ${lang === "ar" ? "نقطة" : "pts"}`;
-
-      // تحديث المبلغ داخل مودال Cliq
-      const cliqAmount = document.getElementById("cliqAmount");
       if (cliqAmount) cliqAmount.textContent = UI.fmt(total);
 
       return { sub, ship, discPts, discCoupon, total };
@@ -298,100 +504,11 @@ UI.init({
         `).join("");
     };
 
-    /* ============ CLIQ MODAL LOGIC ============ */
-    const cliqModal = document.getElementById("cliqModal");
-    const cliqSummary = document.getElementById("cliqSummary");
-    const cliqFileName = document.getElementById("cliqFileName");
-    const cliqFileInput = document.getElementById("cliqFileInput");
-    const cliqFileBox = document.getElementById("cliqFileBox");
-    const cliqFileText = document.getElementById("cliqFileText");
-    const payRadios = document.querySelectorAll("input[name=pay]");
-
-    const openCliqModal = () => {
-      sum(); // لتحديث المبلغ
-      cliqModal.classList.remove("hidden");
-      document.body.style.overflow = "hidden";
-    };
-    const closeCliqModal = () => {
-      cliqModal.classList.add("hidden");
-      document.body.style.overflow = "";
-    };
-
-    const setRadioToCOD = () => {
-      document.querySelector('input[name=pay][value="COD"]').checked = true;
-      cliqSummary.classList.add("hidden");
-    };
-
-    const setRadioToCliq = () => {
-      document.querySelector('input[name=pay][value="CLIQ"]').checked = true;
-    };
-
-    // عند اختيار دفع
-    payRadios.forEach((r) => r.onchange = () => {
-      if (r.value === "CLIQ" && r.checked) {
-        // افتح المودال
-        openCliqModal();
-      } else {
-        cliqSummary.classList.add("hidden");
-      }
-    });
-
-    // زر "تعديل" في الملخص
-    document.getElementById("cliqEdit").onclick = () => {
-      openCliqModal();
-    };
-
-    // زر "تأكيد" في المودال
-    document.getElementById("cliqConfirm").onclick = () => {
-      if (!cliqProofFile) {
-        UI.toast(lang === "ar" ? "ارفع صورة الإشعار أولاً" : "Upload receipt first", "warn");
-        return;
-      }
-      setRadioToCliq();
-      cliqSummary.classList.remove("hidden");
-      cliqFileName.textContent = cliqProofFile.name || "صورة";
-      closeCliqModal();
-    };
-
-    // زر "إلغاء" في المودال
-    document.getElementById("cliqCancel").onclick = () => {
-      // إذا كان Cliq محدد مسبقًا، نبقيه
-      // إذا كان المستخدم لسه ضغط Cliq، نرجع COD
-      if (!cliqProofFile) {
-        setRadioToCOD();
-      }
-      closeCliqModal();
-    };
-
-    // إغلاق عند الضغط خارج المودال
-    cliqModal.addEventListener("click", (e) => {
-      if (e.target === cliqModal) {
-        if (!cliqProofFile) setRadioToCOD();
-        closeCliqModal();
-      }
-    });
-
-    // رفع ملف
-    cliqFileBox.onclick = () => cliqFileInput.click();
-    cliqFileInput.onchange = (e) => {
-      const f = e.target.files?.[0];
-      if (!f) return;
-      cliqProofFile = f;
-      cliqFileBox.classList.add("has-file");
-      cliqFileText.textContent = f.name;
-    };
-
     /* ============ COUPON ============ */
     document.getElementById("couponApply").onclick = () => {
       const code = document.getElementById("couponInput").value.trim();
       const status = document.getElementById("couponStatus");
-      if (!code) {
-        status.innerHTML = "";
-        appliedCoupon = null;
-        Coupons.clear();
-        sum();
-        return;
-      }
+      if (!code) { status.innerHTML = ""; appliedCoupon = null; Coupons.clear(); sum(); return; }
       const res = Coupons.apply(code, Cart.subtotal());
       if (!res.ok) {
         const reasons = {
@@ -423,7 +540,7 @@ UI.init({
       sum();
     };
 
-    /* ============ INIT RENDER ============ */
+    /* ============ INIT ============ */
     document.getElementById("usePoints").onchange = sum;
     citySel.onchange = sum;
     renderItems();
@@ -469,7 +586,7 @@ UI.init({
         paymentMethod: pay,
         paymentStatus: pay === "CLIQ" ? "AWAITING_VERIFICATION" : "PENDING",
         status: "PENDING",
-        cliqProofName: pay === "CLIQ" ? cliqProofFile.name : null,
+        cliqProofName: pay === "CLIQ" && cliqProofFile ? cliqProofFile.name : null,
         pointsEarned: earned, pointsUsed: usedPts
       };
 
@@ -498,7 +615,7 @@ UI.init({
         `طلب جديد ${id}\nالاسم: ${order.name}\nالهاتف: ${order.phone}\nالمدينة: ${order.city}\nالطريقة: ${pay}\nالمجموع: ${(order.total / 100).toFixed(2)} دينار`
       );
       const box = document.getElementById("successBox");
-      box.classList.remove("hidden");
+      box.hidden = false;
       box.innerHTML = `
         <h2>${lang === 'ar' ? '✓ تم استلام طلبك!' : '✓ Order received!'}</h2>
         <p>${lang === 'ar' ? 'رقم الطلب' : 'Order ID'}: <strong class="font-en">${id}</strong></p>
