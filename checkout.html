@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="css/identity.css" />
 <link rel="stylesheet" href="css/style.css" />
 <link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/mobile.css" />
 <link rel="stylesheet" href="css/rtl.css" />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
 </head>
@@ -22,7 +23,10 @@
   <form id="checkoutForm" class="checkout-grid">
     <section class="form-col reveal">
       <label><span data-i18n="checkout.name"></span><input name="name" required minlength="2" /></label>
-      <label><span data-i18n="checkout.email"></span><input name="email" type="email" required /></label>
+      <label>
+        <span data-i18n="checkout.email"></span>
+        <input name="email" type="email" placeholder="اختياري — للتأكيد بالبريد" />
+      </label>
       <label><span data-i18n="checkout.phone"></span><input name="phone" required minlength="7" /></label>
       <label><span data-i18n="checkout.city"></span>
         <select name="city" id="citySelect" required></select>
@@ -78,12 +82,13 @@
 <script src="js/config.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
 <script src="js/shipping.js"></script>
 <script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
 <script src="js/store.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/aurora.js"></script>
-<script src="js/notifications.js"></script>
 <script src="js/ui.js"></script>
 <script>
 UI.init({
@@ -202,7 +207,9 @@ UI.init({
 
       const order = {
         id, createdAt: Date.now(),
-        name: fd.get("name"), email: fd.get("email"), phone: fd.get("phone"),
+        name: fd.get("name"),
+        email: (fd.get("email") || "").trim() || null,
+        phone: fd.get("phone"),
         city: fd.get("city"), address: fd.get("address"), notes: fd.get("notes"),
         items: Cart.get(),
         subtotal: t.sub, shipping: t.ship, discount: t.discPts + t.discCoupon, total: t.total,
@@ -253,17 +260,5 @@ UI.init({
   }
 });
 </script>
-<script src="js/design-tokens.js"></script>
-<script src="js/config.js"></script>
-<script src="js/i18n.js"></script>
-<script src="js/wishlist.js"></script>
-<script src="js/notifications.js"></script>
-<script src="js/shipping.js"></script>
-<script src="js/coupons.js"></script>
-<script src="js/tracking.js"></script>
-<script src="js/store.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/aurora.js"></script>
-<script src="js/ui.js"></script>
 </body>
 </html>
