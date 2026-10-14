@@ -12,13 +12,12 @@
 <link rel="stylesheet" href="css/alerts.css" />
 <link rel="stylesheet" href="css/rtl.css" />
 <style>
-  /* ============ PANEL LAYOUT ============ */
   body.design-body { background: var(--bg); }
   body.design-body::before { display: none; }
 
   .dp-app {
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: 240px 1fr;
     min-height: 100vh;
   }
   .dp-side {
@@ -57,7 +56,6 @@
   .dp-tab.active {
     background: linear-gradient(135deg, #12A89B, #5FD0C5);
     color: #fff;
-    box-shadow: 0 8px 20px rgba(18,168,155,.4);
   }
   .dp-tab .dp-tab-ico { font-size: 16px; width: 20px; text-align: center; }
   .dp-side-foot {
@@ -90,8 +88,6 @@
     font-size: 22px; cursor: pointer; color: var(--ink);
   }
   .dp-title { font-size: 18px; font-weight: 900; color: var(--deep); flex: 1; }
-  html.dark .dp-title { color: var(--cyan); }
-  .dp-top-actions { display: flex; gap: 8px; align-items: center; }
   .dp-status {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 4px 10px;
@@ -104,22 +100,11 @@
     content: "";
     width: 6px; height: 6px; border-radius: 50%;
     background: #2E7D32;
-    animation: dpPulse 1.5s ease-in-out infinite;
-  }
-  @keyframes dpPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .4; }
   }
 
   .dp-content { padding: 26px 30px 80px; max-width: 1100px; }
   .dp-panel { display: none; }
-  .dp-panel.active { display: block; animation: dpFade .3s ease; }
-  @keyframes dpFade {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ============ FORM CONTROLS ============ */
+  .dp-panel.active { display: block; }
   .dp-group {
     background: var(--white);
     border: 1px solid var(--line);
@@ -132,22 +117,13 @@
     font-weight: 900;
     color: var(--deep);
     margin-bottom: 6px;
-    letter-spacing: .04em;
     text-transform: uppercase;
     font-family: "Orbitron", sans-serif;
   }
-  html.dark .dp-group h3 { color: var(--cyan); }
   .dp-group p.dp-help {
     font-size: 12px; color: var(--muted);
     margin-bottom: 20px; line-height: 1.6;
   }
-  .dp-group p.dp-help code {
-    background: var(--paper-2);
-    padding: 2px 6px; border-radius: 4px;
-    font-family: monospace;
-    font-size: 11px;
-  }
-
   .dp-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -161,22 +137,8 @@
     font-weight: 800;
     color: var(--deep);
     margin-bottom: 8px;
-    letter-spacing: .03em;
   }
-  html.dark .dp-field > span { color: var(--ink); }
-  .dp-field > span small {
-    font-weight: 500;
-    color: var(--muted);
-    font-size: 11px;
-    margin-inline-start: 6px;
-  }
-  .dp-field input[type=text],
-  .dp-field input[type=number],
-  .dp-field input[type=email],
-  .dp-field input[type=password],
-  .dp-field input[type=url],
-  .dp-field textarea,
-  .dp-field select {
+  .dp-field input, .dp-field select, .dp-field textarea {
     width: 100%;
     padding: 11px 14px;
     border-radius: 10px;
@@ -185,22 +147,12 @@
     color: var(--ink);
     font-family: inherit;
     font-size: 14px;
-    font-weight: 500;
-    transition: all .2s;
   }
-  html.dark .dp-field input,
-  html.dark .dp-field textarea,
-  html.dark .dp-field select {
-    background: var(--paper-2);
-  }
-  .dp-field input:focus,
-  .dp-field textarea:focus,
-  .dp-field select:focus {
+  .dp-field input:focus, .dp-field select:focus, .dp-field textarea:focus {
     outline: none;
     border-color: var(--teal-2);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal-2) 15%, transparent);
   }
-
   .dp-field.color-field {
     display: grid;
     grid-template-columns: 44px 1fr;
@@ -211,15 +163,7 @@
     width: 44px; height: 44px;
     padding: 0; border: 1.5px solid var(--line);
     border-radius: 10px; cursor: pointer;
-    background: transparent;
   }
-  .dp-field.color-field input[type=text] {
-    font-family: "Orbitron", monospace;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    font-size: 13px;
-  }
-
   .dp-toggle {
     display: flex; align-items: center; gap: 12px;
     padding: 12px 14px;
@@ -227,12 +171,8 @@
     background: var(--paper);
     border: 1.5px solid var(--line);
     cursor: pointer;
-    transition: all .2s;
     font-size: 13px; font-weight: 700;
-    color: var(--ink);
   }
-  html.dark .dp-toggle { background: var(--paper-2); }
-  .dp-toggle:hover { border-color: var(--teal-2); }
   .dp-toggle input { display: none; }
   .dp-toggle .switch {
     width: 40px; height: 22px;
@@ -240,7 +180,6 @@
     border-radius: 999px;
     position: relative;
     transition: background .2s;
-    flex-shrink: 0;
   }
   .dp-toggle .switch::after {
     content: "";
@@ -250,28 +189,17 @@
     background: #fff;
     border-radius: 50%;
     transition: transform .2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,.15);
   }
-  .dp-toggle input:checked + .switch {
-    background: var(--teal-2);
-  }
-  .dp-toggle input:checked + .switch::after {
-    transform: translateX(18px);
-  }
-  [dir="rtl"] .dp-toggle input:checked + .switch::after {
-    transform: translateX(-18px);
-  }
-
+  .dp-toggle input:checked + .switch { background: var(--teal-2); }
+  .dp-toggle input:checked + .switch::after { transform: translateX(18px); }
+  [dir="rtl"] .dp-toggle input:checked + .switch::after { transform: translateX(-18px); }
   .dp-range-row {
     display: grid;
     grid-template-columns: 1fr 60px;
     gap: 12px;
     align-items: center;
   }
-  .dp-range-row input[type=range] {
-    width: 100%;
-    accent-color: var(--teal-2);
-  }
+  .dp-range-row input[type=range] { width: 100%; accent-color: var(--teal-2); }
   .dp-range-row .dp-range-val {
     font-family: "Orbitron", monospace;
     font-size: 12px;
@@ -282,17 +210,14 @@
     border-radius: 6px;
     color: var(--teal);
   }
-
   .dp-img-picker {
     border: 2px dashed var(--line);
     border-radius: 14px;
     padding: 20px;
     text-align: center;
     cursor: pointer;
-    transition: all .2s;
     background: var(--paper);
   }
-  html.dark .dp-img-picker { background: var(--paper-2); }
   .dp-img-picker:hover {
     border-color: var(--teal-2);
     background: color-mix(in srgb, var(--teal-2) 6%, transparent);
@@ -309,27 +234,20 @@
     max-width: 100%;
     max-height: 200px;
     object-fit: contain;
-    display: block;
   }
   .dp-img-picker .dp-prev.empty::after {
     content: "لا صورة — اضغط للاختيار";
     color: var(--muted);
     font-size: 12px;
   }
-  .dp-img-picker .dp-meta {
-    font-size: 12px;
-    color: var(--muted);
-  }
+  .dp-img-picker .dp-meta { font-size: 12px; color: var(--muted); }
   .dp-img-picker .dp-meta strong {
     display: block;
     color: var(--ink);
     font-size: 13px;
     margin-bottom: 4px;
   }
-
-  .dp-list {
-    display: flex; flex-direction: column; gap: 8px;
-  }
+  .dp-list { display: flex; flex-direction: column; gap: 8px; }
   .dp-list-item {
     display: flex; align-items: center; gap: 12px;
     padding: 12px 14px;
@@ -338,16 +256,8 @@
     border-radius: 10px;
     font-size: 13px;
   }
-  html.dark .dp-list-item { background: var(--paper-2); }
-  .dp-list-item .grip {
-    cursor: grab;
-    color: var(--muted);
-    font-size: 16px;
-    user-select: none;
-  }
-  .dp-list-item .label { flex: 1; font-weight: 700; color: var(--ink); }
+  .dp-list-item .label { flex: 1; font-weight: 700; }
   .dp-list-item .actions { display: flex; gap: 6px; }
-
   .dp-btn {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 8px 14px;
@@ -359,19 +269,14 @@
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
-    transition: all .2s;
   }
-  html.dark .dp-btn { background: var(--paper-2); }
   .dp-btn:hover { border-color: var(--teal-2); color: var(--teal); }
   .dp-btn.primary {
     background: linear-gradient(135deg, #12A89B, #0F5C56);
     color: #fff;
     border-color: transparent;
   }
-  .dp-btn.primary:hover { box-shadow: 0 8px 20px rgba(18,168,155,.4); }
   .dp-btn.danger { color: #C03030; border-color: #C03030; }
-  .dp-btn.danger:hover { background: #C03030; color: #fff; }
-
   .dp-actions-bar {
     display: flex; gap: 10px; flex-wrap: wrap;
     padding: 20px 0;
@@ -384,7 +289,6 @@
     padding-inline: 30px;
     z-index: 10;
   }
-
   .dp-preset-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -396,10 +300,8 @@
     border: 1.5px solid var(--line);
     background: var(--white);
     cursor: pointer;
-    transition: all .25s;
     text-align: center;
   }
-  html.dark .dp-preset { background: var(--paper-2); }
   .dp-preset:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 24px rgba(0,0,0,.08);
@@ -414,20 +316,8 @@
     overflow: hidden;
   }
   .dp-preset .swatch span { display: block; }
-  .dp-preset strong {
-    display: block;
-    font-size: 13px;
-    color: var(--ink);
-    margin-bottom: 2px;
-  }
-  .dp-preset small {
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  /* ============ CODE EDITOR ============ */
   .dp-code {
-    font-family: "JetBrains Mono", Consolas, monospace;
+    font-family: monospace;
     font-size: 13px;
     line-height: 1.6;
     background: #0B1A18;
@@ -438,11 +328,8 @@
     min-height: 180px;
     resize: vertical;
     width: 100%;
-    tab-size: 2;
   }
   .dp-code:focus { outline: none; box-shadow: 0 0 0 3px rgba(18,168,155,.3); }
-
-  /* ============ HISTORY ============ */
   .dp-history-item {
     display: grid;
     grid-template-columns: 1fr auto auto;
@@ -454,19 +341,16 @@
     margin-bottom: 8px;
     font-size: 13px;
   }
-  html.dark .dp-history-item { background: var(--paper-2); }
   .dp-history-item .time {
-    font-family: "Orbitron", monospace;
+    font-family: monospace;
     font-size: 11px;
     color: var(--muted);
   }
-
-  /* ============ MOBILE ============ */
   @media (max-width: 900px) {
     .dp-app { grid-template-columns: 1fr; }
     .dp-side {
       position: fixed; top: 0; inset-inline-start: 0;
-      width: 260px; transform: translateX(-100%);
+      width: 240px; transform: translateX(-100%);
       transition: transform .3s;
       z-index: 100;
     }
@@ -479,8 +363,6 @@
 </style>
 </head>
 <body class="design-body">
-<canvas id="aurora"></canvas>
-<div id="grain"></div>
 
 <div class="dp-app">
   <aside class="dp-side" id="dpSide">
@@ -521,43 +403,41 @@
     </header>
 
     <div class="dp-content">
-      <!-- ============ IDENTITY ============ -->
       <section class="dp-panel active" id="dp-identity">
         <div class="dp-group">
           <h3>اسم المتجر</h3>
           <p class="dp-help">يظهر في الهيدر، الفوتر، عنوان المتصفح، و SEO.</p>
           <div class="dp-row">
-            <label class="dp-field"><span>الاسم بالعربي <small>Max 40 حرف</small></span><input type="text" data-bind="identity.nameAr" /></label>
-            <label class="dp-field"><span>الاسم بالإنجليزي <small>Max 40 حرف</small></span><input type="text" data-bind="identity.nameEn" /></label>
+            <label class="dp-field"><span>الاسم بالعربي</span><input type="text" data-bind="identity.nameAr" /></label>
+            <label class="dp-field"><span>الاسم بالإنجليزي</span><input type="text" data-bind="identity.nameEn" /></label>
           </div>
           <div class="dp-row">
             <label class="dp-field"><span>Tagline بالعربي</span><input type="text" data-bind="identity.taglineAr" /></label>
             <label class="dp-field"><span>Tagline بالإنجليزي</span><input type="text" data-bind="identity.taglineEn" /></label>
           </div>
         </div>
-
         <div class="dp-group">
-          <h3>الشعار الرئيسي</h3>
-          <p class="dp-help">المقاس الموصى: <code>800×200</code> · PNG/SVG شفاف · الحجم الأقصى بعد الضغط: 200KB.</p>
+          <h3>الشعار</h3>
+          <p class="dp-help">المقاس الموصى: 800×200 · PNG/SVG شفاف.</p>
           <div class="dp-row">
             <div class="dp-img-picker" data-img="identity.logo">
               <div class="dp-prev empty"></div>
-              <div class="dp-meta"><strong>الشعار (فاتح)</strong> يظهر على الخلفية الفاتحة</div>
+              <div class="dp-meta"><strong>الشعار (فاتح)</strong></div>
             </div>
             <div class="dp-img-picker" data-img="identity.logoDark">
               <div class="dp-prev empty"></div>
-              <div class="dp-meta"><strong>الشعار (داكن)</strong> يظهر على الخلفية الداكنة</div>
+              <div class="dp-meta"><strong>الشعار (داكن)</strong></div>
             </div>
             <div class="dp-img-picker" data-img="identity.favicon">
               <div class="dp-prev empty"></div>
-              <div class="dp-meta"><strong>Favicon</strong> أيقونة المتصفح · 64×64</div>
+              <div class="dp-meta"><strong>Favicon</strong> 64×64</div>
             </div>
           </div>
           <div class="dp-row">
             <label class="dp-field">
-              <span>ارتفاع الشعار في الهيدر <small>بكسل</small></span>
+              <span>ارتفاع الشعار</span>
               <div class="dp-range-row">
-                <input type="range" min="20" max="80" data-bind="identity.logoHeight" data-type="number" />
+                <input type="range" min="20" max="100" data-bind="identity.logoHeight" data-type="number" />
                 <span class="dp-range-val">44</span>
               </div>
             </label>
@@ -565,152 +445,98 @@
         </div>
       </section>
 
-      <!-- ============ COLORS ============ -->
       <section class="dp-panel" id="dp-colors">
         <div class="dp-group">
-          <h3>Presets جاهزة</h3>
-          <p class="dp-help">اختر ثيم جاهز أو ابدأ من الصفر.</p>
+          <h3>Presets</h3>
           <div class="dp-preset-grid" id="dpPresetGrid"></div>
         </div>
-
         <div class="dp-group">
-          <h3>الألوان الأساسية</h3>
-          <p class="dp-help">غيّر الألوان. المعاينة الفورية تظهر مباشرة في المتصفح.</p>
+          <h3>الألوان</h3>
           <div class="dp-row">
-            <label class="dp-field color-field"><span style="grid-column:1/-1">Primary — اللون الأساسي</span><input type="color" data-bind="colors.teal" /><input type="text" data-bind="colors.teal" data-color-hex /></label>
-            <label class="dp-field color-field"><span style="grid-column:1/-1">Accent — لون التفاعل</span><input type="color" data-bind="colors.teal2" /><input type="text" data-bind="colors.teal2" data-color-hex /></label>
-            <label class="dp-field color-field"><span style="grid-column:1/-1">Highlight — العنبري</span><input type="color" data-bind="colors.amber" /><input type="text" data-bind="colors.amber" data-color-hex /></label>
-            <label class="dp-field color-field"><span style="grid-column:1/-1">Deep — الداكن</span><input type="color" data-bind="colors.deep" /><input type="text" data-bind="colors.deep" data-color-hex /></label>
+            <label class="dp-field color-field"><span style="grid-column:1/-1">Primary</span><input type="color" data-bind="colors.teal" /><input type="text" data-bind="colors.teal" data-color-hex /></label>
+            <label class="dp-field color-field"><span style="grid-column:1/-1">Accent</span><input type="color" data-bind="colors.teal2" /><input type="text" data-bind="colors.teal2" data-color-hex /></label>
+            <label class="dp-field color-field"><span style="grid-column:1/-1">Amber</span><input type="color" data-bind="colors.amber" /><input type="text" data-bind="colors.amber" data-color-hex /></label>
+            <label class="dp-field color-field"><span style="grid-column:1/-1">Deep</span><input type="color" data-bind="colors.deep" /><input type="text" data-bind="colors.deep" data-color-hex /></label>
           </div>
         </div>
-
         <div class="dp-group">
           <h3>الخلفيات والنصوص</h3>
           <div class="dp-row">
-            <label class="dp-field color-field"><span style="grid-column:1/-1">Background — الخلفية</span><input type="color" data-bind="colors.bg" /><input type="text" data-bind="colors.bg" data-color-hex /></label>
-            <label class="dp-field color-field"><span style="grid-column:1/-1">Surface — البطاقات</span><input type="color" data-bind="colors.white" /><input type="text" data-bind="colors.white" data-color-hex /></label>
-            <label class="dp-field color-field"><span style="grid-column:1/-1">Text — النص الأساسي</span><input type="color" data-bind="colors.ink" /><input type="text" data-bind="colors.ink" data-color-hex /></label>
-            <label class="dp-field color-field"><span style="grid-column:1/-1">Muted — النص الثانوي</span><input type="color" data-bind="colors.muted" /><input type="text" data-bind="colors.muted" data-color-hex /></label>
+            <label class="dp-field color-field"><span style="grid-column:1/-1">Background</span><input type="color" data-bind="colors.bg" /><input type="text" data-bind="colors.bg" data-color-hex /></label>
+            <label class="dp-field color-field"><span style="grid-column:1/-1">Surface</span><input type="color" data-bind="colors.white" /><input type="text" data-bind="colors.white" data-color-hex /></label>
+            <label class="dp-field color-field"><span style="grid-column:1/-1">Text</span><input type="color" data-bind="colors.ink" /><input type="text" data-bind="colors.ink" data-color-hex /></label>
+            <label class="dp-field color-field"><span style="grid-column:1/-1">Muted</span><input type="color" data-bind="colors.muted" /><input type="text" data-bind="colors.muted" data-color-hex /></label>
           </div>
         </div>
       </section>
 
-      <!-- ============ TYPOGRAPHY ============ -->
       <section class="dp-panel" id="dp-typography">
         <div class="dp-group">
           <h3>الخطوط</h3>
-          <p class="dp-help">اختر من القائمة أو ارفع خطك الخاص (.woff2 أو .ttf).</p>
           <div class="dp-row">
-            <label class="dp-field">
-              <span>الخط العربي</span>
+            <label class="dp-field"><span>العربي</span>
               <select data-bind="typography.fontAr">
-                <option value="Baloo Bhaijaan 2">Baloo Bhaijaan 2 (افتراضي)</option>
+                <option value="Baloo Bhaijaan 2">Baloo Bhaijaan 2</option>
                 <option value="Cairo">Cairo</option>
                 <option value="Tajawal">Tajawal</option>
                 <option value="IBM Plex Sans Arabic">IBM Plex Sans Arabic</option>
                 <option value="Almarai">Almarai</option>
-                <option value="Noto Kufi Arabic">Noto Kufi Arabic</option>
               </select>
             </label>
-            <label class="dp-field">
-              <span>الخط الإنجليزي</span>
+            <label class="dp-field"><span>الإنجليزي</span>
               <select data-bind="typography.fontEn">
-                <option value="Orbitron">Orbitron (افتراضي)</option>
+                <option value="Orbitron">Orbitron</option>
                 <option value="Inter">Inter</option>
                 <option value="Poppins">Poppins</option>
                 <option value="Space Grotesk">Space Grotesk</option>
-                <option value="JetBrains Mono">JetBrains Mono</option>
-                <option value="DM Sans">DM Sans</option>
               </select>
             </label>
           </div>
         </div>
-
         <div class="dp-group">
-          <h3>الأحجام والأوزان</h3>
+          <h3>الأحجام</h3>
           <div class="dp-row">
-            <label class="dp-field">
-              <span>حجم H1 <small>بكسل</small></span>
-              <div class="dp-range-row"><input type="range" min="24" max="120" data-bind="typography.h1" data-type="number" /><span class="dp-range-val">72</span></div>
+            <label class="dp-field"><span>H1</span>
+              <div class="dp-range-row"><input type="range" min="24" max="100" data-bind="typography.h1" data-type="number" /><span class="dp-range-val">52</span></div>
             </label>
-            <label class="dp-field">
-              <span>حجم H2 <small>بكسل</small></span>
-              <div class="dp-range-row"><input type="range" min="18" max="80" data-bind="typography.h2" data-type="number" /><span class="dp-range-val">42</span></div>
+            <label class="dp-field"><span>H2</span>
+              <div class="dp-range-row"><input type="range" min="18" max="60" data-bind="typography.h2" data-type="number" /><span class="dp-range-val">22</span></div>
             </label>
-            <label class="dp-field">
-              <span>حجم H3 <small>بكسل</small></span>
-              <div class="dp-range-row"><input type="range" min="14" max="48" data-bind="typography.h3" data-type="number" /><span class="dp-range-val">26</span></div>
+            <label class="dp-field"><span>H3</span>
+              <div class="dp-range-row"><input type="range" min="14" max="40" data-bind="typography.h3" data-type="number" /><span class="dp-range-val">16</span></div>
             </label>
-            <label class="dp-field">
-              <span>حجم النص <small>بكسل</small></span>
-              <div class="dp-range-row"><input type="range" min="12" max="22" data-bind="typography.body" data-type="number" /><span class="dp-range-val">16</span></div>
-            </label>
-          </div>
-          <div class="dp-row">
-            <label class="dp-field">
-              <span>وزن العناوين <small>400-900</small></span>
-              <select data-bind="typography.headingWeight">
-                <option value="700">Bold 700</option>
-                <option value="800">Extra 800</option>
-                <option value="900">Black 900</option>
-              </select>
-            </label>
-            <label class="dp-field">
-              <span>وزن النص</span>
-              <select data-bind="typography.bodyWeight">
-                <option value="400">Regular 400</option>
-                <option value="500">Medium 500</option>
-                <option value="600">Semi 600</option>
-              </select>
+            <label class="dp-field"><span>Body</span>
+              <div class="dp-range-row"><input type="range" min="12" max="20" data-bind="typography.body" data-type="number" /><span class="dp-range-val">15</span></div>
             </label>
           </div>
         </div>
       </section>
 
-      <!-- ============ EFFECTS ============ -->
       <section class="dp-panel" id="dp-effects">
         <div class="dp-group">
-          <h3>Aurora Background</h3>
-          <p class="dp-help">خلفية canvas الحية — blobs + waves + particles.</p>
+          <h3>Aurora</h3>
           <div class="dp-row">
             <label class="dp-toggle"><input type="checkbox" data-bind="effects.aurora.enabled" data-type="bool" /><span class="switch"></span>تفعيل Aurora</label>
           </div>
           <div class="dp-row">
-            <label class="dp-field">
-              <span>عدد الـ Blobs</span>
+            <label class="dp-field"><span>عدد Blobs</span>
               <div class="dp-range-row"><input type="range" min="0" max="8" data-bind="effects.aurora.blobs" data-type="number" /><span class="dp-range-val">5</span></div>
             </label>
-            <label class="dp-field">
-              <span>عدد الجزيئات</span>
-              <div class="dp-range-row"><input type="range" min="0" max="200" data-bind="effects.aurora.particles" data-type="number" /><span class="dp-range-val">60</span></div>
+            <label class="dp-field"><span>الجزيئات</span>
+              <div class="dp-range-row"><input type="range" min="0" max="80" data-bind="effects.aurora.particles" data-type="number" /><span class="dp-range-val">25</span></div>
             </label>
-            <label class="dp-field">
-              <span>السرعة <small>0.2x - 2x</small></span>
+            <label class="dp-field"><span>السرعة</span>
               <div class="dp-range-row"><input type="range" min="20" max="200" data-bind="effects.aurora.speed" data-type="number" /><span class="dp-range-val">100</span></div>
             </label>
           </div>
         </div>
-
-        <div class="dp-group">
-          <h3>Glassmorphism</h3>
-          <div class="dp-row">
-            <label class="dp-toggle"><input type="checkbox" data-bind="effects.glass.enabled" data-type="bool" /><span class="switch"></span>تفعيل الزجاج الشفاف</label>
-            <label class="dp-field">
-              <span>شدة Blur <small>px</small></span>
-              <div class="dp-range-row"><input type="range" min="0" max="40" data-bind="effects.glass.blur" data-type="number" /><span class="dp-range-val">16</span></div>
-            </label>
-          </div>
-        </div>
-
         <div class="dp-group">
           <h3>الشكل والظلال</h3>
           <div class="dp-row">
-            <label class="dp-field">
-              <span>انحناء الزوايا <small>px</small></span>
-              <div class="dp-range-row"><input type="range" min="0" max="40" data-bind="effects.radius" data-type="number" /><span class="dp-range-val">16</span></div>
+            <label class="dp-field"><span>الزوايا</span>
+              <div class="dp-range-row"><input type="range" min="0" max="40" data-bind="effects.radius" data-type="number" /><span class="dp-range-val">12</span></div>
             </label>
-            <label class="dp-field">
-              <span>شدة الظلال</span>
+            <label class="dp-field"><span>الظلال</span>
               <select data-bind="effects.shadows">
                 <option value="none">بدون</option>
                 <option value="soft">خفيف</option>
@@ -720,223 +546,38 @@
             </label>
           </div>
         </div>
-
-        <div class="dp-group">
-          <h3>التفاعلات</h3>
-          <div class="dp-row">
-            <label class="dp-toggle"><input type="checkbox" data-bind="effects.tilt" data-type="bool" /><span class="switch"></span>البطاقات تميل مع الفأرة</label>
-            <label class="dp-toggle"><input type="checkbox" data-bind="effects.magnetic" data-type="bool" /><span class="switch"></span>الأزرار تنجذب للفأرة</label>
-            <label class="dp-toggle"><input type="checkbox" data-bind="effects.splitText" data-type="bool" /><span class="switch"></span>حروف العناوين تظهر متتالية</label>
-          </div>
-        </div>
       </section>
 
-      <!-- ============ ANIMATION ============ -->
       <section class="dp-panel" id="dp-animation">
         <div class="dp-group">
-          <h3>الحركات العامة</h3>
+          <h3>Marquee</h3>
           <div class="dp-row">
-            <label class="dp-field">
-              <span>سرعة الحركة <small>0.5x - 2x</small></span>
-              <div class="dp-range-row"><input type="range" min="50" max="200" data-bind="animation.speed" data-type="number" /><span class="dp-range-val">100</span></div>
-            </label>
-            <label class="dp-toggle"><input type="checkbox" data-bind="animation.reveal" data-type="bool" /><span class="switch"></span>Reveal عند التمرير</label>
-            <label class="dp-field">
-              <span>نوع الـ Reveal</span>
-              <select data-bind="animation.revealType">
-                <option value="fade">تلاشي</option>
-                <option value="slide">انزلاق</option>
-                <option value="zoom">تكبير</option>
-                <option value="rotate">دوران</option>
-              </select>
+            <label class="dp-toggle"><input type="checkbox" data-bind="animation.marquee.enabled" data-type="bool" /><span class="switch"></span>تفعيل</label>
+            <label class="dp-field"><span>السرعة</span>
+              <div class="dp-range-row"><input type="range" min="10" max="80" data-bind="animation.marquee.speed" data-type="number" /><span class="dp-range-val">45</span></div>
             </label>
           </div>
         </div>
-
-        <div class="dp-group">
-          <h3>Marquee — الشريط العلوي</h3>
-          <div class="dp-row">
-            <label class="dp-toggle"><input type="checkbox" data-bind="animation.marquee.enabled" data-type="bool" /><span class="switch"></span>تفعيل الشريط</label>
-            <label class="dp-field">
-              <span>السرعة <small>ثانية</small></span>
-              <div class="dp-range-row"><input type="range" min="10" max="80" data-bind="animation.marquee.speed" data-type="number" /><span class="dp-range-val">32</span></div>
-            </label>
-            <label class="dp-field">
-              <span>الاتجاه</span>
-              <select data-bind="animation.marquee.direction">
-                <option value="normal">يمين → يسار</option>
-                <option value="reverse">يسار → يمين</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
         <div class="dp-group">
           <h3>Hero Slider</h3>
           <div class="dp-row">
-            <label class="dp-toggle"><input type="checkbox" data-bind="animation.heroSlider.enabled" data-type="bool" /><span class="switch"></span>تفعيل السلايدر</label>
-            <label class="dp-field">
-              <span>السرعة <small>ثانية بين الصور</small></span>
+            <label class="dp-toggle"><input type="checkbox" data-bind="animation.heroSlider.enabled" data-type="bool" /><span class="switch"></span>تفعيل</label>
+            <label class="dp-field"><span>السرعة</span>
               <div class="dp-range-row"><input type="range" min="2" max="10" data-bind="animation.heroSlider.speed" data-type="number" /><span class="dp-range-val">4</span></div>
             </label>
-            <label class="dp-field">
-              <span>نوع الانتقال</span>
-              <select data-bind="animation.heroSlider.transition">
-                <option value="fade">تلاشي</option>
-                <option value="slide">انزلاق</option>
-                <option value="zoom">تكبير</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
-        <div class="dp-group">
-          <h3>مؤثرات إضافية</h3>
-          <div class="dp-row">
-            <label class="dp-field">
-              <span>Cursor</span>
-              <select data-bind="animation.cursor">
-                <option value="none">عادي (افتراضي)</option>
-                <option value="dot">نقطة صغيرة</option>
-                <option value="ring">حلقة متتبعة</option>
-                <option value="glow">توهج</option>
-              </select>
-            </label>
-            <label class="dp-toggle"><input type="checkbox" data-bind="animation.loadingScreen" data-type="bool" /><span class="switch"></span>Loading Screen عند التحميل</label>
           </div>
         </div>
       </section>
 
-      <!-- ============ LAYOUT ============ -->
       <section class="dp-panel" id="dp-layout">
         <div class="dp-group">
-          <h3>شبكة المنتجات</h3>
+          <h3>Container</h3>
           <div class="dp-row">
-            <label class="dp-field">
-              <span>عدد الأعمدة</span>
-              <select data-bind="layout.gridCols">
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </select>
-            </label>
-            <label class="dp-field">
-              <span>المسافة بين الكروت <small>px</small></span>
-              <div class="dp-range-row"><input type="range" min="8" max="48" data-bind="layout.gridGap" data-type="number" /><span class="dp-range-val">24</span></div>
-            </label>
-          </div>
-        </div>
-
-        <div class="dp-group">
-          <h3>عرض الصفحة</h3>
-          <div class="dp-row">
-            <label class="dp-field">
-              <span>Container width</span>
+            <label class="dp-field"><span>العرض</span>
               <select data-bind="layout.containerWidth">
-                <option value="narrow">ضيق (1000px)</option>
-                <option value="normal">عادي (1320px)</option>
-                <option value="wide">عريض (1600px)</option>
-                <option value="full">كامل العرض</option>
-              </select>
-            </label>
-            <label class="dp-field">
-              <span>المسافات العامة</span>
-              <select data-bind="layout.spacing">
-                <option value="tight">ضيق</option>
+                <option value="narrow">ضيق</option>
                 <option value="normal">عادي</option>
-                <option value="loose">واسع</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
-        <div class="dp-group">
-          <h3>الهيدر والفوتر</h3>
-          <div class="dp-row">
-            <label class="dp-field">
-              <span>نمط الهيدر</span>
-              <select data-bind="layout.headerStyle">
-                <option value="glass">زجاجي (blur)</option>
-                <option value="solid">صلب</option>
-                <option value="transparent">شفاف</option>
-                <option value="gradient">متدرج</option>
-              </select>
-            </label>
-            <label class="dp-field">
-              <span>عدد أعمدة الفوتر</span>
-              <select data-bind="layout.footerCols">
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-              </select>
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ COMPONENTS ============ -->
-      <section class="dp-panel" id="dp-components">
-        <div class="dp-group">
-          <h3>الأزرار</h3>
-          <div class="dp-row">
-            <label class="dp-field">
-              <span>نمط الأزرار الأساسية</span>
-              <select data-bind="components.buttonStyle">
-                <option value="gradient">متدرج (Gradient)</option>
-                <option value="solid">صلب</option>
-                <option value="outlined">محدد</option>
-                <option value="glass">زجاجي</option>
-                <option value="3d">3D shadow</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
-        <div class="dp-group">
-          <h3>البطاقات والحقول</h3>
-          <div class="dp-row">
-            <label class="dp-field">
-              <span>نمط البطاقات</span>
-              <select data-bind="components.cardStyle">
-                <option value="glass">زجاجي</option>
-                <option value="solid">صلب</option>
-                <option value="outlined">محدد</option>
-                <option value="gradient-border">حد متدرج</option>
-              </select>
-            </label>
-            <label class="dp-field">
-              <span>نمط الحقول</span>
-              <select data-bind="components.inputStyle">
-                <option value="rounded">دائري</option>
-                <option value="flat">مسطح</option>
-                <option value="underlined">سفلي</option>
-                <option value="glass">زجاجي</option>
-              </select>
-            </label>
-          </div>
-        </div>
-
-        <div class="dp-group">
-          <h3>الإشعارات والنوافذ</h3>
-          <div class="dp-row">
-            <label class="dp-field">
-              <span>موضع التنبيهات</span>
-              <select data-bind="components.toastPosition">
-                <option value="top-right">أعلى يمين</option>
-                <option value="top-left">أعلى يسار</option>
-                <option value="top-center">أعلى وسط</option>
-                <option value="bottom-right">أسفل يمين</option>
-                <option value="bottom-left">أسفل يسار</option>
-                <option value="bottom-center">أسفل وسط</option>
-              </select>
-            </label>
-            <label class="dp-field">
-              <span>حجم النوافذ المنبثقة</span>
-              <select data-bind="components.modalSize">
-                <option value="sm">صغير</option>
-                <option value="md">متوسط</option>
-                <option value="lg">كبير</option>
+                <option value="wide">عريض</option>
                 <option value="full">كامل</option>
               </select>
             </label>
@@ -944,15 +585,29 @@
         </div>
       </section>
 
-      <!-- ============ IMAGES ============ -->
+      <section class="dp-panel" id="dp-components">
+        <div class="dp-group">
+          <h3>المكونات</h3>
+          <div class="dp-row">
+            <label class="dp-field"><span>موضع التنبيهات</span>
+              <select data-bind="components.toastPosition">
+                <option value="top-right">أعلى يمين</option>
+                <option value="top-left">أعلى يسار</option>
+                <option value="bottom-right">أسفل يمين</option>
+                <option value="bottom-left">أسفل يسار</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </section>
+
       <section class="dp-panel" id="dp-images">
         <div class="dp-group">
           <h3>صور Hero Slider</h3>
-          <p class="dp-help">حتى 5 صور. المقاس الموصى: <code>800×1000</code> (نسبة 4:5).</p>
+          <p class="dp-help">حتى 5 صور — 800×1000.</p>
           <div class="dp-row" id="dpHeroImages"></div>
           <button class="dp-btn primary" id="dpAddHero">+ إضافة صورة</button>
         </div>
-
         <div class="dp-group">
           <h3>صور الأقسام</h3>
           <div class="dp-row">
@@ -964,152 +619,86 @@
               <div class="dp-prev empty"></div>
               <div class="dp-meta"><strong>غلاف المطاطي</strong> 800×600</div>
             </div>
-            <div class="dp-img-picker" data-img="images.ogImage">
-              <div class="dp-prev empty"></div>
-              <div class="dp-meta"><strong>OG Image</strong> 1200×630 — لشبكات التواصل</div>
-            </div>
           </div>
         </div>
       </section>
 
-      <!-- ============ SECTIONS ============ -->
       <section class="dp-panel" id="dp-sections">
         <div class="dp-group">
-          <h3>ترتيب وإخفاء الأقسام</h3>
-          <p class="dp-help">اسحب الأقسام لإعادة الترتيب، أو أخفِ ما لا تحتاجه.</p>
+          <h3>ترتيب الأقسام</h3>
           <div class="dp-list" id="dpSectionsList"></div>
-        </div>
-
-        <div class="dp-group">
-          <h3>Banners مخصصة</h3>
-          <p class="dp-help">أضف بانر بصورة كاملة أو صورة + نص في أي مكان.</p>
-          <div id="dpBannersList"></div>
-          <button class="dp-btn primary" id="dpAddBanner">+ إضافة Banner</button>
         </div>
       </section>
 
-      <!-- ============ CONTENT ============ -->
       <section class="dp-panel" id="dp-content">
         <div class="dp-group">
           <h3>نصوص Hero</h3>
           <div class="dp-row">
-            <label class="dp-field"><span>العنوان الرئيسي (عربي)</span><input type="text" data-bind="content.heroTitleAr" /></label>
-            <label class="dp-field"><span>العنوان الرئيسي (إنجليزي)</span><input type="text" data-bind="content.heroTitleEn" /></label>
-          </div>
-          <div class="dp-row">
-            <label class="dp-field"><span>الوصف (عربي)</span><textarea rows="2" data-bind="content.heroSubAr"></textarea></label>
-            <label class="dp-field"><span>الوصف (إنجليزي)</span><textarea rows="2" data-bind="content.heroSubEn"></textarea></label>
+            <label class="dp-field"><span>العنوان (عربي)</span><input type="text" data-bind="content.heroTitleAr" /></label>
+            <label class="dp-field"><span>العنوان (إنجليزي)</span><input type="text" data-bind="content.heroTitleEn" /></label>
           </div>
         </div>
-
         <div class="dp-group">
-          <h3>Footer</h3>
-          <label class="dp-field"><span>حقوق النشر (يظهر أسفل الفوتر)</span><input type="text" data-bind="content.copyright" /></label>
-        </div>
-
-        <div class="dp-group">
-          <h3>SEO / Meta</h3>
-          <div class="dp-row">
-            <label class="dp-field"><span>العنوان (Title)</span><input type="text" data-bind="meta.title" /></label>
-          </div>
-          <label class="dp-field"><span>الوصف (Description)</span><textarea rows="2" data-bind="meta.description"></textarea></label>
-          <label class="dp-field"><span>الكلمات المفتاحية</span><input type="text" data-bind="meta.keywords" placeholder="ماوس باد، الأردن، ..." /></label>
+          <h3>SEO</h3>
+          <label class="dp-field"><span>Title</span><input type="text" data-bind="meta.title" /></label>
+          <label class="dp-field"><span>Description</span><textarea rows="2" data-bind="meta.description"></textarea></label>
         </div>
       </section>
 
-      <!-- ============ ANALYTICS ============ -->
       <section class="dp-panel" id="dp-analytics">
         <div class="dp-group">
           <h3>معرّفات التحليلات</h3>
-          <p class="dp-help">الصق ID فقط، السكربتات تُضاف تلقائيًا.</p>
           <div class="dp-row">
             <label class="dp-field"><span>Google Analytics 4</span><input type="text" data-bind="analytics.ga4" placeholder="G-XXXXXXXXXX" /></label>
-            <label class="dp-field"><span>Meta Pixel</span><input type="text" data-bind="analytics.metaPixel" placeholder="1234567890" /></label>
-            <label class="dp-field"><span>TikTok Pixel</span><input type="text" data-bind="analytics.tiktok" placeholder="CXXXXXXXXXXX" /></label>
+            <label class="dp-field"><span>Meta Pixel</span><input type="text" data-bind="analytics.metaPixel" /></label>
+            <label class="dp-field"><span>TikTok Pixel</span><input type="text" data-bind="analytics.tiktok" /></label>
           </div>
-        </div>
-
-        <div class="dp-group">
-          <h3>سكربتات مخصصة</h3>
-          <p class="dp-help">كود قبل <code>&lt;/head&gt;</code> أو قبل <code>&lt;/body&gt;</code> (Sentry, Hotjar, إلخ).</p>
-          <label class="dp-field"><span>قبل <code>&lt;/head&gt;</code></span><textarea class="dp-code" rows="5" data-bind="analytics.headScript"></textarea></label>
-          <label class="dp-field" style="margin-top:14px"><span>قبل <code>&lt;/body&gt;</code></span><textarea class="dp-code" rows="5" data-bind="analytics.bodyScript"></textarea></label>
         </div>
       </section>
 
-      <!-- ============ CUSTOM CSS ============ -->
       <section class="dp-panel" id="dp-custom">
         <div class="dp-group">
           <h3>CSS مخصص</h3>
-          <p class="dp-help">اكتب أي CSS — يُطبَّق فورًا على الموقع كله.</p>
-          <textarea class="dp-code" rows="14" data-bind="custom.css" placeholder="/* مثال */&#10;.card { box-shadow: 0 20px 60px rgba(0,0,0,.2); }"></textarea>
-        </div>
-
-        <div class="dp-group">
-          <h3>خيارات المطوّر</h3>
-          <div class="dp-row">
-            <label class="dp-toggle"><input type="checkbox" data-bind="custom.preconnect" data-type="bool" /><span class="switch"></span>Preconnect (سرعة تحميل أفضل)</label>
-            <label class="dp-toggle"><input type="checkbox" data-bind="custom.lazyImages" data-type="bool" /><span class="switch"></span>Lazy loading للصور</label>
-          </div>
-          <label class="dp-field">
-            <span>الوضع الداكن</span>
-            <select data-bind="custom.darkModeBehavior">
-              <option value="manual">يدوي (زر في الهيدر)</option>
-              <option value="auto">تلقائي حسب نظام الزائر</option>
-              <option value="hidden">مخفي</option>
-            </select>
-          </label>
+          <textarea class="dp-code" rows="14" data-bind="custom.css"></textarea>
         </div>
       </section>
 
-      <!-- ============ PRESETS ============ -->
       <section class="dp-panel" id="dp-presets">
         <div class="dp-group">
-          <h3>Presets جاهزة</h3>
-          <p class="dp-help">تطبيق فوري. يمكنك التراجع من تبويب "السجل".</p>
+          <h3>Presets</h3>
           <div class="dp-preset-grid" id="dpPresetBig"></div>
         </div>
       </section>
 
-      <!-- ============ HISTORY ============ -->
       <section class="dp-panel" id="dp-history">
         <div class="dp-group">
           <h3>آخر 20 تعديل</h3>
-          <p class="dp-help">اضغط "استعادة" للرجوع لأي حالة سابقة.</p>
           <div id="dpHistoryList"></div>
         </div>
       </section>
 
-      <!-- ============ BACKUP ============ -->
       <section class="dp-panel" id="dp-backup">
         <div class="dp-group">
           <h3>تصدير</h3>
-          <p class="dp-help">حمّل نسخة JSON كاملة من كل إعدادات التصميم.</p>
           <button class="dp-btn primary" id="dpExportAll">تصدير الكل</button>
           <button class="dp-btn" id="dpExportColors">الألوان فقط</button>
           <button class="dp-btn" id="dpExportImages">الصور فقط</button>
         </div>
-
         <div class="dp-group">
           <h3>استيراد</h3>
-          <p class="dp-help">حذار — سيستبدل الإعدادات الحالية.</p>
-          <input type="file" id="dpImportFile" accept=".json" style="margin-bottom:12px" />
+          <input type="file" id="dpImportFile" accept=".json" />
           <button class="dp-btn" id="dpImport">استيراد</button>
         </div>
-
         <div class="dp-group">
           <h3>إعادة ضبط</h3>
-          <p class="dp-help">يعيد كل شي للحالة الافتراضية (الألوان، الخطوط، الصور، إلخ).</p>
           <button class="dp-btn danger" id="dpReset">إعادة ضبط مصنع</button>
         </div>
       </section>
 
-      <!-- ============ ACTIONS BAR ============ -->
       <div class="dp-actions-bar">
         <button class="dp-btn primary" id="dpSave">💾 حفظ التغييرات</button>
         <button class="dp-btn" id="dpPreview">👁️ معاينة</button>
         <button class="dp-btn" id="dpUndo">↩️ تراجع</button>
-        <button class="dp-btn" id="dpRedo">↪️ إعادة</button>
         <button class="dp-btn" id="dpApply">✓ تطبيق على الموقع</button>
       </div>
     </div>
@@ -1119,18 +708,12 @@
 <input type="file" id="dpImgInput" accept="image/*" style="display:none" />
 <input type="file" id="dpImgHeroInput" accept="image/*" style="display:none" />
 
+<script src="js/design-tokens.js"></script>
 <script src="js/config.js"></script>
 <script src="js/i18n.js"></script>
-<script src="js/wishlist.js"></script>
-<script src="js/notifications.js"></script>
-<script src="js/shipping.js"></script>
-<script src="js/coupons.js"></script>
-<script src="js/tracking.js"></script>
 <script src="js/store.js"></script>
 <script src="js/cart.js"></script>
-<script src="js/aurora.js"></script>
 <script src="js/ui.js"></script>
-<script src="js/design-tokens.js"></script>
 <script src="js/design-panel.js"></script>
 </body>
 </html>
