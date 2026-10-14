@@ -1,17 +1,7 @@
 /* ============================================================
-   SaWWA Souq — Design Tokens v4
-   - يُحمَّل أول سكربت في كل صفحة
-   - يقرأ sawwa_design-config.js إن وُجد (للنشر)
-   - ثم يُطبّق sawwa_design من localStorage (معاينة)
-   - يربط الشعار تلقائيًا
+   SaWWA Souq — Design Tokens v4 (Performance Fix)
    ============================================================ */
 (function () {
-  /* ============ 1. LOAD FROM DEPLOYED CONFIG FILE (if present) ============ */
-  const DEPLOYED = (typeof window.SAWWA_DESIGN_CONFIG === "object" && window.SAWWA_DESIGN_CONFIG !== null)
-    ? window.SAWWA_DESIGN_CONFIG
-    : {};
-
-  /* ============ 2. DEFAULT ============ */
   const DEFAULT = {
     identity: {
       nameAr: "سوّا سوق", nameEn: "SaWWA Souq",
@@ -19,23 +9,23 @@
       logo: "", logoDark: "", favicon: "", logoHeight: 44
     },
     colors: {
-      teal: "#0F5C56", teal2: "#12A89B", amber: "#E8A33D", deep: "#0A3D38",
-      bg: "#EDF1EE", white: "#FFFFFF", ink: "#0B1A18", muted: "#647570"
+      teal: "#0D7377", teal2: "#0D7377", amber: "#D97706", deep: "#111110",
+      bg: "#F7F7F5", white: "#FFFFFF", ink: "#111110", muted: "#666660"
     },
     typography: {
       fontAr: "Baloo Bhaijaan 2", fontEn: "Orbitron",
-      h1: 72, h2: 42, h3: 26, body: 16,
-      headingWeight: 900, bodyWeight: 500
+      h1: 52, h2: 22, h3: 16, body: 15,
+      headingWeight: 800, bodyWeight: 500
     },
     effects: {
-      aurora: { enabled: true, blobs: 5, particles: 60, speed: 100 },
-      glass: { enabled: true, blur: 16 },
-      radius: 16, shadows: "medium",
-      tilt: true, magnetic: true, splitText: true
+      aurora: { enabled: true, blobs: 5, particles: 25, speed: 100 },
+      glass: { enabled: false, blur: 16 },
+      radius: 12, shadows: "soft",
+      tilt: false, magnetic: false, splitText: false
     },
     animation: {
       speed: 100, reveal: true, revealType: "fade",
-      marquee: { enabled: true, speed: 32, direction: "normal" },
+      marquee: { enabled: true, speed: 45, direction: "normal" },
       heroSlider: { enabled: true, speed: 4, transition: "fade" },
       cursor: "none", loadingScreen: false
     },
@@ -45,7 +35,7 @@
     },
     components: {
       buttonStyle: "gradient", cardStyle: "glass",
-      inputStyle: "rounded", toastPosition: "bottom-center", modalSize: "md"
+      inputStyle: "rounded", toastPosition: "top-right", modalSize: "md"
     },
     images: { coverGlass: "", coverRubber: "", ogImage: "", heroSlides: [] },
     sections: {
@@ -74,14 +64,11 @@
     return out;
   }
 
-  /* ============ 3. LAYERED MERGE ============ */
-  let local = {};
-  try { local = JSON.parse(localStorage.getItem("sawwa_design") || "{}"); } catch {}
-  // DEFAULT ← DEPLOYED ← LOCAL (الأخير يفوز)
-  const D = merge(merge(DEFAULT, DEPLOYED), local);
+  let stored = {};
+  try { stored = JSON.parse(localStorage.getItem("sawwa_design") || "{}"); } catch { }
+  const D = merge(DEFAULT, stored);
   window.DESIGN = D;
 
-  /* ============ COLOR MATH ============ */
   const hexToRgb = (h) => {
     const x = String(h).replace("#", "");
     return [parseInt(x.substr(0, 2), 16) || 0, parseInt(x.substr(2, 2), 16) || 0, parseInt(x.substr(4, 2), 16) || 0];
@@ -93,12 +80,10 @@
     return rgbToHex(r * (1 + factor), g * (1 + factor), b * (1 + factor));
   };
 
-  /* ============ APPLY DESIGN ============ */
   function applyDesign() {
     const root = document.documentElement;
     const C = D.colors;
 
-    /* Accent colors */
     root.style.setProperty("--teal", C.teal);
     root.style.setProperty("--teal-2", C.teal2);
     root.style.setProperty("--cyan", C.teal2);
@@ -106,8 +91,9 @@
     root.style.setProperty("--amber-2", C.amber);
     root.style.setProperty("--deep", C.deep);
     root.style.setProperty("--deeper", C.deep);
+    root.style.setProperty("--brand", C.teal);
+    root.style.setProperty("--brand-hover", adjust(C.teal, -0.12));
 
-    /* Fonts */
     const fAr = D.typography.fontAr.replace(/\s+/g, "+");
     const fEn = D.typography.fontEn.replace(/\s+/g, "+");
     const fontId = "design-fonts-link";
@@ -119,14 +105,13 @@
     fontLink.href = "https://fonts.googleapis.com/css2?family=" + fAr + ":wght@400;500;600;700;800;900&family=" + fEn + ":wght@400;500;700;900&display=swap";
     document.head.appendChild(fontLink);
 
-    /* Shadows */
     const SH = {
-      none: { sm: "none", md: "none", lg: "none" },
-      soft: { sm: "0 2px 8px rgba(0,0,0,.05)", md: "0 8px 24px rgba(0,0,0,.08)", lg: "0 20px 60px rgba(0,0,0,.12)" },
+      none:   { sm: "none", md: "none", lg: "none" },
+      soft:   { sm: "0 1px 3px rgba(0,0,0,.06)", md: "0 4px 12px rgba(0,0,0,.06)", lg: "0 12px 32px rgba(0,0,0,.08)" },
       medium: { sm: "0 4px 16px rgba(10,61,56,.06)", md: "0 12px 40px rgba(10,61,56,.10)", lg: "0 30px 80px rgba(10,61,56,.16)" },
       strong: { sm: "0 8px 24px rgba(0,0,0,.15)", md: "0 20px 60px rgba(0,0,0,.2)", lg: "0 40px 100px rgba(0,0,0,.3)" }
     };
-    const sh = SH[D.effects.shadows] || SH.medium;
+    const sh = SH[D.effects.shadows] || SH.soft;
     root.style.setProperty("--sh-sm", sh.sm);
     root.style.setProperty("--sh", sh.md);
     root.style.setProperty("--sh-lg", sh.lg);
@@ -134,96 +119,33 @@
     root.style.setProperty("--shadow", sh.md);
     root.style.setProperty("--shadow-lg", sh.lg);
 
-    /* Radius */
     const R = D.effects.radius;
     root.style.setProperty("--radius", R + "px");
-    root.style.setProperty("--radius-sm", Math.max(4, R - 6) + "px");
+    root.style.setProperty("--radius-sm", Math.max(4, R - 4) + "px");
     root.style.setProperty("--radius-md", (R + 4) + "px");
-    root.style.setProperty("--radius-lg", (R + 12) + "px");
+    root.style.setProperty("--radius-lg", (R + 8) + "px");
     root.style.setProperty("--r", R + "px");
-    root.style.setProperty("--r-sm", Math.max(4, R - 6) + "px");
+    root.style.setProperty("--r-sm", Math.max(4, R - 4) + "px");
     root.style.setProperty("--r-md", (R + 4) + "px");
-    root.style.setProperty("--r-lg", (R + 12) + "px");
+    root.style.setProperty("--r-lg", (R + 8) + "px");
 
-    /* Dark derived */
     const darkBg = adjust(C.bg, -0.92);
-    const darkPaper = adjust(C.bg, -0.92);
-    const darkWhite = adjust(C.bg, -0.85);
     const darkInk = adjust(C.ink, 0.85);
     const darkMuted = adjust(C.muted, 0.30);
 
-    /* Glass off */
-    const glassOff = D.effects.glass.enabled ? "" : `
-      .card, .site-header, .btn.ghost, .icon-btn, input, textarea, select,
-      .trust-item, .feature, .dash-card, .summary-col, .points-card {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-      }`;
+    const containerMap = { narrow: "1000px", normal: "1280px", wide: "1500px", full: "100%" };
+    const CW = containerMap[D.layout.containerWidth] || "1280px";
 
-    /* Reveal */
-    const revealMap = { fade: "translateY(0)", slide: "translateY(28px)", zoom: "scale(.9)", rotate: "perspective(1000px) rotateY(-10deg) translateY(28px)" };
-    const revealFrom = revealMap[D.animation.revealType] || "translateY(28px)";
-
-    /* Spacing */
-    const spacingMap = {
-      tight: { container: "16px 20px 80px", gap: "16px" },
-      normal: { container: "30px 26px 100px", gap: "24px" },
-      loose: { container: "50px 40px 140px", gap: "36px" }
-    };
-    const SP = spacingMap[D.layout.spacing] || spacingMap.normal;
-
-    /* Container width */
-    const containerMap = { narrow: "1000px", normal: "1320px", wide: "1600px", full: "100%" };
-    const CW = containerMap[D.layout.containerWidth] || "1320px";
-
-    /* Header style */
-    const headerMap = {
-      glass: { bg: "var(--glass)", blur: "blur(20px) saturate(180%)", border: "1px solid var(--glass-border)" },
-      solid: { bg: "var(--bg)", blur: "none", border: "none" },
-      transparent: { bg: "transparent", blur: "none", border: "none" },
-      gradient: { bg: "linear-gradient(135deg, " + C.deep + ", " + C.teal + ")", blur: "none", border: "none" }
-    };
-    const HDR = headerMap[D.layout.headerStyle] || headerMap.glass;
-
-    /* Button style */
-    const buttonMap = {
-      gradient: "",
-      solid: ".btn.primary { background: var(--teal) !important; box-shadow: none !important; }",
-      outlined: ".btn.primary { background: transparent !important; color: var(--teal) !important; border: 2px solid var(--teal) !important; box-shadow: none !important; }",
-      glass: ".btn.primary { background: var(--glass) !important; color: var(--ink) !important; border: 1px solid var(--glass-border) !important; backdrop-filter: blur(12px) !important; box-shadow: none !important; }",
-      "3d": ".btn.primary { box-shadow: 0 6px 0 var(--deep) !important; } .btn.primary:active { box-shadow: 0 2px 0 var(--deep) !important; transform: translateY(4px); }"
-    };
-    const BTN = buttonMap[D.components.buttonStyle] || "";
-
-    /* Input style */
-    const inputMap = {
-      rounded: "",
-      flat: "input, textarea, select { border-radius: 0 !important; }",
-      underlined: "input, textarea, select { border-radius: 0 !important; border: none !important; border-bottom: 2px solid var(--line) !important; background: transparent !important; }",
-      glass: "input, textarea, select { background: var(--glass) !important; backdrop-filter: blur(10px) !important; border: 1px solid var(--glass-border) !important; }"
-    };
-    const INP = inputMap[D.components.inputStyle] || "";
-
-    /* Modal size */
-    const modalSizeMap = { sm: "380px", md: "620px", lg: "840px", full: "100%" };
-    const MS = modalSizeMap[D.components.modalSize] || "620px";
-
-    /* Build CSS */
     const dynCss = `
       :root {
         --bg: ${C.bg};
         --paper: ${C.bg};
-        --paper-2: ${adjust(C.bg, -0.05)};
         --white: ${C.white};
         --ink: ${C.ink};
-        --ink-2: ${adjust(C.ink, 0.15)};
         --muted: ${C.muted};
         --stone: ${C.muted};
         --sage: ${C.muted};
         --line: rgba(0,0,0,0.08);
-        --glass: rgba(255,255,255,0.55);
-        --glass-strong: rgba(255,255,255,0.75);
-        --glass-border: rgba(255,255,255,0.65);
         --h1-size: ${D.typography.h1}px;
         --h2-size: ${D.typography.h2}px;
         --h3-size: ${D.typography.h3}px;
@@ -233,60 +155,19 @@
       }
       html.dark {
         --bg: ${darkBg};
-        --paper: ${darkPaper};
-        --paper-2: ${adjust(C.bg, -0.95)};
-        --white: ${darkWhite};
+        --paper: ${darkBg};
         --ink: ${darkInk};
-        --ink-2: ${adjust(darkInk, -0.15)};
         --muted: ${darkMuted};
-        --stone: ${darkMuted};
-        --sage: ${darkMuted};
-        --line: rgba(255,255,255,0.08);
-        --glass: rgba(13,30,27,0.55);
-        --glass-strong: rgba(13,30,27,0.75);
-        --glass-border: rgba(95,208,197,0.18);
-        --shadow-sm: 0 4px 16px rgba(0,0,0,.4);
-        --shadow: 0 12px 40px rgba(0,0,0,.5);
-        --shadow-lg: 0 30px 80px rgba(0,0,0,.6);
-        --sh-sm: 0 4px 16px rgba(0,0,0,.4);
-        --sh: 0 12px 40px rgba(0,0,0,.5);
-        --sh-lg: 0 30px 80px rgba(0,0,0,.6);
       }
       body {
-        font-family: var(--font-ar) !important;
+        font-family: var(--font-ar);
         font-size: var(--body-size);
         font-weight: var(--body-weight);
         background: var(--bg);
         color: var(--ink);
       }
-      .font-en, h1.font-en, h2.font-en, .logo, .badge-new, .price,
-      .section-title, .page-title, .stat strong, .points-num, .big-num {
-        font-family: var(--font-en) !important;
-      }
-      h1 { font-size: var(--h1-size); font-weight: var(--heading-weight); }
-      h2 { font-size: var(--h2-size); font-weight: var(--heading-weight); }
-      h3 { font-size: var(--h3-size); font-weight: var(--heading-weight); }
-      .site-header {
-        background: ${HDR.bg} !important;
-        backdrop-filter: ${HDR.blur} !important;
-        -webkit-backdrop-filter: ${HDR.blur} !important;
-        border-bottom: ${HDR.border} !important;
-      }
-      .container { max-width: ${CW}; padding: ${SP.container}; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: ${SP.gap}; }
+      .container { max-width: ${CW}; }
       .logo { height: ${D.identity.logoHeight}px; }
-      .modal-card { max-width: ${MS} !important; }
-      .reveal { transform: ${revealFrom}; }
-      .reveal.in { transform: none; }
-      ${D.animation.marquee.enabled ? "" : ".marquee-ticker { display: none !important; }"}
-      .marquee-track {
-        animation-duration: ${D.animation.marquee.speed}s !important;
-        animation-direction: ${D.animation.marquee.direction === "reverse" ? "reverse" : "normal"} !important;
-      }
-      ${(D.sections.hidden || []).map((id) => '[data-section="' + id + '"] { display: none !important; }').join("\n")}
-      ${glassOff}
-      ${BTN}
-      ${INP}
       ${D.custom.css || ""}
     `;
 
@@ -298,14 +179,12 @@
     }
     st.textContent = dynCss;
 
-    /* Favicon */
     if (D.identity.favicon) {
       let fav = document.querySelector('link[rel="icon"]');
       if (!fav) { fav = document.createElement("link"); fav.rel = "icon"; document.head.appendChild(fav); }
       fav.href = D.identity.favicon;
     }
 
-    /* Meta */
     if (D.meta.title) document.title = D.meta.title;
     const setMeta = (name, content) => {
       if (!content) return;
@@ -325,7 +204,7 @@
     const logoDark = D.identity.logoDark;
     const defaultLight = "assets/logo.svg";
 
-    document.querySelectorAll(".site-header .logo img, nav .logo img, .dp-side-head img, .sidebar-head .logo img").forEach((img) => {
+    document.querySelectorAll(".site-header .logo img, nav .logo img, .sidebar-head .logo img").forEach((img) => {
       const target = logoLight || defaultLight;
       if (img.getAttribute("src") !== target) img.setAttribute("src", target);
     });
@@ -342,36 +221,25 @@
     }
   }
 
-  /* ============ COMBINED ============ */
   window.DESIGN_APPLY = function () {
     applyDesign();
     applyLogo();
-    window.dispatchEvent(new Event("design-applied"));
   };
 
   applyDesign();
 
-  let logoTimeout;
-  const scheduleApplyLogo = () => {
-    clearTimeout(logoTimeout);
-    logoTimeout = setTimeout(applyLogo, 80);
-  };
-
+  /* Single delayed apply — replaces heavy MutationObserver */
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", scheduleApplyLogo);
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(applyLogo, 150);
+      setTimeout(applyLogo, 600);
+    });
   } else {
-    scheduleApplyLogo();
+    setTimeout(applyLogo, 150);
+    setTimeout(applyLogo, 600);
   }
 
-  const startObserver = () => {
-    if (!document.body) return;
-    const obs = new MutationObserver(scheduleApplyLogo);
-    obs.observe(document.body, { childList: true, subtree: true });
-  };
-  if (document.body) startObserver();
-  else window.addEventListener("DOMContentLoaded", startObserver);
-
-  /* ============ ANALYTICS ============ */
+  /* Analytics — skip on panel */
   const isDesign = document.documentElement.classList.contains("design-body") ||
     (document.body && document.body.classList.contains("design-body"));
 
@@ -396,11 +264,11 @@
       document.head.appendChild(s);
     }
     if (D.analytics.headScript) {
-      try { const s = document.createElement("script"); s.textContent = D.analytics.headScript; document.head.appendChild(s); } catch {}
+      try { const s = document.createElement("script"); s.textContent = D.analytics.headScript; document.head.appendChild(s); } catch { }
     }
     if (D.analytics.bodyScript) {
       window.addEventListener("DOMContentLoaded", () => {
-        try { const s = document.createElement("script"); s.textContent = D.analytics.bodyScript; document.body.appendChild(s); } catch {}
+        try { const s = document.createElement("script"); s.textContent = D.analytics.bodyScript; document.body.appendChild(s); } catch { }
       });
     }
   }
