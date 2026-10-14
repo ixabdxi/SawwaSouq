@@ -1,14 +1,22 @@
 /* ============================================================
-   SaWWA Souq — Design Tokens v3
-   يُحمَّل أول سكربت في كل صفحة
-   يقرأ الإعدادات ويطبّقها + يربط الشعار المرفوع
+   SaWWA Souq — Design Tokens v4
+   - يُحمَّل أول سكربت في كل صفحة
+   - يقرأ sawwa_design-config.js إن وُجد (للنشر)
+   - ثم يُطبّق sawwa_design من localStorage (معاينة)
+   - يربط الشعار تلقائيًا
    ============================================================ */
 (function () {
+  /* ============ 1. LOAD FROM DEPLOYED CONFIG FILE (if present) ============ */
+  const DEPLOYED = (typeof window.SAWWA_DESIGN_CONFIG === "object" && window.SAWWA_DESIGN_CONFIG !== null)
+    ? window.SAWWA_DESIGN_CONFIG
+    : {};
+
+  /* ============ 2. DEFAULT ============ */
   const DEFAULT = {
     identity: {
       nameAr: "سوّا سوق", nameEn: "SaWWA Souq",
       taglineAr: "جودة تستحقّها، بسعر يناسبك.", taglineEn: "Quality you deserve, price you love.",
-      logo: "", logoDark: "", favicon: "", logoHeight: 60
+      logo: "", logoDark: "", favicon: "", logoHeight: 44
     },
     colors: {
       teal: "#0F5C56", teal2: "#12A89B", amber: "#E8A33D", deep: "#0A3D38",
@@ -37,7 +45,7 @@
     },
     components: {
       buttonStyle: "gradient", cardStyle: "glass",
-      inputStyle: "rounded", toastPosition: "top-right", modalSize: "md"
+      inputStyle: "rounded", toastPosition: "bottom-center", modalSize: "md"
     },
     images: { coverGlass: "", coverRubber: "", ogImage: "", heroSlides: [] },
     sections: {
@@ -66,9 +74,11 @@
     return out;
   }
 
-  let stored = {};
-  try { stored = JSON.parse(localStorage.getItem("sawwa_design") || "{}"); } catch { }
-  const D = merge(DEFAULT, stored);
+  /* ============ 3. LAYERED MERGE ============ */
+  let local = {};
+  try { local = JSON.parse(localStorage.getItem("sawwa_design") || "{}"); } catch {}
+  // DEFAULT ← DEPLOYED ← LOCAL (الأخير يفوز)
+  const D = merge(merge(DEFAULT, DEPLOYED), local);
   window.DESIGN = D;
 
   /* ============ COLOR MATH ============ */
@@ -194,17 +204,6 @@
     };
     const INP = inputMap[D.components.inputStyle] || "";
 
-    /* Toast position */
-    const toastPosMap = {
-      "top-right": "top:100px;inset-inline-end:28px;inset-inline-start:auto;bottom:auto;",
-      "top-left": "top:100px;inset-inline-start:28px;inset-inline-end:auto;bottom:auto;",
-      "top-center": "top:100px;inset-inline-start:50%;transform:translateX(-50%);inset-inline-end:auto;bottom:auto;",
-      "bottom-right": "bottom:28px;inset-inline-end:28px;inset-inline-start:auto;top:auto;",
-      "bottom-left": "bottom:28px;inset-inline-start:28px;inset-inline-end:auto;top:auto;",
-      "bottom-center": "bottom:28px;inset-inline-start:50%;transform:translateX(-50%);inset-inline-end:auto;top:auto;"
-    };
-    const TP = toastPosMap[D.components.toastPosition] || toastPosMap["top-right"];
-
     /* Modal size */
     const modalSizeMap = { sm: "380px", md: "620px", lg: "840px", full: "100%" };
     const MS = modalSizeMap[D.components.modalSize] || "620px";
@@ -276,7 +275,6 @@
       .container { max-width: ${CW}; padding: ${SP.container}; }
       .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: ${SP.gap}; }
       .logo { height: ${D.identity.logoHeight}px; }
-      .toast-container { ${TP} }
       .modal-card { max-width: ${MS} !important; }
       .reveal { transform: ${revealFrom}; }
       .reveal.in { transform: none; }
@@ -327,19 +325,16 @@
     const logoDark = D.identity.logoDark;
     const defaultLight = "assets/logo.svg";
 
-    /* شعار الهيدر */
     document.querySelectorAll(".site-header .logo img, nav .logo img, .dp-side-head img, .sidebar-head .logo img").forEach((img) => {
       const target = logoLight || defaultLight;
       if (img.getAttribute("src") !== target) img.setAttribute("src", target);
     });
 
-    /* شعار الفوتر — يستخدم الداكن لو موجود، وإلا الفاتح */
     document.querySelectorAll(".site-footer .logo img, .logo-footer img").forEach((img) => {
       const target = logoDark || logoLight || defaultLight;
       if (img.getAttribute("src") !== target) img.setAttribute("src", target);
     });
 
-    /* أيقونة المتصفح */
     if (D.identity.favicon) {
       let fav = document.querySelector('link[rel="icon"]');
       if (!fav) { fav = document.createElement("link"); fav.rel = "icon"; document.head.appendChild(fav); }
@@ -347,16 +342,15 @@
     }
   }
 
-  /* ============ COMBINED APPLY (للمعاينة الحية) ============ */
+  /* ============ COMBINED ============ */
   window.DESIGN_APPLY = function () {
     applyDesign();
     applyLogo();
+    window.dispatchEvent(new Event("design-applied"));
   };
 
-  /* ============ INITIAL APPLY ============ */
   applyDesign();
 
-  /* Schedule logo apply (after UI.js builds header/footer) */
   let logoTimeout;
   const scheduleApplyLogo = () => {
     clearTimeout(logoTimeout);
@@ -369,17 +363,15 @@
     scheduleApplyLogo();
   }
 
-  /* Watch DOM — يطبّق الشعار لما الهيدر يُبنى */
   const startObserver = () => {
     if (!document.body) return;
     const obs = new MutationObserver(scheduleApplyLogo);
     obs.observe(document.body, { childList: true, subtree: true });
   };
-
   if (document.body) startObserver();
   else window.addEventListener("DOMContentLoaded", startObserver);
 
-  /* ============ ANALYTICS (skip on panel) ============ */
+  /* ============ ANALYTICS ============ */
   const isDesign = document.documentElement.classList.contains("design-body") ||
     (document.body && document.body.classList.contains("design-body"));
 
@@ -404,11 +396,11 @@
       document.head.appendChild(s);
     }
     if (D.analytics.headScript) {
-      try { const s = document.createElement("script"); s.textContent = D.analytics.headScript; document.head.appendChild(s); } catch { }
+      try { const s = document.createElement("script"); s.textContent = D.analytics.headScript; document.head.appendChild(s); } catch {}
     }
     if (D.analytics.bodyScript) {
       window.addEventListener("DOMContentLoaded", () => {
-        try { const s = document.createElement("script"); s.textContent = D.analytics.bodyScript; document.body.appendChild(s); } catch { }
+        try { const s = document.createElement("script"); s.textContent = D.analytics.bodyScript; document.body.appendChild(s); } catch {}
       });
     }
   }
