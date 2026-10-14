@@ -1,13 +1,10 @@
 /* ============================================================
-   SaWWA Souq — Aurora Background (Mobile-Optimized)
-   على الموبايل: معطّل تلقائيًا
-   على الديسكتوب: 5 blobs + particles + waves
+   SaWWA Souq — Aurora Background (Performance Optimized)
    ============================================================ */
 (() => {
   const canvas = document.getElementById("aurora");
   if (!canvas) return;
 
-  /* ============ MOBILE CHECK ============ */
   const isMobile = () =>
     window.matchMedia("(max-width: 900px)").matches ||
     window.matchMedia("(hover: none)").matches ||
@@ -16,7 +13,6 @@
   const isReducedMotion = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* Kill canvas on mobile / reduced motion */
   if (isMobile() || isReducedMotion()) {
     canvas.style.display = "none";
     canvas.width = 0;
@@ -30,6 +26,8 @@
   let rafId = null;
   let paused = false;
   let active = true;
+  let lastFrame = 0;
+  const FRAME_MS = 33; // 30fps
 
   const COLORS = [
     { r: 18, g: 168, b: 155 },
@@ -41,9 +39,8 @@
 
   let blobs = [];
   let particles = [];
-  let PARTICLE_COUNT = 60;
+  let PARTICLE_COUNT = 25;
 
-  /* ============ SETTINGS FROM DESIGN PANEL ============ */
   const applySettings = () => {
     const s = window.AURORA_SETTINGS || {};
     if (s.enabled === false) {
@@ -56,7 +53,7 @@
     canvas.style.display = "block";
 
     const blobsCount = typeof s.blobs === "number" ? s.blobs : 5;
-    PARTICLE_COUNT = typeof s.particles === "number" ? s.particles : 60;
+    PARTICLE_COUNT = typeof s.particles === "number" ? Math.min(s.particles, 40) : 25;
     const speed = typeof s.speed === "number" ? s.speed / 100 : 1;
 
     blobs = [
@@ -68,13 +65,11 @@
     ].slice(0, blobsCount);
 
     initParticles();
-
     if (!rafId) startLoop();
   };
 
-  /* ============ RESIZE ============ */
   const resize = () => {
-    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     w = window.innerWidth;
     h = window.innerHeight;
     canvas.width = w * dpr;
@@ -85,7 +80,6 @@
     ctx.scale(dpr, dpr);
   };
 
-  /* ============ PARTICLES ============ */
   const initParticles = () => {
     particles = [];
     for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -102,12 +96,10 @@
 
   const isDark = () => document.documentElement.classList.contains("dark");
 
-  /* ============ DRAW ============ */
   const drawBlobs = () => {
     const dark = isDark();
     const baseAlpha = dark ? 0.65 : 0.40;
     ctx.globalCompositeOperation = "lighter";
-
     for (const b of blobs) {
       const cx = (b.x + Math.sin(t * b.sp + b.ph) * 0.14) * w;
       const cy = (b.y + Math.cos(t * b.sp * 1.4 + b.ph) * 0.14) * h;
@@ -128,14 +120,12 @@
     const dark = isDark();
     ctx.globalCompositeOperation = dark ? "screen" : "multiply";
     const baseAlpha = dark ? 0.10 : 0.045;
-
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       ctx.beginPath();
-      const y0 = (0.30 + i * 0.20) * h;
+      const y0 = (0.35 + i * 0.25) * h;
       ctx.moveTo(0, y0);
-      for (let x = 0; x <= w; x += 8) {
-        const y = y0 + Math.sin((x * 0.0035) + t * 0.0013 + i * 1.3) * 55
-          + Math.sin((x * 0.0018) - t * 0.0008 + i * 2.1) * 25;
+      for (let x = 0; x <= w; x += 12) {
+        const y = y0 + Math.sin((x * 0.0035) + t * 0.0013 + i * 1.3) * 55;
         ctx.lineTo(x, y);
       }
       ctx.lineTo(w, h);
@@ -168,16 +158,22 @@
     }
   };
 
-  const loop = () => {
+  const loop = (now) => {
     if (!active || paused) {
       rafId = null;
       return;
     }
+    if (now - lastFrame < FRAME_MS) {
+      rafId = requestAnimationFrame(loop);
+      return;
+    }
+    lastFrame = now;
+
     ctx.clearRect(0, 0, w, h);
     drawBlobs();
     drawWaves();
     drawParticles();
-    t += 16;
+    t += 32;
     rafId = requestAnimationFrame(loop);
   };
 
@@ -190,32 +186,18 @@
     rafId = null;
   };
 
-  /* ============ VISIBILITY (توقف عند إخفاء التاب) ============ */
   document.addEventListener("visibilitychange", () => {
     paused = document.hidden;
     if (!paused && active && !rafId) startLoop();
   });
 
-  /* ============ WATCH AURORA_SETTINGS CHANGES ============ */
   let settingsTimeout = null;
   const scheduleSettingsApply = () => {
     clearTimeout(settingsTimeout);
-    settingsTimeout = setTimeout(() => {
-      resize();
-      applySettings();
-    }, 120);
+    settingsTimeout = setTimeout(() => { resize(); applySettings(); }, 150);
   };
-
-  /* يقرأ AURORA_SETTINGS عند أول تحميل + عند تغيير design */
   window.addEventListener("aurora-change", scheduleSettingsApply);
   window.addEventListener("design-applied", scheduleSettingsApply);
-
-  /* ============ INIT ============ */
-  const init = () => {
-    resize();
-    applySettings();
-    startLoop();
-  };
 
   resize();
   applySettings();
@@ -230,12 +212,6 @@
     resize();
     initParticles();
     if (!rafId) startLoop();
-  });
-
-  /* Watch theme changes (dark/light) — إعادة ضبط الألوان */
-  new MutationObserver(() => {}).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["class"]
   });
 
   window.AURORA = { start: startLoop, stop: stopLoop, resize, applySettings };
