@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>المتجر — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container">
+  <h1 class="page-title font-en">Shop</h1>
+  <div class="filters">
+    <button class="chip active" data-filter="all">All</button>
+    <button class="chip" data-filter="RUBBER" data-i18n="home.rubber"></button>
+    <button class="chip" data-filter="GLASS" data-i18n="home.glass"></button>
+  </div>
+  <div id="shopGrid" class="grid"></div>
+</main>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const grid = document.getElementById("shopGrid");
+    const render = (filter = "all") => {
+      const lang = window.SAWWA.lang;
+      const list = Store.products.all().filter((p) => p.active && (filter === "all" || p.type === filter));
+      grid.innerHTML = list.map((p) => {
+        const onSale = p.compareAtPrice && p.compareAtPrice > p.price;
+        const discount = onSale ? Math.round((1 - p.price / p.compareAtPrice) * 100) : 0;
+        const img = (p.images && p.images[0]) || "assets/placeholder.svg";
+        return `
+        <div class="card reveal">
+          <a href="product.html?id=${p.id}" class="card-link">
+            <div class="card-img">
+              ${onSale ? `<span class="sale-badge">-${discount}%</span>` : ""}
+              <img src="${img}" alt="${lang === 'ar' ? p.nameAr : p.nameEn}" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <h3>${lang === 'ar' ? p.nameAr : p.nameEn}</h3>
+              <div class="price-row">
+                ${onSale ? `<span class="price-old">${UI.fmt(p.compareAtPrice)}</span>` : ""}
+                <span class="price">${UI.fmt(p.price)}</span>
+              </div>
+              ${p.stock <= 0 ? `<div class="badge-out">${lang === 'ar' ? 'نفد المخزون' : 'Out of stock'}</div>` : ""}
+            </div>
+          </a>
+          <div class="card-actions">
+            <button class="btn primary full add-btn" data-id="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>
+              ${p.stock <= 0 ? (lang === 'ar' ? 'نفد المخزون' : 'Out of stock') : (lang === 'ar' ? 'أضف إلى السلة' : 'Add to cart')}
+            </button>
+          </div>
+        </div>`;
+      }).join("");
+      grid.querySelectorAll(".add-btn").forEach((b) => b.onclick = (ev) => {
+        ev.preventDefault();
+        const prod = Store.products.byId(b.dataset.id);
+        if (prod) {
+          Cart.add(prod, 1);
+          UI.toast(
+            lang === "ar" ? `أُضيف "${prod.nameAr}" إلى السلة` : `"${prod.nameEn}" added to cart`,
+            "success"
+          );
+          b.textContent = lang === "ar" ? "✓ أُضيف" : "✓ Added";
+          setTimeout(() => { b.textContent = lang === "ar" ? "أضف إلى السلة" : "Add to cart"; }, 1100);
+        }
+      });
+      setTimeout(() => grid.querySelectorAll(".reveal").forEach(el => el.classList.add("in")), 30);
+    };
+    render();
+    document.querySelectorAll(".chip").forEach((b) => b.onclick = () => {
+      document.querySelectorAll(".chip").forEach((x) => x.classList.remove("active"));
+      b.classList.add("active");
+      render(b.dataset.filter);
+    });
+  }
+});
+</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

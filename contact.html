@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>اتصل بنا — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container">
+  <h1 class="page-title font-en">Contact</h1>
+
+  <div class="contact-grid">
+    <form class="contact-form" id="contactForm">
+      <label><span>الاسم</span><input type="text" name="name" required minlength="2" /></label>
+      <label><span>البريد أو الهاتف</span><input type="text" name="contact" required minlength="5" /></label>
+      <label><span>الموضوع</span>
+        <select name="subject" required>
+          <option value="general">استفسار عام</option>
+          <option value="order">بخصوص طلب</option>
+          <option value="custom">طلب مخصص</option>
+          <option value="wholesale">شراء بالجملة</option>
+          <option value="complaint">شكوى</option>
+          <option value="suggestion">اقتراح</option>
+        </select>
+      </label>
+      <label><span>الرسالة</span><textarea name="message" rows="5" required minlength="10"></textarea></label>
+      <button class="btn primary full" type="submit">إرسال</button>
+    </form>
+
+    <div class="contact-info">
+      <div class="contact-info-card">
+        <div class="cico">💬</div>
+        <div>
+          <h4>واتساب (الأسرع)</h4>
+          <p>نرد خلال دقائق في ساعات العمل.<br />
+            <a href="https://wa.me/962791252004" target="_blank" rel="noopener">+962 79 125 2004</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="contact-info-card">
+        <div class="cico">✉️</div>
+        <div>
+          <h4>البريد الإلكتروني</h4>
+          <p>للاستفسارات التفصيلية.<br />
+            <a href="mailto:hello@sawwasouq.com">hello@sawwasouq.com</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="contact-info-card">
+        <div class="cico">🕐</div>
+        <div>
+          <h4>ساعات العمل</h4>
+          <p>السبت – الخميس: 10 ص – 10 م<br />
+            الجمعة: 2 م – 10 م</p>
+        </div>
+      </div>
+
+      <div class="contact-info-card">
+        <div class="cico">📍</div>
+        <div>
+          <h4>الموقع</h4>
+          <p>عمّان، الأردن<br />
+            شحن لكل محافظات المملكة.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const lang = window.SAWWA.lang;
+    document.getElementById("contactForm").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const msg = {
+        id: "msg-" + Date.now().toString(36).toUpperCase(),
+        name: fd.get("name"),
+        contact: fd.get("contact"),
+        subject: fd.get("subject"),
+        message: fd.get("message"),
+        createdAt: Date.now(),
+        read: false
+      };
+      const list = JSON.parse(localStorage.getItem("sawwa_messages") || "[]");
+      list.unshift(msg);
+      localStorage.setItem("sawwa_messages", JSON.stringify(list));
+      UI.toast(
+        lang === "ar" ? "شكرًا! سنتواصل معك قريبًا." : "Thanks! We'll contact you soon.",
+        "success", null, 5000
+      );
+      e.target.reset();
+    };
+  }
+});
+</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

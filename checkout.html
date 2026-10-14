@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الدفع — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container">
+  <h1 class="page-title" data-i18n="checkout.title"></h1>
+  <form id="checkoutForm" class="checkout-grid">
+    <section class="form-col reveal">
+      <label><span data-i18n="checkout.name"></span><input name="name" required minlength="2" /></label>
+      <label><span data-i18n="checkout.email"></span><input name="email" type="email" required /></label>
+      <label><span data-i18n="checkout.phone"></span><input name="phone" required minlength="7" /></label>
+      <label><span data-i18n="checkout.city"></span>
+        <select name="city" id="citySelect" required></select>
+      </label>
+      <label><span data-i18n="checkout.address"></span><textarea name="address" required minlength="5"></textarea></label>
+      <label><span data-i18n="checkout.notes"></span><textarea name="notes"></textarea></label>
+
+      <fieldset class="pay">
+        <legend data-i18n="checkout.payment"></legend>
+        <label class="radio"><input type="radio" name="pay" value="COD" checked /><span data-i18n="checkout.cod"></span></label>
+        <label class="radio"><input type="radio" name="pay" value="CLIQ" /><span data-i18n="checkout.cliq"></span></label>
+      </fieldset>
+
+      <div id="cliqBox" class="cliq-box hidden">
+        <div class="row"><span data-i18n="checkout.cliqId"></span><code id="cliqCode" class="font-en"></code></div>
+        <p data-i18n="checkout.cliqInstructions" style="margin:10px 0"></p>
+        <label><span data-i18n="checkout.proof"></span>
+          <input type="file" name="proof" accept="image/*" />
+        </label>
+      </div>
+
+      <label class="points-box">
+        <input type="checkbox" id="usePoints" />
+        <span data-i18n="checkout.points"></span>
+        <small data-i18n="checkout.pointsHint"></small>
+        <em id="pointsBalance"></em>
+      </label>
+    </section>
+
+    <aside class="summary-col reveal">
+      <h3 data-i18n="cart.title"></h3>
+      <div id="summaryItems"></div>
+
+      <div class="coupon-row">
+        <input type="text" id="couponInput" placeholder="كود الخصم" />
+        <button type="button" class="btn ghost" id="couponApply">تطبيق</button>
+      </div>
+      <div id="couponStatus"></div>
+
+      <div class="row"><span data-i18n="cart.subtotal"></span><span id="sumSub"></span></div>
+      <div class="row" id="discountRow" style="display:none"><span data-i18n="checkout.points"></span><span id="sumDisc"></span></div>
+      <div class="row" id="couponRow" style="display:none"><span>كود الخصم</span><span id="sumCoupon"></span></div>
+      <div class="row"><span data-i18n="cart.shipping"></span><span id="sumShip"></span></div>
+      <div class="row total"><span data-i18n="cart.total"></span><span id="sumTotal"></span></div>
+      <button class="btn primary full" data-i18n="checkout.placeOrder" type="submit" style="margin-top:16px"></button>
+    </aside>
+  </form>
+
+  <div id="successBox" class="success-box hidden"></div>
+</main>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const lang = window.SAWWA.lang;
+    document.getElementById("cliqCode").textContent = window.SAWWA.cliqId;
+
+    const citySel = document.getElementById("citySelect");
+    citySel.innerHTML = `<option value="">--</option>` + Shipping.list().map((c) => `<option>${c}</option>`).join("");
+
+    let appliedCoupon = null;
+
+    const sum = () => {
+      const sub = Cart.subtotal();
+      const city = citySel.value;
+      const ship = city ? Shipping.getFee(city) : (window.SAWWA.shipping * 100);
+      const pts = Store.points.get();
+      const use = document.getElementById("usePoints").checked && pts >= window.SAWWA.loyalty.minRedeem;
+      const discPts = use ? Math.min(Math.floor(pts / 100) * 100, sub) : 0;
+      const discCoupon = appliedCoupon ? Coupons.discountFor(appliedCoupon, sub - discPts) : 0;
+      const total = Math.max(0, sub + ship - discPts - discCoupon);
+
+      document.getElementById("sumSub").textContent = UI.fmt(sub);
+      document.getElementById("sumShip").textContent = UI.fmt(ship);
+      document.getElementById("sumTotal").textContent = UI.fmt(total);
+
+      const dRow = document.getElementById("discountRow");
+      if (discPts > 0) { dRow.style.display = "flex"; document.getElementById("sumDisc").textContent = "- " + UI.fmt(discPts); }
+      else dRow.style.display = "none";
+
+      const cRow = document.getElementById("couponRow");
+      if (discCoupon > 0) { cRow.style.display = "flex"; document.getElementById("sumCoupon").textContent = "- " + UI.fmt(discCoupon); }
+      else cRow.style.display = "none";
+
+      document.getElementById("pointsBalance").textContent = `${pts} ${lang === "ar" ? "نقطة" : "pts"}`;
+      return { sub, ship, discPts, discCoupon, total };
+    };
+
+    const renderItems = () => {
+      const items = Cart.get();
+      document.getElementById("summaryItems").innerHTML = items.length === 0
+        ? `<p class="muted">${lang === "ar" ? "لا منتجات." : "No items."}</p>`
+        : items.map((it) => `
+          <div class="row small"><span>${lang === "ar" ? it.nameAr : it.nameEn} × ${it.qty}</span><span>${UI.fmt(it.price * it.qty)}</span></div>
+        `).join("");
+    };
+
+    document.querySelectorAll("input[name=pay]").forEach((r) => r.onchange = () => {
+      document.getElementById("cliqBox").classList.toggle("hidden", !(r.value === "CLIQ" && r.checked));
+    });
+    document.getElementById("usePoints").onchange = sum;
+    citySel.onchange = sum;
+
+    // Coupon apply
+    document.getElementById("couponApply").onclick = () => {
+      const code = document.getElementById("couponInput").value.trim();
+      const status = document.getElementById("couponStatus");
+      if (!code) { status.innerHTML = ""; appliedCoupon = null; Coupons.clear(); sum(); return; }
+      const res = Coupons.apply(code, Cart.subtotal());
+      if (!res.ok) {
+        const reasons = {
+          not_found: lang === "ar" ? "الكود غير موجود" : "Code not found",
+          inactive: lang === "ar" ? "الكود غير مفعّل" : "Code inactive",
+          expired: lang === "ar" ? "انتهت صلاحية الكود" : "Code expired",
+          max_uses: lang === "ar" ? "انتهى استخدام الكود" : "Code max uses reached",
+          min_cart: lang === "ar" ? "الحد الأدنى للسلة لم يتحقق" : "Minimum cart not met"
+        };
+        status.innerHTML = `<div class="coupon-error">${reasons[res.reason] || "خطأ"}</div>`;
+        appliedCoupon = null;
+        sum();
+        return;
+      }
+      appliedCoupon = res.coupon;
+      status.innerHTML = `
+        <div class="coupon-applied">
+          <span>✓</span>
+          <span>${res.coupon.code} ${lang === "ar" ? "مُطبَّق" : "applied"}</span>
+          <button type="button" id="couponRemove">×</button>
+        </div>`;
+      document.getElementById("couponRemove").onclick = () => {
+        appliedCoupon = null;
+        Coupons.clear();
+        status.innerHTML = "";
+        document.getElementById("couponInput").value = "";
+        sum();
+      };
+      sum();
+    };
+
+    renderItems();
+    sum();
+
+    document.getElementById("checkoutForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const pay = fd.get("pay");
+      const city = fd.get("city");
+
+      if (Cart.get().length === 0) { UI.toast(lang === "ar" ? "سلتك فارغة" : "Cart is empty", "warn"); return; }
+      if (!city) { UI.toast(lang === "ar" ? "اختر المحافظة" : "Choose governorate", "warn"); return; }
+      if (pay === "CLIQ" && !fd.get("proof")?.name) { UI.toast(lang === "ar" ? "ارفع صورة الإشعار" : "Upload receipt", "warn"); return; }
+
+      const ok = await UI.confirm(
+        lang === "ar" ? "تأكيد الطلب" : "Confirm order",
+        lang === "ar" ? "سيتم إرسال طلبك الآن." : "Your order will be placed now.",
+        { icon: "✓", okLabel: lang === "ar" ? "تأكيد" : "Confirm" }
+      );
+      if (!ok) return;
+
+      const t = sum();
+      const earned = Math.floor((t.total / 100) * window.SAWWA.loyalty.earnPerJOD);
+      const usedPts = document.getElementById("usePoints").checked && Store.points.get() >= window.SAWWA.loyalty.minRedeem
+        ? Math.min(Store.points.get(), Math.floor(Store.points.get() / 100) * 100)
+        : 0;
+      const id = "SW-" + Date.now().toString(36).toUpperCase();
+
+      const order = {
+        id, createdAt: Date.now(),
+        name: fd.get("name"), email: fd.get("email"), phone: fd.get("phone"),
+        city: fd.get("city"), address: fd.get("address"), notes: fd.get("notes"),
+        items: Cart.get(),
+        subtotal: t.sub, shipping: t.ship, discount: t.discPts + t.discCoupon, total: t.total,
+        couponCode: appliedCoupon ? appliedCoupon.code : null,
+        paymentMethod: pay,
+        paymentStatus: pay === "CLIQ" ? "AWAITING_VERIFICATION" : "PENDING",
+        status: "PENDING",
+        pointsEarned: earned, pointsUsed: usedPts
+      };
+
+      Store.orders.create(order);
+      order.items.forEach((it) => Store.products.decrementStock(it.id, it.qty));
+      if (usedPts > 0) Store.points.subtract(usedPts);
+      if (pay === "COD") Store.points.add(earned);
+      if (appliedCoupon) Coupons.incrementUse();
+
+      if (window.Notifications) {
+        Notifications.add(
+          lang === "ar" ? `طلب جديد ${id}` : `New order ${id}`,
+          lang === "ar" ? "شكرًا لطلبك! سنتواصل معك لتأكيد التفاصيل." : "Thanks! We'll contact you to confirm."
+        );
+      }
+
+      Cart.clear();
+      Coupons.clear();
+
+      UI.toast(
+        lang === "ar" ? `تم استلام طلبك ${id}` : `Order ${id} received!`,
+        "success", null, 5000
+      );
+
+      const waMsg = encodeURIComponent(
+        `طلب جديد ${id}\nالاسم: ${order.name}\nالهاتف: ${order.phone}\nالمدينة: ${order.city}\nالطريقة: ${pay}\nالمجموع: ${(order.total / 100).toFixed(2)} دينار`
+      );
+      const box = document.getElementById("successBox");
+      box.classList.remove("hidden");
+      box.innerHTML = `
+        <h2>${lang === 'ar' ? '✓ تم استلام طلبك!' : '✓ Order received!'}</h2>
+        <p>${lang === 'ar' ? 'رقم الطلب' : 'Order ID'}: <strong class="font-en">${id}</strong></p>
+        <a class="btn primary" href="track.html">${lang === 'ar' ? 'تتبع الطلب' : 'Track order'}</a>
+        <a class="btn" href="https://wa.me/${window.SAWWA.whatsapp}?text=${waMsg}" target="_blank" rel="noopener">
+          ${lang === 'ar' ? 'تواصل عبر واتساب' : 'Contact on WhatsApp'}
+        </a>
+        <a class="btn ghost" href="shop.html">${lang === 'ar' ? 'متابعة التسوق' : 'Continue shopping'}</a>`;
+      e.target.style.display = "none";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+  }
+});
+</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>تتبع الطلب — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container narrow">
+  <h1 class="page-title font-en">Track Order</h1>
+
+  <div class="track-wrap">
+    <form class="track-form" id="trackForm">
+      <label style="display:block;margin-bottom:14px">
+        <span style="display:block;font-size:12px;margin-bottom:8px;color:var(--muted);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-family:Orbitron,sans-serif">
+          رقم الطلب
+        </span>
+        <input type="text" id="trackId" placeholder="SW-XXXXXXXX" required />
+      </label>
+      <button class="btn primary full" type="submit">تتبع</button>
+    </form>
+
+    <div id="trackResult"></div>
+  </div>
+</main>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const lang = window.SAWWA.lang;
+    const out = document.getElementById("trackResult");
+
+    const renderOrder = (order) => {
+      const tl = Tracking.timeline(order, lang);
+      out.innerHTML = `
+        <div class="track-result">
+          <div class="track-head">
+            <div>
+              <div style="font-size:11px;color:var(--muted);font-weight:800;letter-spacing:.15em;text-transform:uppercase;font-family:Orbitron,sans-serif;margin-bottom:6px">
+                ${lang === "ar" ? "رقم الطلب" : "Order"}
+              </div>
+              <strong>${order.id}</strong>
+            </div>
+            <span class="status-pill ${order.status}">${order.status}</span>
+          </div>
+
+          <div class="timeline">
+            ${tl.map((s) => `
+              <div class="tl-item ${s.done ? "done" : ""} ${s.current ? "current" : ""}">
+                <div class="tl-label">${s.label}</div>
+                <div class="tl-time">${new Date(order.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}</div>
+              </div>`).join("")}
+          </div>
+
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);font-size:14px">
+            <div style="display:flex;justify-content:space-between;padding:6px 0"><span>${lang === "ar" ? "الاسم" : "Name"}</span><strong>${order.name || "—"}</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0"><span>${lang === "ar" ? "المدينة" : "City"}</span><strong>${order.city || "—"}</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0"><span>${lang === "ar" ? "المجموع" : "Total"}</span><strong>${UI.fmt(order.total)}</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0"><span>${lang === "ar" ? "طريقة الدفع" : "Payment"}</span><strong>${order.paymentMethod || "—"}</strong></div>
+          </div>
+        </div>`;
+    };
+
+    document.getElementById("trackForm").onsubmit = (e) => {
+      e.preventDefault();
+      const id = document.getElementById("trackId").value.trim().toUpperCase();
+      if (!id) return;
+      const order = Store.orders.byId(id);
+      if (!order) {
+        out.innerHTML = `<div class="track-result" style="text-align:center;padding:40px">
+          <p style="font-size:16px;color:var(--muted);margin-bottom:12px">
+            ${lang === "ar" ? "لم نجد هذا الطلب. تأكد من الرقم أو تواصل معنا عبر واتساب." : "Order not found. Check the ID or contact us on WhatsApp."}
+          </p>
+          <a href="https://wa.me/962791252004" target="_blank" rel="noopener" class="btn primary">واتساب</a>
+        </div>`;
+        return;
+      }
+      renderOrder(order);
+    };
+  }
+});
+</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الهوية البصرية — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container">
+  <h1 class="page-title font-en">Brand Identity</h1>
+  <p class="muted" style="margin-bottom:40px">الهوية البصرية الرسمية — الشعار، الألوان، الخطوط.</p>
+
+  <section style="margin-bottom:70px">
+    <h2 class="section-title">الشعار</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;">
+      <div style="padding:40px;border-radius:var(--radius);background:#fff;display:grid;place-items:center;box-shadow:var(--shadow-sm)">
+        <img src="assets/logo.svg" alt="" style="height:70px" />
+        <span style="font-size:11px;color:var(--stone);margin-top:14px;letter-spacing:.1em">PRIMARY · WHITE BG</span>
+      </div>
+      <div style="padding:40px;border-radius:var(--radius);background:var(--brand-deep);display:grid;place-items:center;box-shadow:var(--shadow-sm)">
+        <img src="assets/logo-white.svg" alt="" style="height:70px" />
+        <span style="font-size:11px;color:var(--brand-sage);margin-top:14px;letter-spacing:.1em">PRIMARY · DARK BG</span>
+      </div>
+      <div style="padding:40px;border-radius:var(--radius);background:var(--brand-sage);display:grid;place-items:center;box-shadow:var(--shadow-sm)">
+        <img src="assets/logo.svg" alt="" style="height:70px" />
+        <span style="font-size:11px;color:var(--brand-deep);margin-top:14px;letter-spacing:.1em">PRIMARY · SAGE BG</span>
+      </div>
+      <div style="padding:40px;border-radius:var(--radius);background:var(--brand-light);display:grid;place-items:center;box-shadow:var(--shadow-sm)">
+        <img src="assets/favicon.svg" alt="" style="height:90px" />
+        <span style="font-size:11px;color:var(--brand-stone);margin-top:14px;letter-spacing:.1em">ICON</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="margin-bottom:70px">
+    <h2 class="section-title">الألوان الرسمية</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;">
+      <div style="border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="height:140px;background:#0F5C56"></div>
+        <div style="padding:14px;background:var(--white)">
+          <strong>Teal</strong><br /><code style="font-size:12px;color:var(--stone)">#0F5C56</code>
+        </div>
+      </div>
+      <div style="border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="height:140px;background:#0A3D38"></div>
+        <div style="padding:14px;background:var(--white)">
+          <strong>Deep</strong><br /><code style="font-size:12px;color:var(--stone)">#0A3D38</code>
+        </div>
+      </div>
+      <div style="border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="height:140px;background:#8FA9A5"></div>
+        <div style="padding:14px;background:var(--white)">
+          <strong>Sage</strong><br /><code style="font-size:12px;color:var(--stone)">#8FA9A5</code>
+        </div>
+      </div>
+      <div style="border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="height:140px;background:#4A5654"></div>
+        <div style="padding:14px;background:var(--white)">
+          <strong>Stone</strong><br /><code style="font-size:12px;color:var(--stone)">#4A5654</code>
+        </div>
+      </div>
+      <div style="border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="height:140px;background:#C9CFCE"></div>
+        <div style="padding:14px;background:var(--white)">
+          <strong>Light</strong><br /><code style="font-size:12px;color:var(--stone)">#C9CFCE</code>
+        </div>
+      </div>
+      <div style="border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div style="height:140px;background:#EDEDEB"></div>
+        <div style="padding:14px;background:var(--white)">
+          <strong>BG</strong><br /><code style="font-size:12px;color:var(--stone)">#EDEDEB</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="margin-bottom:70px">
+    <h2 class="section-title">الخطوط</h2>
+    <div style="background:var(--white);border-radius:var(--radius);padding:36px;box-shadow:var(--shadow-sm)">
+      <div style="font-family:var(--font-en);font-size:13px;color:var(--stone);letter-spacing:.2em;margin-bottom:10px">ORBITRON · ENGLISH</div>
+      <div style="font-family:var(--font-en);font-size:38px;font-weight:900;letter-spacing:.08em;color:var(--brand-deep);margin-bottom:20px">
+        SAWWA SOUQ — 1234
+      </div>
+      <div style="font-family:var(--font-en);font-size:14px;font-weight:500;letter-spacing:.05em;color:var(--brand-stone)">
+        ABCDEFGHIJKLMNOPQRSTUVWXYZ · abcdefghijklmnopqrstuvwxyz
+      </div>
+
+      <div style="font-family:var(--font-ar);font-size:13px;color:var(--stone);letter-spacing:.2em;margin:40px 0 10px">BALOO BHAIJAAN 2 · ARABIC</div>
+      <div style="font-size:34px;font-weight:800;color:var(--brand-deep);margin-bottom:20px;font-family:var(--font-ar)">
+        سوّا سوق للأجهزة الرقمية ١٢٣
+      </div>
+      <div style="font-size:15px;font-weight:500;color:var(--brand-stone);font-family:var(--font-ar)">
+        أ ب ت ث ج ح خ د ذ ر ز س ش ص ض ط ظ ع غ ف ق ك ل م ن ه و ي
+      </div>
+    </div>
+  </section>
+
+  <section style="margin-bottom:70px">
+    <h2 class="section-title">تطبيقات الشعار</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px">
+      <div style="padding:28px;border-radius:var(--radius);background:var(--white);text-align:center;box-shadow:var(--shadow-sm)">
+        <div class="brand-chip" style="margin-bottom:16px">NEW DROP</div>
+        <div style="font-family:var(--font-en);font-weight:900;font-size:22px;color:var(--brand-deep)">SAWWA SOUQ</div>
+      </div>
+      <div style="padding:28px;border-radius:var(--radius);background:var(--grad-teal);color:#fff;text-align:center">
+        <div style="font-family:var(--font-en);letter-spacing:.1em;font-size:11px;opacity:.7;margin-bottom:8px">PREMIUM</div>
+        <div style="font-family:var(--font-en);font-weight:900;font-size:22px">SAWWA SOUQ</div>
+      </div>
+      <div style="padding:28px;border-radius:var(--radius);background:var(--brand-light);text-align:center;position:relative;overflow:hidden">
+        <span style="font-family:var(--font-en);font-weight:900;font-size:56px;color:var(--brand-teal)">S</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="brand-divider"><span>SAWWA SOUQ · EST 2024</span></div>
+</main>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+<script>UI.init();</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

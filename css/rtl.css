@@ -1,0 +1,11 @@
+body.lang-en { font-family: "Orbitron", "Baloo Bhaijaan 2", system-ui, sans-serif; }
+body.lang-en .font-en { letter-spacing: .02em; }
+
+[dir="ltr"] .ci-qty button:first-child { order: 3; }
+[dir="ltr"] .ci-qty button:last-child { order: 1; }
+[dir="ltr"] .cart-btn .badge { inset-inline-end: auto; inset-inline-start: -6px; }
+[dir="ltr"] .whatsapp-fab { inset-inline-start: auto; inset-inline-end: 28px; }
+[dir="ltr"] .toast-container { inset-inline-end: auto; inset-inline-start: 28px; }
+[dir="ltr"] .prose .lead { border-inline-start: none; border-inline-end: 5px solid var(--cyan); }
+[dir="ltr"] .floating-tag.tag-1 { inset-inline-end: auto; inset-inline-start: -10%; }
+[dir="ltr"] .floating-tag.tag-2 { inset-inline-start: auto; inset-inline-end: -6%; }

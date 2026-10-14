@@ -1,0 +1,79 @@
+/* ============================================================
+   SAWWA SOUQ — OFFICIAL IDENTITY
+   ============================================================ */
+
+:root {
+  --brand-teal:  #0F5C56;
+  --brand-deep:  #0A3D38;
+  --brand-sage:  #8FA9A5;
+  --brand-stone: #4A5654;
+  --brand-light: #C9CFCE;
+  --brand-bg:    #EDEDEB;
+
+  --font-ar: "Baloo Bhaijaan 2", "Tajawal", system-ui, sans-serif;
+  --font-en: "Orbitron", "Baloo Bhaijaan 2", system-ui, sans-serif;
+}
+
+body { font-family: var(--font-ar); }
+
+.font-en,
+.logo,
+.badge-new,
+.price,
+.stat strong,
+.points-num,
+h1.font-en,
+h2.font-en,
+.section-title.font-en,
+.page-title.font-en {
+  font-family: var(--font-en);
+  letter-spacing: .06em;
+}
+
+/* ============ BRAND DIVIDER ============ */
+.brand-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 50px 0;
+}
+.brand-divider::before,
+.brand-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--brand-sage), transparent);
+}
+.brand-divider span {
+  font-family: var(--font-en);
+  font-size: 11px;
+  letter-spacing: .35em;
+  color: var(--brand-stone);
+  opacity: .7;
+  font-weight: 700;
+}
+
+/* ============ BRAND CHIP ============ */
+.brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-sage) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-sage) 40%, transparent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  color: var(--brand-teal);
+  font-family: var(--font-en);
+}
+html.dark .brand-chip { color: var(--cyan); }
+.brand-chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand-teal);
+  box-shadow: 0 0 10px var(--brand-teal);
+}
