@@ -1,14 +1,16 @@
 /* ============================================================
-   SaWWA SOUQ — ALERTS & MODALS
-   Toasts · Confirm Modal · Skeleton
+   SaWWA SOUQ — ALERTS · MODALS · TOASTS v2
+   Glass enhancement + Fixed toast positioning
    ============================================================ */
 
-/* ============ TOAST CONTAINER — أسفل وسط الشاشة ============ */
+/* ============ TOAST CONTAINER — ثابت أسفل الوسط ============ */
 .toast-container {
   position: fixed;
-  bottom: 32px;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
+  bottom: 28px;
+  left: 50% !important;
+  right: auto !important;
+  top: auto !important;
+  transform: translateX(-50%) !important;
   z-index: 9999;
   display: flex;
   flex-direction: column-reverse;
@@ -16,26 +18,26 @@
   pointer-events: none;
   max-width: 440px;
   width: calc(100% - 40px);
-}
-
-[dir="rtl"] .toast-container {
-  transform: translateX(50%);
+  padding-inline: 0;
 }
 
 /* ============ TOAST ============ */
 .toast {
   pointer-events: auto;
-  background: color-mix(in srgb, var(--white) 96%, transparent);
-  border: 1px solid color-mix(in srgb, var(--sage) 30%, transparent);
-  border-top: 3px solid var(--teal-2);
-  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-top: 3px solid var(--brand, var(--teal-2, #12A89B));
+  border-radius: 16px;
   padding: 16px 20px;
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, .25);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.18),
+    0 6px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
   animation: toastSlideUp .45s cubic-bezier(.34, 1.56, .64, 1);
   position: relative;
   overflow: hidden;
@@ -43,8 +45,13 @@
 }
 
 html.dark .toast {
-  background: rgba(13, 30, 27, .95);
-  border-color: rgba(95, 208, 197, .2);
+  background: rgba(13, 30, 27, 0.94);
+  border-color: rgba(95, 208, 197, 0.25);
+  border-top-color: var(--brand, #12A89B);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    0 6px 16px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(95, 208, 197, 0.08);
 }
 
 @keyframes toastSlideUp {
@@ -71,7 +78,8 @@ html.dark .toast {
   font-size: 18px;
   color: #fff;
   font-weight: 900;
-  background: linear-gradient(135deg, #12A89B, #0F5C56);
+  background: linear-gradient(135deg, var(--brand, #12A89B), var(--teal, #0F5C56));
+  box-shadow: 0 6px 16px rgba(15, 92, 86, 0.25);
 }
 
 .toast-body {
@@ -83,33 +91,33 @@ html.dark .toast {
 .toast-title {
   font-weight: 900;
   font-size: 14px;
-  color: var(--deep);
+  color: var(--deep, #0A3D38);
   margin-bottom: 3px;
   letter-spacing: .01em;
   font-family: "Orbitron", sans-serif;
 }
 
 html.dark .toast-title {
-  color: var(--cyan);
+  color: var(--cyan, #5FD0C5);
 }
 
 .toast-msg {
   font-size: 13px;
-  color: var(--muted);
+  color: var(--muted, #647570);
   line-height: 1.55;
   word-wrap: break-word;
   font-weight: 500;
 }
 
 html.dark .toast-msg {
-  color: var(--sage);
+  color: var(--sage, #8FA9A5);
 }
 
 .toast-close {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--muted);
+  color: var(--muted, #647570);
   font-size: 20px;
   line-height: 1;
   padding: 0 4px;
@@ -123,39 +131,25 @@ html.dark .toast-msg {
 }
 
 /* ============ TOAST TYPES ============ */
-.toast.success {
-  border-top-color: #2E7D32;
-}
-.toast.success .toast-icon {
-  background: linear-gradient(135deg, #2E7D32, #1B5E20);
-}
+.toast.success { border-top-color: #2E7D32; }
+.toast.success .toast-icon { background: linear-gradient(135deg, #2E7D32, #1B5E20); }
 
-.toast.error {
-  border-top-color: #C03030;
-}
-.toast.error .toast-icon {
-  background: linear-gradient(135deg, #C03030, #8A1F1F);
-}
+.toast.error { border-top-color: #C03030; }
+.toast.error .toast-icon { background: linear-gradient(135deg, #C03030, #8A1F1F); }
 
-.toast.warn {
-  border-top-color: #E8A33D;
-}
-.toast.warn .toast-icon {
-  background: linear-gradient(135deg, #E8A33D, #B8701F);
-}
+.toast.warn { border-top-color: #E8A33D; }
+.toast.warn .toast-icon { background: linear-gradient(135deg, #E8A33D, #B8701F); }
 
-.toast.info .toast-icon {
-  background: linear-gradient(135deg, #12A89B, #0F5C56);
-}
+.toast.info .toast-icon { background: linear-gradient(135deg, var(--brand, #12A89B), var(--teal, #0F5C56)); }
 
-/* ============ MODAL BACKDROP ============ */
+/* ============ MODAL — مع glass مُحسّن ============ */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 9998;
-  background: rgba(6, 31, 28, .78);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(6, 31, 28, 0.55);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,20 +159,28 @@ html.dark .toast-msg {
   overscroll-behavior: contain;
 }
 
+html.dark .modal-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-/* ============ MODAL CARD ============ */
 .modal-card {
-  background: var(--white);
-  border: 1px solid color-mix(in srgb, var(--sage) 30%, transparent);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 24px;
   padding: 40px 44px;
   max-width: 520px;
   width: 100%;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .05);
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.4),
+    0 10px 30px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   animation: modalPop .4s cubic-bezier(.34, 1.56, .64, 1);
   position: relative;
   max-height: calc(100vh - 48px);
@@ -187,8 +189,12 @@ html.dark .toast-msg {
 }
 
 html.dark .modal-card {
-  background: #0D1E1B;
-  border-color: rgba(95, 208, 197, .2);
+  background: rgba(13, 30, 27, 0.94);
+  border-color: rgba(95, 208, 197, 0.22);
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.7),
+    0 10px 30px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(95, 208, 197, 0.08);
 }
 
 @keyframes modalPop {
@@ -196,7 +202,6 @@ html.dark .modal-card {
   100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
-/* ============ MODAL ICON ============ */
 .modal-icon {
   width: 76px;
   height: 76px;
@@ -207,21 +212,23 @@ html.dark .modal-card {
   font-size: 34px;
   font-weight: 900;
   color: #fff;
-  background: linear-gradient(135deg, #12A89B, #0F5C56);
-  box-shadow: 0 12px 36px rgba(18, 168, 155, .5);
+  background: linear-gradient(135deg, var(--brand, #12A89B), var(--teal, #0F5C56));
+  box-shadow:
+    0 12px 36px rgba(18, 168, 155, 0.5),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.15),
+    inset 0 2px 6px rgba(255, 255, 255, 0.3);
   animation: modalIconPulse 2s ease-in-out infinite;
 }
 
 @keyframes modalIconPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 12px 36px rgba(18, 168, 155, .5); }
-  50%      { transform: scale(1.05); box-shadow: 0 16px 48px rgba(18, 168, 155, .7); }
+  0%, 100% { transform: scale(1); box-shadow: 0 12px 36px rgba(18, 168, 155, .5), inset 0 -2px 6px rgba(0,0,0,.15), inset 0 2px 6px rgba(255,255,255,.3); }
+  50%      { transform: scale(1.05); box-shadow: 0 16px 48px rgba(18, 168, 155, .7), inset 0 -2px 6px rgba(0,0,0,.15), inset 0 2px 6px rgba(255,255,255,.3); }
 }
 
-/* ============ MODAL TEXT ============ */
 .modal-card h3 {
   font-size: 24px;
   font-weight: 900;
-  color: var(--deep);
+  color: var(--deep, #0A3D38);
   margin-bottom: 12px;
   letter-spacing: -.01em;
   line-height: 1.25;
@@ -230,22 +237,21 @@ html.dark .modal-card {
 }
 
 html.dark .modal-card h3 {
-  color: var(--cyan);
+  color: var(--cyan, #5FD0C5);
 }
 
 .modal-card p {
   font-size: 15px;
-  color: var(--muted);
+  color: var(--muted, #647570);
   line-height: 1.75;
   margin-bottom: 32px;
   font-weight: 500;
 }
 
 html.dark .modal-card p {
-  color: var(--sage);
+  color: var(--sage, #8FA9A5);
 }
 
-/* ============ MODAL ACTIONS ============ */
 .modal-actions {
   display: flex;
   gap: 12px;
@@ -261,39 +267,39 @@ html.dark .modal-card p {
 }
 
 .modal-actions .btn.primary {
-  background: linear-gradient(135deg, #12A89B, #0F5C56);
+  background: linear-gradient(135deg, var(--brand, #12A89B), var(--teal, #0F5C56));
   color: #fff;
   border: none;
-  box-shadow: 0 12px 32px rgba(18, 168, 155, .4);
+  box-shadow: 0 12px 32px rgba(18, 168, 155, 0.4);
 }
 
 .modal-actions .btn.primary:hover {
   transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 20px 50px rgba(18, 168, 155, .55);
+  box-shadow: 0 20px 50px rgba(18, 168, 155, 0.55);
 }
 
 .modal-actions .btn.ghost {
   background: transparent;
-  color: var(--ink);
-  border: 1.5px solid var(--line);
+  color: var(--ink, #0B1A18);
+  border: 1.5px solid var(--border, #E7E5E4);
 }
 
 html.dark .modal-actions .btn.ghost {
-  color: var(--ink);
-  border-color: rgba(95, 208, 197, .25);
+  color: var(--ink, #E8EFED);
+  border-color: rgba(95, 208, 197, 0.25);
 }
 
 .modal-actions .btn.ghost:hover {
-  background: color-mix(in srgb, var(--sage) 15%, transparent);
+  background: color-mix(in srgb, var(--sage, #8FA9A5) 15%, transparent);
 }
 
 /* ============ SKELETON ============ */
 .skeleton {
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--sage) 12%, transparent) 25%,
-    color-mix(in srgb, var(--sage) 25%, transparent) 50%,
-    color-mix(in srgb, var(--sage) 12%, transparent) 75%
+    color-mix(in srgb, var(--sage, #8FA9A5) 12%, transparent) 25%,
+    color-mix(in srgb, var(--sage, #8FA9A5) 25%, transparent) 50%,
+    color-mix(in srgb, var(--sage, #8FA9A5) 12%, transparent) 75%
   );
   background-size: 200% 100%;
   animation: skeleton 1.6s linear infinite;
@@ -308,10 +314,30 @@ html.dark .modal-actions .btn.ghost {
 /* ============ MOBILE ============ */
 @media (max-width: 640px) {
   .toast-container {
-    bottom: 16px;
-    width: calc(100% - 24px);
-    max-width: 100%;
+    bottom: 16px !important;
+    width: calc(100% - 24px) !important;
+    max-width: 100% !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
   }
+
+  .toast {
+    padding: 14px 16px;
+    border-radius: 14px;
+    gap: 12px;
+  }
+
+  .toast-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    border-radius: 9px;
+  }
+
+  .toast-title { font-size: 13px; }
+  .toast-msg { font-size: 12px; }
+  .toast-close { font-size: 18px; }
 
   .modal-card {
     padding: 28px 24px;
@@ -326,14 +352,8 @@ html.dark .modal-actions .btn.ghost {
     margin-bottom: 18px;
   }
 
-  .modal-card h3 {
-    font-size: 20px;
-  }
-
-  .modal-card p {
-    font-size: 14px;
-    margin-bottom: 24px;
-  }
+  .modal-card h3 { font-size: 20px; }
+  .modal-card p { font-size: 14px; margin-bottom: 24px; }
 
   .modal-actions {
     flex-direction: column-reverse;
