@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>حسابي — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container">
+  <h1 class="page-title" data-i18n="account.title"></h1>
+  <div class="account-grid">
+    <section>
+      <div class="points-card">
+        <h3 data-i18n="account.points"></h3>
+        <div class="points-num" id="pointsNum">0</div>
+        <small data-i18n="checkout.pointsHint"></small>
+      </div>
+
+      <div style="margin-top:20px;background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--glass-border);border-radius:var(--r-md);padding:22px">
+        <h4 style="font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;font-family:Orbitron,sans-serif;color:var(--deep);margin-bottom:14px">
+          ${window.SAWWA?.lang === "ar" ? "الكوبونات المتاحة" : "Available coupons"}
+        </h4>
+        <div id="couponsList"></div>
+      </div>
+    </section>
+
+    <section>
+      <h3 style="font-size:16px;font-weight:900;color:var(--deep);margin-bottom:18px;letter-spacing:.05em" data-i18n="account.orders"></h3>
+      <div id="ordersList"></div>
+    </section>
+  </div>
+</main>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const lang = window.SAWWA.lang;
+    document.getElementById("pointsNum").textContent = Store.points.get();
+
+    // Coupons
+    const coup = Coupons.all().filter((c) => c.active && (!c.expires || new Date(c.expires) > Date.now()));
+    const cList = document.getElementById("couponsList");
+    if (coup.length === 0) {
+      cList.innerHTML = `<p class="muted" style="font-size:13px">${lang === "ar" ? "لا توجد كوبونات حاليًا." : "No coupons yet."}</p>`;
+    } else {
+      cList.innerHTML = coup.slice(0, 5).map((c) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px">
+          <div>
+            <strong style="font-family:Orbitron,sans-serif;letter-spacing:.08em">${c.code}</strong><br />
+            <small class="muted">${c.type === "percent" ? c.value + "%" : (c.value/100).toFixed(2) + " دينار"} ${lang === "ar" ? "خصم" : "off"}</small>
+          </div>
+          <button class="btn ghost small copy-coupon" data-code="${c.code}">${lang === "ar" ? "نسخ" : "Copy"}</button>
+        </div>`).join("");
+      document.querySelectorAll(".copy-coupon").forEach((b) => b.onclick = () => {
+        navigator.clipboard?.writeText(b.dataset.code);
+        UI.toast(lang === "ar" ? "تم نسخ الكود" : "Code copied", "success", null, 2000);
+      });
+    }
+
+    // Orders
+    const list = Store.orders.all();
+    const wrap = document.getElementById("ordersList");
+    if (list.length === 0) {
+      wrap.innerHTML = `<p class="muted">${lang === "ar" ? "لا توجد طلبات بعد" : "No orders yet"}</p>`;
+    } else {
+      wrap.innerHTML = list.map((o) => {
+        const tl = Tracking.timeline(o, lang);
+        const idx = Tracking.statusIndex(o.status);
+        const current = tl[idx];
+        return `
+        <div class="order-row">
+          <div>
+            <div class="font-en"><strong>${o.id}</strong></div>
+            <small>${new Date(o.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}</small>
+          </div>
+          <div>${o.items.length} × ${lang === "ar" ? "منتج" : "items"}</div>
+          <div class="font-en">${UI.fmt(o.total)}</div>
+          <div class="status ${o.status.toLowerCase()}">${current ? current.label : o.status}</div>
+        </div>`;
+      }).join("");
+    }
+  }
+});
+</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

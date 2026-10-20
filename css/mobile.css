@@ -1,0 +1,139 @@
+/* ============================================================
+   SaWWA SOUQ — Mobile Optimizations (v9 CLEAR)
+   ============================================================ */
+
+@media (max-width: 900px) {
+  #aurora,
+  #grain,
+  canvas#aurora { display: none !important; }
+
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .marquee-track { animation-duration: 55s !important; }
+
+  .reveal,
+  .reveal-3d {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .card:hover,
+  .feature:hover,
+  .trust-item:hover,
+  .chip:hover,
+  .wish-btn-card:hover,
+  .contact-info-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .card:hover {
+    border-color: var(--border-2) !important;
+    box-shadow: var(--shadow-xs) !important;
+    transform: none !important;
+  }
+
+  .card:hover .card-img img { transform: none !important; }
+
+  .logo {
+    height: 32px !important;
+    min-width: 60px !important;
+    min-height: 24px !important;
+  }
+  .logo img,
+  .logo svg {
+    font-size: 0 !important;
+    color: transparent !important;
+  }
+  .logo:hover { opacity: .75 !important; }
+
+  .nav { display: none !important; }
+
+  .hs-slide { transition: opacity .5s ease !important; }
+
+  .whatsapp-fab {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 20px !important;
+    bottom: 16px !important;
+    inset-inline-start: 16px !important;
+  }
+
+  .btn { padding: 10px 18px !important; font-size: 13px !important; }
+  .btn.small { padding: 7px 14px !important; font-size: 12px !important; }
+
+  input, textarea, select { font-size: 16px !important; }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .wish-btn-card {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 13px !important;
+    top: 8px !important;
+    inset-inline-end: 8px !important;
+  }
+
+  .sale-badge {
+    font-size: 9px !important;
+    padding: 3px 8px !important;
+    top: 8px !important;
+    inset-inline-start: 8px !important;
+  }
+
+  .container { padding: 20px 16px 60px !important; }
+
+  .hero { padding: 40px 16px !important; }
+  .hero-text h1 { font-size: 40px !important; }
+  .hero-cta { flex-direction: column !important; gap: 8px !important; }
+  .hero-cta .btn { width: 100% !important; }
+
+  .trust-strip { padding: 20px 16px !important; gap: 8px !important; }
+  .trust-item {
+    flex: 1 1 100% !important;
+    padding: 12px 14px !important;
+    font-size: 12px !important;
+  }
+
+  .site-footer {
+    padding: 40px 16px 20px !important;
+    margin-top: 40px !important;
+  }
+  .footer-inner { gap: 24px !important; }
+
+  .modal-backdrop { padding: 12px !important; }
+  .modal-card { padding: 24px 20px !important; }
+  .toast-container { bottom: 12px !important; }
+  .toast { padding: 12px 14px !important; }
+
+  .notif-panel {
+    top: 68px !important;
+    inset-inline-end: 12px !important;
+    inset-inline-start: 12px !important;
+    width: auto !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .grid { grid-template-columns: 1fr !important; }
+  .hero-text h1 { font-size: 34px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

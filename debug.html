@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>تشخيص — SaWWA Souq</title>
+<style>
+  body { font-family: monospace; padding: 20px; background: #F4F1EA; color: #0B1A18; direction: ltr; }
+  h1 { color: #0A3D38; }
+  .box { background: #fff; border: 2px solid #0A3D38; padding: 16px; margin: 12px 0; border-radius: 8px; }
+  .ok { border-color: #2E7D32; }
+  .err { border-color: #C03030; }
+  .warn { border-color: #E8A33D; }
+  pre { background: #0B1A18; color: #F4F1EA; padding: 12px; overflow: auto; border-radius: 6px; font-size: 12px; }
+  img { max-width: 200px; border: 1px solid #ccc; margin-top: 8px; }
+  button { background: #0A3D38; color: #fff; border: none; padding: 10px 20px; cursor: pointer; border-radius: 6px; font-weight: bold; margin: 4px; }
+</style>
+</head>
+<body>
+<h1>SaWWA Souq — Debug Panel</h1>
+
+<div class="box">
+  <strong>1. عدد المنتجات في localStorage:</strong>
+  <div id="prodCount">...</div>
+</div>
+
+<div class="box">
+  <strong>2. أول منتج (raw):</strong>
+  <pre id="firstProd">...</pre>
+</div>
+
+<div class="box">
+  <strong>3. مسار الصورة لأول منتج:</strong>
+  <div id="imgPath">...</div>
+  <div id="imgPreview"></div>
+</div>
+
+<div class="box">
+  <strong>4. عدد صفوف البطاقات في الصفحة:</strong>
+  <div id="cardCount">...</div>
+</div>
+
+<div class="box">
+  <strong>5. عدد عناصر &lt;img&gt; في البطاقات:</strong>
+  <div id="cardImgCount">...</div>
+</div>
+
+<div class="box">
+  <strong>6. أبعاد أول صورة:</strong>
+  <div id="imgDims">...</div>
+</div>
+
+<div class="box warn">
+  <strong>أزرار الإصلاح:</strong>
+  <div>
+    <button onclick="fix1()">مسح وإعادة زرع المنتجات</button>
+    <button onclick="fix2()">عرض المسار الكامل للصورة</button>
+  </div>
+</div>
+
+<div class="box">
+  <strong>7. ملفات SVG (اختبر الوصول):</strong>
+  <div id="fileTest"></div>
+</div>
+
+<script src="js/design-tokens.js"></script>
+<script>
+  // 1. عدد المنتجات
+  const products = JSON.parse(localStorage.getItem("sawwa_products") || "[]");
+  document.getElementById("prodCount").textContent = products.length + " منتج";
+
+  // 2. أول منتج
+  if (products[0]) {
+    document.getElementById("firstProd").textContent = JSON.stringify(products[0], null, 2);
+  } else {
+    document.getElementById("firstProd").textContent = "لا توجد منتجات!";
+    document.getElementById("firstProd").style.color = "#C03030";
+  }
+
+  // 3. مسار الصورة
+  if (products[0] && products[0].images && products[0].images[0]) {
+    const path = products[0].images[0];
+    document.getElementById("imgPath").innerHTML = `<code>${path}</code>`;
+    const img = document.createElement("img");
+    img.src = path;
+    img.onerror = () => {
+      document.getElementById("imgPath").style.color = "#C03030";
+      document.getElementById("imgPath").innerHTML += ' <strong>← المسار غلط! الملف غير موجود</strong>';
+    };
+    document.getElementById("imgPreview").appendChild(img);
+  } else {
+    document.getElementById("imgPath").textContent = "images[0] فارغ! seedProducts ما عدّلت";
+    document.getElementById("imgPath").style.color = "#C03030";
+  }
+
+  // 4. البطاقات
+  document.getElementById("cardCount").textContent = document.querySelectorAll(".card").length + " بطاقة";
+
+  // 5. صور في البطاقات
+  document.getElementById("cardImgCount").textContent = document.querySelectorAll(".card-img img").length + " صورة";
+
+  // 6. أبعاد أول صورة
+  const firstCardImg = document.querySelector(".card-img img");
+  if (firstCardImg) {
+    firstCardImg.onload = () => {
+      document.getElementById("imgDims").textContent = `طبيعي: ${firstCardImg.naturalWidth}×${firstCardImg.naturalHeight}، معروض: ${firstCardImg.width}×${firstCardImg.height}`;
+      document.getElementById("imgDims").className = "box ok";
+    };
+    if (firstCardImg.complete) {
+      document.getElementById("imgDims").textContent = `طبيعي: ${firstCardImg.naturalWidth}×${firstCardImg.naturalHeight}، معروض: ${firstCardImg.width}×${firstCardImg.height}`;
+    }
+  } else {
+    document.getElementById("imgDims").textContent = "ما فيه صورة في البطاقات — gridHTML لم تعدّل";
+    document.getElementById("imgDims").style.color = "#C03030";
+  }
+
+  // 7. اختبار الوصول للملفات
+  const testFiles = ["rubber-1.svg","rubber-2.svg","glass-1.svg","placeholder.svg"];
+  testFiles.forEach((f) => {
+    const path = "assets/products/" + f;
+    fetch(path, { method: "HEAD" })
+      .then((r) => {
+        const div = document.createElement("div");
+        div.textContent = `${r.ok ? "✓" : "✗"} ${path} — ${r.status}`;
+        div.style.color = r.ok ? "#2E7D32" : "#C03030";
+        document.getElementById("fileTest").appendChild(div);
+      })
+      .catch(() => {
+        const div = document.createElement("div");
+        div.textContent = `✗ ${path} — فشل الوصول`;
+        div.style.color = "#C03030";
+        document.getElementById("fileTest").appendChild(div);
+      });
+  });
+
+  function fix1() {
+    localStorage.removeItem("sawwa_seeded_v2");
+    localStorage.removeItem("sawwa_products");
+    alert("تم المسح. اذهب إلى index.html وأعد التحميل");
+  }
+  function fix2() {
+    const p = JSON.parse(localStorage.getItem("sawwa_products") || "[]")[0];
+    if (p && p.images) alert("المسار: " + p.images[0]);
+    else alert("لا يوجد مسار");
+  }
+</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

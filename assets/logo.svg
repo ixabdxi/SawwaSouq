@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 120" role="img" aria-label="SaWWA Souq">
+  <defs>
+    <linearGradient id="brandS" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F5C56"/>
+      <stop offset="1" stop-color="#0A3D38"/>
+    </linearGradient>
+  </defs>
+
+  <!-- حرف S الكبير -->
+  <path d="M32 42 C32 26, 46 18, 62 18 L82 18 L82 34 L62 34 C54 34, 50 38, 50 44 C50 50, 54 54, 62 54 L72 54 C90 54, 100 64, 100 82 C100 100, 88 110, 70 110 L28 110 L28 94 L70 94 C78 94, 82 90, 82 82 C82 74, 78 70, 70 70 L60 70 C44 70, 32 60, 32 42 Z" fill="url(#brandS)"/>
+
+  <!-- AWW -->
+  <g fill="#0F5C56" font-family="Orbitron, 'Arial Black', sans-serif" font-weight="700">
+    <text x="120" y="58" font-size="34" letter-spacing="2">AWW</text>
+  </g>
+
+  <!-- SOUQ (تحت) -->
+  <g fill="#8FA9A5" font-family="Orbitron, 'Arial Black', sans-serif" font-weight="500">
+    <text x="120" y="92" font-size="28" letter-spacing="4">SOUQ</text>
+  </g>
+
+  <!-- q + سوق على اليمين -->
+  <g fill="#0A3D38" font-family="Orbitron, 'Arial Black', sans-serif" font-weight="900">
+    <text x="290" y="92" font-size="46">q</text>
+  </g>
+  <g fill="#0A3D38" font-family="'Baloo Bhaijaan 2', 'Tajawal', Arial, sans-serif" font-weight="800">
+    <text x="335" y="92" font-size="40" text-anchor="start" direction="rtl">سوق</text>
+  </g>
+</svg>

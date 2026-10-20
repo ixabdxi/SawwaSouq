@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>لوحة التحكم — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/admin.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<style>
+  .hidden { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+</style>
+</head>
+<body class="admin-body">
+<canvas id="aurora"></canvas>
+
+<div id="loginScreen" class="login-wrap">
+  <div class="login-card">
+    <img src="assets/logo.svg" alt="SaWWA Souq" style="height:60px;margin:0 auto 20px;display:block" />
+    <h1>ADMIN PANEL</h1>
+    <p>أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
+    <input type="password" id="pwd" placeholder="كلمة المرور" />
+    <button class="btn primary" id="loginBtn">دخول</button>
+    <p id="loginErr" class="error"></p>
+  </div>
+</div>
+
+<div id="adminApp" class="hidden">
+  <aside class="admin-sidebar">
+    <div class="sidebar-head">
+      <a href="index.html" class="logo"><img src="assets/logo.svg" alt="SaWWA Souq" /></a>
+      <button class="sidebar-close" id="sidebarClose">×</button>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="side-tab active" data-tab="dash"><span class="icon">📊</span><span>نظرة عامة</span></button>
+      <button class="side-tab" data-tab="orders"><span class="icon">🛒</span><span>الطلبات</span><span class="side-badge" id="badge-orders"></span></button>
+      <button class="side-tab" data-tab="products"><span class="icon">📦</span><span>المنتجات</span></button>
+      <button class="side-tab" data-tab="inventory"><span class="icon">🏷️</span><span>المخزون</span><span class="side-badge warn" id="badge-low"></span></button>
+      <button class="side-tab" data-tab="customers"><span class="icon">👥</span><span>العملاء</span></button>
+      <button class="side-tab" data-tab="reviews"><span class="icon">⭐</span><span>المراجعات</span><span class="side-badge" id="badge-reviews"></span></button>
+      <button class="side-tab" data-tab="messages"><span class="icon">✉️</span><span>الرسائل</span><span class="side-badge" id="badge-messages"></span></button>
+      <button class="side-tab" data-tab="coupons"><span class="icon">🎟️</span><span>كوبونات</span></button>
+      <button class="side-tab" data-tab="loyalty"><span class="icon">💎</span><span>النقاط</span></button>
+      <button class="side-tab" data-tab="analytics"><span class="icon">📈</span><span>التحليلات</span></button>
+      <button class="side-tab" data-tab="notifications"><span class="icon">🔔</span><span>الإشعارات</span></button>
+      <button class="side-tab" data-tab="announce"><span class="icon">📣</span><span>إعلان الموقع</span></button>
+      <button class="side-tab" data-tab="settings"><span class="icon">⚙️</span><span>الإعدادات</span></button>
+      <button class="side-tab" data-tab="backup"><span class="icon">💾</span><span>نسخ احتياطي</span></button>
+    </nav>
+    <div class="sidebar-foot">
+      <a href="index.html" class="btn ghost">← عرض الموقع</a>
+      <button class="btn ghost" id="logoutBtn">تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <h2 class="topbar-title" id="topbarTitle">نظرة عامة</h2>
+      <div class="topbar-actions"><span class="live-dot"></span><span id="currentTime"></span></div>
+    </header>
+
+    <div class="admin-content">
+      <section class="tab-panel active" id="tab-dash">
+        <div class="stats">
+          <div class="stat"><div class="stat-ico">🛒</div><span>إجمالي الطلبات</span><strong id="stOrders">0</strong><small id="stOrdersToday">+0 اليوم</small></div>
+          <div class="stat"><div class="stat-ico">💰</div><span>إجمالي المبيعات</span><strong id="stRevenue">0</strong><small id="stRevenueToday">+0 اليوم</small></div>
+          <div class="stat"><div class="stat-ico">⏳</div><span>طلبات معلّقة</span><strong id="stPending">0</strong><small>بانتظار التحقق</small></div>
+          <div class="stat"><div class="stat-ico">⚠️</div><span>مخزون منخفض</span><strong id="stLow">0</strong><small>≤ 10 وحدات</small></div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-card"><h3>مبيعات آخر 7 أيام</h3><canvas id="chartSales" height="220"></canvas></div>
+          <div class="dash-card"><h3>أفضل 5 منتجات</h3><div id="topProducts"></div></div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-card"><h3>أحدث الطلبات</h3><div id="recentOrders"></div></div>
+          <div class="dash-card"><h3>تنبيهات ذكية</h3><div id="smartAlerts"></div></div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-orders">
+        <div class="panel-toolbar">
+          <input type="search" id="orderSearch" placeholder="ابحث..." />
+          <select id="orderFilterStatus">
+            <option value="">كل الحالات</option>
+            <option value="PENDING">PENDING</option>
+            <option value="CONFIRMED">CONFIRMED</option>
+            <option value="SHIPPED">SHIPPED</option>
+            <option value="DELIVERED">DELIVERED</option>
+            <option value="CANCELLED">CANCELLED</option>
+          </select>
+          <select id="orderFilterPay">
+            <option value="">كل طرق الدفع</option>
+            <option value="COD">COD</option>
+            <option value="CLIQ">CLIQ</option>
+          </select>
+          <button class="btn ghost" id="exportOrders">تصدير CSV</button>
+        </div>
+        <div id="ordersTable"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-products">
+        <div class="panel-toolbar">
+          <button class="btn primary" id="newProductBtn">+ منتج جديد</button>
+          <input type="search" id="prodSearch" placeholder="ابحث بالاسم..." />
+          <select id="prodFilterType">
+            <option value="">الكل</option>
+            <option value="RUBBER">مطاطي</option>
+            <option value="GLASS">زجاجي</option>
+          </select>
+        </div>
+        <div id="prodTable"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-inventory">
+        <div class="panel-toolbar">
+          <input type="search" id="invSearch" placeholder="ابحث بالمنتج..." />
+          <select id="invFilterStatus">
+            <option value="">كل الحالات</option>
+            <option value="low">منخفض</option>
+            <option value="out">نفد</option>
+            <option value="ok">متوفر</option>
+          </select>
+          <button class="btn ghost" id="bulkUpdate">تعديل جماعي</button>
+          <button class="btn ghost" id="exportInventory">تصدير CSV</button>
+        </div>
+        <div id="inventoryTable"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-customers">
+        <div class="panel-toolbar"><input type="search" id="custSearch" placeholder="ابحث..." /></div>
+        <div id="customersTable"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-reviews">
+        <div class="panel-toolbar">
+          <select id="reviewFilter">
+            <option value="pending">بانتظار الموافقة</option>
+            <option value="approved">منشورة</option>
+            <option value="">الكل</option>
+          </select>
+        </div>
+        <div id="reviewsTable"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-messages">
+        <div class="panel-toolbar">
+          <select id="msgFilter">
+            <option value="all">الكل</option>
+            <option value="unread">غير مقروءة</option>
+            <option value="read">مقروءة</option>
+          </select>
+          <button class="btn ghost" id="exportMessages">تصدير CSV</button>
+        </div>
+        <div id="messagesTable"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-coupons">
+        <div class="panel-toolbar"><button class="btn primary" id="newCouponBtn">+ كوبون جديد</button></div>
+        <div id="couponsTable"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-loyalty">
+        <div class="dash-grid">
+          <div class="dash-card">
+            <h3>إعدادات نظام النقاط</h3>
+            <label style="display:block;margin-bottom:14px"><span>نقاط لكل دينار (كسب)</span><input type="number" id="loyEarn" step="0.1" /></label>
+            <label style="display:block;margin-bottom:14px"><span>قيمة 100 نقطة (بالقرش)</span><input type="number" id="loyRedeem" /></label>
+            <label style="display:block;margin-bottom:14px"><span>الحد الأدنى للاستبدال</span><input type="number" id="loyMin" /></label>
+            <button class="btn primary" id="saveLoyalty">حفظ</button>
+          </div>
+          <div class="dash-card"><h3>سجل حركات النقاط</h3><div id="loyaltyLedger"></div></div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-analytics">
+        <div class="dash-grid">
+          <div class="dash-card"><h3>متوسط قيمة السلة</h3><div class="big-num" id="anaAvg">0</div></div>
+          <div class="dash-card"><h3>معدل التحويل</h3><div class="big-num" id="anaConv">0%</div></div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-card"><h3>المنتجات الأكثر مبيعًا</h3><div id="anaTopProducts"></div></div>
+          <div class="dash-card"><h3>المدن الأكثر طلبًا</h3><div id="anaCities"></div></div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-notifications">
+        <div class="dash-card"><h3>إشعارات النظام</h3><div id="sysNotifications"></div></div>
+        <div class="dash-card">
+          <h3>إرسال إشعار للعملاء</h3>
+          <label style="display:block;margin-bottom:14px"><span>العنوان</span><input type="text" id="notifTitle" /></label>
+          <label style="display:block;margin-bottom:14px"><span>النص</span><textarea id="notifBody" rows="3"></textarea></label>
+          <button class="btn primary" id="sendNotif">إرسال</button>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-announce">
+        <div class="dash-card">
+          <h3>إعلان الموقع العلوي</h3>
+          <label style="display:block;margin-bottom:14px"><span>النص العربي</span><input type="text" id="annAr" /></label>
+          <label style="display:block;margin-bottom:14px"><span>النص الإنجليزي</span><input type="text" id="annEn" /></label>
+          <label style="display:block;margin-bottom:14px"><span>مفعّل؟</span><select id="annEnabled"><option value="1">نعم</option><option value="0">لا</option></select></label>
+          <button class="btn primary" id="saveAnnounce">حفظ</button>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-settings">
+        <div class="dash-card">
+          <h3>إعدادات المتجر</h3>
+          <label style="display:block;margin-bottom:14px"><span>اسم المتجر (عربي)</span><input type="text" id="setNameAr" /></label>
+          <label style="display:block;margin-bottom:14px"><span>اسم المتجر (إنجليزي)</span><input type="text" id="setNameEn" /></label>
+          <label style="display:block;margin-bottom:14px"><span>رقم واتساب</span><input type="text" id="setWhatsapp" /></label>
+          <label style="display:block;margin-bottom:14px"><span>معرّف Cliq</span><input type="text" id="setCliq" /></label>
+          <button class="btn primary" id="saveSettings">حفظ</button>
+        </div>
+        <div class="dash-card">
+          <h3>أمان اللوحة</h3>
+          <label style="display:block;margin-bottom:14px"><span>كلمة مرور جديدة</span><input type="password" id="newPwd" /></label>
+          <button class="btn primary" id="savePwd">تحديث كلمة المرور</button>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-backup">
+        <div class="dash-card"><h3>تصدير البيانات</h3><p>حمّل نسخة JSON كاملة.</p><button class="btn primary" id="exportAll">تحميل نسخة</button></div>
+        <div class="dash-card"><h3>استيراد البيانات</h3><p>سيستبدل كل البيانات الحالية.</p><input type="file" id="importFile" accept=".json" /><button class="btn ghost" id="importAll">استيراد</button></div>
+        <div class="dash-card"><h3>إعادة ضبط مصنع</h3><button class="btn ghost" style="color:#FF5252;border-color:#FF5252" id="factoryReset">إعادة ضبط</button></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- ========== MODAL: PRODUCT ========== -->
+<div id="productModal" class="modal-backdrop hidden">
+  <div class="product-modal-card">
+    <div class="pm-preview-strip">
+      <div class="pm-preview-card">
+        <div class="pm-preview-img" id="pm_previewImg"><span>📷</span></div>
+        <div class="pm-preview-info">
+          <h4 id="pm_previewNameAr">الاسم العربي</h4>
+          <p class="pm-preview-name-en" id="pm_previewNameEn">English Name</p>
+          <div class="pm-preview-price" id="pm_previewPrice">0 دينار</div>
+          <span class="pm-preview-type" id="pm_previewType">RUBBER</span>
+        </div>
+      </div>
+      <div class="pm-preview-meta"><div id="pm_previewStatus" class="pm-status">—</div></div>
+    </div>
+
+    <div class="pm-body">
+      <h3 id="prodModalTitle" class="pm-title">منتج جديد</h3>
+
+      <section class="pm-section">
+        <h4 class="pm-section-title">بيانات أساسية</h4>
+        <div class="pm-grid-2">
+          <label><span>الاسم (عربي) *</span><input type="text" id="pm_nameAr" placeholder="ماوس باد مطاطي 1" /></label>
+          <label><span>الاسم (إنجليزي) *</span><input type="text" id="pm_nameEn" placeholder="Rubber Mousepad 1" dir="ltr" /></label>
+        </div>
+        <label><span>الوصف (عربي)</span><textarea id="pm_descAr" rows="3"></textarea></label>
+        <label><span>الوصف (إنجليزي)</span><textarea id="pm_descEn" rows="3" dir="ltr"></textarea></label>
+      </section>
+
+      <section class="pm-section">
+        <h4 class="pm-section-title">التصنيف والصورة</h4>
+        <div class="pm-grid-2">
+          <label><span>النوع</span><select id="pm_type"><option value="RUBBER">مطاطي</option><option value="GLASS">زجاجي</option></select></label>
+          <label><span>الحزمة</span><input type="text" id="pm_pkg" /></label>
+        </div>
+        <label>
+          <span>صورة المنتج</span>
+          <div class="image-uploader" id="pm_drop">
+            <div class="iu-preview" id="pm_preview">
+              <div class="iu-empty"><div class="iu-icon">📷</div><div class="iu-text">اسحب الصورة هنا أو اضغط</div><div class="iu-hint">JPG · PNG · WebP</div></div>
+            </div>
+            <input type="file" id="pm_file" accept="image/*" hidden />
+            <div class="iu-actions">
+              <button type="button" class="btn ghost" id="pm_choose">اختيار صورة</button>
+              <button type="button" class="btn ghost" id="pm_clear" style="display:none">إزالة</button>
+            </div>
+          </div>
+        </label>
+      </section>
+
+      <section class="pm-section">
+        <h4 class="pm-section-title">الأسعار (بالقرش = 1/100 دينار)</h4>
+        <div class="pm-grid-3">
+          <label><span>سعر البيع *</span><input type="number" id="pm_price" min="0" /></label>
+          <label><span>سعر قبل الخصم</span><input type="number" id="pm_compare" min="0" /></label>
+          <label><span>سعر التكلفة (سري)</span><input type="number" id="pm_cost" min="0" /></label>
+        </div>
+        <div class="pm-hint">💡 1200 = 12.00 دينار · 1800 = 18.00 دينار (يظهر مشطوبًا)</div>
+      </section>
+
+      <section class="pm-section">
+        <h4 class="pm-section-title">المخزون</h4>
+        <div class="pm-grid-2">
+          <label><span>الكمية المتوفرة *</span><input type="number" id="pm_stock" min="0" /></label>
+          <label><span>حد التنبيه المنخفض</span><input type="number" id="pm_minStock" min="0" placeholder="10" /></label>
+        </div>
+      </section>
+    </div>
+
+    <div class="pm-actions">
+      <button class="btn ghost" id="pm_cancel">إلغاء</button>
+      <button class="btn primary" id="pm_save">حفظ المنتج</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: STOCK EDITOR ========== -->
+<div id="stockModal" class="modal-backdrop hidden">
+  <div class="stock-modal-card">
+    <div class="sm-header">
+      <div class="sm-preview">
+        <div class="sm-img" id="sm_img"><span>📦</span></div>
+        <div class="sm-meta">
+          <h3 id="sm_name">اسم المنتج</h3>
+          <span class="sm-type" id="sm_type">RUBBER</span>
+          <span class="sm-code" id="sm_id">p-xxx</span>
+        </div>
+      </div>
+      <div class="sm-current-box">
+        <div class="sm-current-label">المخزون الحالي</div>
+        <div class="sm-current-value" id="sm_current">0</div>
+        <div class="sm-current-status" id="sm_status">متوفر</div>
+      </div>
+    </div>
+
+    <div class="sm-body">
+      <section class="sm-section">
+        <h4 class="sm-section-title">تعديل سريع</h4>
+        <div class="sm-quick">
+          <button class="sm-qbtn minus" data-delta="-100">−100</button>
+          <button class="sm-qbtn minus" data-delta="-50">−50</button>
+          <button class="sm-qbtn minus" data-delta="-10">−10</button>
+          <button class="sm-qbtn minus" data-delta="-5">−5</button>
+          <button class="sm-qbtn minus" data-delta="-1">−1</button>
+          <button class="sm-qbtn plus" data-delta="1">+1</button>
+          <button class="sm-qbtn plus" data-delta="5">+5</button>
+          <button class="sm-qbtn plus" data-delta="10">+10</button>
+          <button class="sm-qbtn plus" data-delta="50">+50</button>
+          <button class="sm-qbtn plus" data-delta="100">+100</button>
+        </div>
+      </section>
+
+      <section class="sm-section">
+        <h4 class="sm-section-title">تعيين قيمة دقيقة</h4>
+        <div class="sm-set-row">
+          <input type="number" id="sm_newStock" min="0" placeholder="0" />
+          <button class="btn ghost" id="sm_apply">تطبيق</button>
+        </div>
+      </section>
+
+      <section class="sm-section">
+        <h4 class="sm-section-title">حد التنبيه المنخفض</h4>
+        <div class="sm-set-row">
+          <input type="number" id="sm_minStock" min="0" placeholder="10" />
+          <button class="btn ghost" id="sm_saveMin">حفظ الحد</button>
+        </div>
+        <p class="sm-hint">سيظهر تنبيه عندما يصل المخزون لهذا الحد أو أقل.</p>
+      </section>
+
+      <section class="sm-section">
+        <h4 class="sm-section-title">سجل التغييرات</h4>
+        <div class="sm-history" id="sm_history"></div>
+      </section>
+    </div>
+
+    <div class="sm-actions">
+      <button class="btn ghost" id="sm_cancel">إغلاق</button>
+      <button class="btn primary" id="sm_save">حفظ الكل</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: COUPON ========== -->
+<div id="couponModal" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <h3>كوبون جديد</h3>
+    <div class="modal-form">
+      <label><span>الكود</span><input type="text" id="cp_code" placeholder="SAWWA10" dir="ltr" /></label>
+      <label><span>النوع</span><select id="cp_type"><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت (قرش)</option></select></label>
+      <label><span>القيمة</span><input type="number" id="cp_value" /></label>
+      <label><span>حد الاستخدام الكلي</span><input type="number" id="cp_maxUses" /></label>
+      <label><span>الحد الأدنى للسلة (قرش)</span><input type="number" id="cp_minCart" /></label>
+      <label><span>تاريخ الانتهاء</span><input type="date" id="cp_expires" /></label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="cp_cancel">إلغاء</button>
+      <button class="btn primary" id="cp_save">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

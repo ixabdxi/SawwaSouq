@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>قائمة الرغبات — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container">
+  <h1 class="page-title font-en">Wishlist</h1>
+  <div id="wishWrap"></div>
+</main>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const wrap = document.getElementById("wishWrap");
+    const lang = window.SAWWA.lang;
+
+    const render = () => {
+      const items = Wishlist.get();
+      if (items.length === 0) {
+        wrap.innerHTML = `
+          <div class="wish-empty">
+            <div class="big-heart">♡</div>
+            <p class="muted">${lang === "ar" ? "قائمة الرغبات فارغة." : "Your wishlist is empty."}</p>
+            <a href="shop.html" class="btn primary">${lang === "ar" ? "تسوّق الآن" : "Shop now"}</a>
+          </div>`;
+        return;
+      }
+      wrap.innerHTML = `<div class="wish-list">${items.map((it) => {
+        const onSale = it.compareAtPrice && it.compareAtPrice > it.price;
+        const discount = onSale ? Math.round((1 - it.price / it.compareAtPrice) * 100) : 0;
+        return `
+          <div class="card reveal" data-id="${it.id}">
+            <a href="product.html?id=${it.id}" class="card-link">
+              <div class="card-img">
+                ${onSale ? `<span class="sale-badge">-${discount}%</span>` : ""}
+                <img src="${it.image || "assets/placeholder.svg"}" alt="${lang === "ar" ? it.nameAr : it.nameEn}" loading="lazy" />
+              </div>
+              <div class="card-body">
+                <h3>${lang === "ar" ? it.nameAr : it.nameEn}</h3>
+                <div class="price-row">
+                  ${onSale ? `<span class="price-old">${UI.fmt(it.compareAtPrice)}</span>` : ""}
+                  <span class="price">${UI.fmt(it.price)}</span>
+                </div>
+              </div>
+            </a>
+            <div class="card-actions" style="display:flex;gap:8px">
+              <button class="btn primary full wish-cart" data-id="${it.id}">${lang === "ar" ? "أضف للسلة" : "Add to cart"}</button>
+              <button class="btn ghost wish-rm" data-id="${it.id}" title="${lang === "ar" ? "إزالة" : "Remove"}">✕</button>
+            </div>
+          </div>`;
+      }).join("")}</div>`;
+
+      wrap.querySelectorAll(".wish-cart").forEach((b) => b.onclick = () => {
+        const p = Store.products.byId(b.dataset.id);
+        if (p) {
+          Cart.add(p, 1);
+          UI.toast(lang === "ar" ? `أُضيف "${p.nameAr}" إلى السلة` : `"${p.nameEn}" added`, "success");
+        }
+      });
+      wrap.querySelectorAll(".wish-rm").forEach((b) => b.onclick = () => {
+        Wishlist.remove(b.dataset.id);
+        UI.toast(lang === "ar" ? "أُزيل من الرغبات" : "Removed from wishlist", "info", null, 2000);
+        render();
+      });
+
+      setTimeout(() => wrap.querySelectorAll(".reveal").forEach(el => el.classList.add("in")), 30);
+    };
+
+    render();
+  }
+});
+</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

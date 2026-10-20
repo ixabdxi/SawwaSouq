@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>منتج — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container">
+  <div id="productWrap" class="product-wrap"></div>
+  <section class="reviews">
+    <h2 class="section-title" data-i18n="product.reviews"></h2>
+    <div id="reviewList"></div>
+    <form id="reviewForm" class="review-form">
+      <input type="text" id="rvName" required maxlength="40" placeholder="اسمك" />
+      <select id="rvRating" required>
+        <option value="5">★★★★★</option>
+        <option value="4">★★★★</option>
+        <option value="3">★★★</option>
+        <option value="2">★★</option>
+        <option value="1">★</option>
+      </select>
+      <textarea id="rvBody" required rows="3" maxlength="500" placeholder="رأيك"></textarea>
+      <button class="btn primary" data-i18n="product.submitReview" type="submit"></button>
+    </form>
+  </section>
+</main>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    const p = Store.products.byId(id);
+    const wrap = document.getElementById("productWrap");
+    const lang = window.SAWWA.lang;
+
+    if (!p) {
+      wrap.innerHTML = `<p class="muted">${lang === 'ar' ? 'المنتج غير موجود.' : 'Product not found.'}</p>`;
+      return;
+    }
+
+    const name = lang === "ar" ? p.nameAr : p.nameEn;
+    const onSale = p.compareAtPrice && p.compareAtPrice > p.price;
+    const discount = onSale ? Math.round((1 - p.price / p.compareAtPrice) * 100) : 0;
+    const img = (p.images && p.images[0]) || "assets/placeholder.svg";
+
+    wrap.innerHTML = `
+      <div class="product-img reveal-3d">
+        ${onSale ? `<span class="sale-badge">-${discount}%</span>` : ""}
+        <img src="${img}" alt="${name}" />
+      </div>
+      <div class="product-info reveal">
+        <h1>${name}</h1>
+        <div class="price-row" style="margin:20px 0">
+          ${onSale ? `<span class="price-old" style="font-size:20px">${UI.fmt(p.compareAtPrice)}</span>` : ""}
+          <span class="price big">${UI.fmt(p.price)}</span>
+        </div>
+        <p class="desc">${lang === 'ar' ? p.descAr : p.descEn}</p>
+        <div class="meta">
+          <span>${lang === 'ar' ? 'الحزمة' : 'Package'}: ${p.packaging || '-'}</span>
+          <span>${lang === 'ar' ? 'المخزون' : 'Stock'}: ${p.stock}</span>
+          ${p.warranty ? `<span>✓ ${lang === 'ar' ? 'ضمان الجودة' : 'Warranty'}</span>` : ''}
+        </div>
+        <div class="product-actions">
+          <div class="qty-row">
+            <label>${lang === 'ar' ? 'الكمية' : 'Qty'}</label>
+            <div class="qty-picker">
+              <button type="button" id="qDec">−</button>
+              <input type="number" id="qInput" min="1" max="${p.stock}" value="1" />
+              <button type="button" id="qInc">+</button>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="addBtn" ${p.stock <= 0 ? "disabled" : ""}>
+              ${p.stock <= 0 ? (lang === 'ar' ? 'نفد المخزون' : 'Out of stock') : (lang === 'ar' ? 'أضف إلى السلة' : 'Add to cart')}
+            </button>
+            <button class="btn ghost" id="buyNowBtn" ${p.stock <= 0 ? "disabled" : ""}>
+              ${lang === 'ar' ? 'اشترِ الآن' : 'Buy now'}
+            </button>
+          </div>
+        </div>
+      </div>`;
+
+    const qty = () => Math.max(1, Math.min(p.stock || 1, parseInt(document.getElementById("qInput").value, 10) || 1));
+    document.getElementById("qDec").onclick = () => { document.getElementById("qInput").value = Math.max(1, qty() - 1); };
+    document.getElementById("qInc").onclick = () => { document.getElementById("qInput").value = Math.min(p.stock || 1, qty() + 1); };
+
+    const addBtn = document.getElementById("addBtn");
+    if (addBtn && p.stock > 0) {
+      addBtn.onclick = () => {
+        Cart.add(p, qty());
+        UI.toast(
+          lang === "ar" ? `أُضيف ${qty()} × "${p.nameAr}" إلى السلة` : `${qty()} × "${p.nameEn}" added`,
+          "success"
+        );
+        addBtn.textContent = lang === "ar" ? "✓ أُضيف" : "✓ Added";
+        setTimeout(() => { addBtn.textContent = lang === "ar" ? "أضف إلى السلة" : "Add to cart"; }, 1200);
+      };
+    }
+
+    const buyBtn = document.getElementById("buyNowBtn");
+    if (buyBtn && p.stock > 0) {
+      buyBtn.onclick = async () => {
+        const ok = await UI.confirm(
+          lang === "ar" ? "إتمام الشراء" : "Proceed to checkout",
+          lang === "ar" ? `سيتم إضافة ${qty()} × ${name} والانتقال لصفحة الدفع.` : `${qty()} × ${name} will be added. Continue?`,
+          { icon: "🛒", okLabel: lang === "ar" ? "متابعة" : "Continue" }
+        );
+        if (ok) {
+          Cart.add(p, qty());
+          location.href = "checkout.html";
+        }
+      };
+    }
+
+    const rvList = document.getElementById("reviewList");
+    const renderR = () => {
+      const list = Store.reviews.byProduct(p.id);
+      rvList.innerHTML = list.length === 0
+        ? `<p class="muted">${lang === 'ar' ? 'لا توجد مراجعات بعد.' : 'No reviews yet.'}</p>`
+        : list.map((r) => `
+          <div class="review reveal">
+            <div class="rv-head"><strong>${r.name}</strong><span>${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</span></div>
+            <p>${r.body}</p>
+          </div>`).join("");
+      setTimeout(() => rvList.querySelectorAll(".reveal").forEach(el => el.classList.add("in")), 30);
+    };
+    renderR();
+
+    document.getElementById("reviewForm").onsubmit = (e) => {
+      e.preventDefault();
+      Store.reviews.add({
+        productId: p.id,
+        name: document.getElementById("rvName").value.trim(),
+        rating: parseInt(document.getElementById("rvRating").value, 10),
+        body: document.getElementById("rvBody").value.trim()
+      });
+      UI.toast(
+        lang === "ar" ? "شكرًا! مراجعتك بانتظار الموافقة." : "Thanks! Review pending approval.",
+        "success"
+      );
+      e.target.reset();
+    };
+
+    setTimeout(() => {
+      wrap.querySelectorAll(".reveal, .reveal-3d").forEach(el => el.classList.add("in"));
+    }, 50);
+  }
+});
+</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

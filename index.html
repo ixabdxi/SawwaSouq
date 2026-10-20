@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SaWWA Souq — سوّا سوق</title>
+<meta name="description" content="سوّا سوق — ماوس باد مطاطي وزجاجي في الأردن. جودة تستحقّها، بسعر يناسبك." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<meta name="theme-color" content="#0A3D38" />
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main>
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <span class="badge-new">NEW DROP · SS 2026</span>
+        <h1 class="font-en">SAWWA<br /><span>SOUQ</span></h1>
+        <p data-i18n="hero.tagline"></p>
+        <div class="hero-cta">
+          <a href="shop.html" class="btn primary" data-i18n="hero.cta"></a>
+          <a href="about.html" class="btn ghost" data-i18n="nav.about"></a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-slider" id="heroSlider"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="trust-strip">
+    <div class="trust-item">🚚 شحن 3 دنانير لكل الأردن</div>
+    <div class="trust-item">💵 الدفع عند الاستلام</div>
+    <div class="trust-item">📱 دفع Cliq</div>
+    <div class="trust-item">🛡️ ضمان 7 أيام</div>
+    <div class="trust-item">⭐ +4.8 تقييم العملاء</div>
+  </section>
+
+  <section class="container">
+    <h2 class="section-title font-en">FEATURED</h2>
+    <div id="featuredGrid" class="grid"></div>
+  </section>
+
+  <section class="container">
+    <h2 class="section-title font-en">GLASS</h2>
+    <div id="glassGrid" class="grid"></div>
+  </section>
+
+  <section class="container">
+    <h2 class="section-title font-en">RUBBER</h2>
+    <div id="rubberGrid" class="grid"></div>
+  </section>
+
+  <section class="container">
+    <h2 class="section-title font-en">REVIEWS</h2>
+    <p class="reviews-head">آراء عملاء حقيقيين — من داخل الأردن.</p>
+    <div class="reviews-grid">
+      <div class="review-card reveal">
+        <div class="rv-stars">★★★★★</div>
+        <p>"ماوس باد ممتاز، السطح ناعم والقاعدة ثابتة تمامًا. جودة أعلى من المتوقع."</p>
+        <div class="rv-author">
+          <span class="rv-badge">✓ Verified</span>
+          <span class="rv-name">أحمد م.</span>
+        </div>
+      </div>
+      <div class="review-card reveal">
+        <div class="rv-stars">★★★★★</div>
+        <p>"وصل بسرعة، التغليف محترم، وطلبت الثاني لأخوي. يستاهل كل قرش."</p>
+        <div class="rv-author">
+          <span class="rv-badge">✓ Verified</span>
+          <span class="rv-name">لينا س.</span>
+        </div>
+      </div>
+      <div class="review-card reveal">
+        <div class="rv-stars">★★★★★</div>
+        <p>"استخدمه للعمل واللعب. الزجاجي انزلاقه جنوني، دقة عالية جدًا."</p>
+        <div class="rv-author">
+          <span class="rv-badge">✓ Verified</span>
+          <span class="rv-name">محمد ع.</span>
+        </div>
+      </div>
+      <div class="review-card reveal">
+        <div class="rv-stars">★★★★★</div>
+        <p>"خدمة عملاء سريعة، دفع عند الاستلام، وما في أي تعقيد. 10/10."</p>
+        <div class="rv-author">
+          <span class="rv-badge">✓ Verified</span>
+          <span class="rv-name">رنا ح.</span>
+        </div>
+      </div>
+      <div class="review-card reveal">
+        <div class="rv-stars">★★★★★</div>
+        <p>"أحسن ماوس باد استخدمته، والمقاس 40×90 مثالي للكيبورد والماوس معًا."</p>
+        <div class="rv-author">
+          <span class="rv-badge">✓ Verified</span>
+          <span class="rv-name">يوسف ط.</span>
+        </div>
+      </div>
+      <div class="review-card reveal">
+        <div class="rv-stars">★★★★★</div>
+        <p>"شكرًا سوّا سوق، وصلني خلال يومين، التغليف مرتب، والجودة ممتازة."</p>
+        <div class="rv-author">
+          <span class="rv-badge">✓ Verified</span>
+          <span class="rv-name">سارة خ.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container">
+    <div class="newsletter">
+      <div class="nl-text">
+        <h3>انضم للقائمة البريدية</h3>
+        <p>كن أول من يعرف عن التصاميم الجديدة والعروض الحصرية.</p>
+      </div>
+      <form class="nl-form" id="newsletterForm">
+        <input type="email" placeholder="بريدك الإلكتروني" required />
+        <button type="submit" class="btn primary">اشترك</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const lang = window.SAWWA.lang;
+
+    const initHeroSlider = () => {
+      const slider = document.getElementById("heroSlider");
+      if (!slider) return;
+      const all = Store.products.all().filter((p) => p.active && p.images && p.images.length);
+      const slides = all.slice(0, 5);
+      if (!slides.length) return;
+
+      slider.innerHTML = slides.map((p, i) => `
+        <div class="hs-slide ${i === 0 ? "active" : ""}" style="background-image:url('${p.images[0]}')">
+          <div class="hs-overlay">
+            <span class="hs-tag">${p.type}</span>
+            <h3>${lang === "ar" ? p.nameAr : p.nameEn}</h3>
+            <a href="product.html?id=${p.id}" class="btn small">${lang === "ar" ? "اكتشف" : "Discover"}</a>
+          </div>
+        </div>`).join("") + `
+        <div class="hs-dots">${slides.map((_, i) => `<span class="${i === 0 ? "active" : ""}" data-i="${i}"></span>`).join("")}</div>
+        <div class="hs-progress"><div class="hs-progress-bar"></div></div>`;
+
+      const slideEls = slider.querySelectorAll(".hs-slide");
+      const dotEls = slider.querySelectorAll(".hs-dots span");
+      const bar = slider.querySelector(".hs-progress-bar");
+      let idx = 0;
+      let timer;
+
+      const go = (n) => {
+        idx = (n + slideEls.length) % slideEls.length;
+        slideEls.forEach((el, i) => el.classList.toggle("active", i === idx));
+        dotEls.forEach((el, i) => el.classList.toggle("active", i === idx));
+        reset();
+      };
+      const reset = () => {
+        clearInterval(timer);
+        bar.style.transition = "none";
+        bar.style.width = "0%";
+        void bar.offsetWidth;
+        bar.style.transition = "width 4s linear";
+        bar.style.width = "100%";
+        timer = setInterval(() => go(idx + 1), 4000);
+      };
+      dotEls.forEach((d) => d.onclick = () => go(parseInt(d.dataset.i, 10)));
+      reset();
+    };
+
+    const gridHTML = (list) => list.map((p) => {
+      const onSale = p.compareAtPrice && p.compareAtPrice > p.price;
+      const discount = onSale ? Math.round((1 - p.price / p.compareAtPrice) * 100) : 0;
+      const img = (p.images && p.images[0]) || "assets/placeholder.svg";
+      return `
+      <div class="card reveal">
+        <a href="product.html?id=${p.id}" class="card-link">
+          <div class="card-img">
+            ${onSale ? `<span class="sale-badge">-${discount}%</span>` : ""}
+            <img src="${img}" alt="${lang === 'ar' ? p.nameAr : p.nameEn}" loading="lazy" />
+          </div>
+          <div class="card-body">
+            <h3>${lang === 'ar' ? p.nameAr : p.nameEn}</h3>
+            <div class="price-row">
+              ${onSale ? `<span class="price-old">${UI.fmt(p.compareAtPrice)}</span>` : ""}
+              <span class="price">${UI.fmt(p.price)}</span>
+            </div>
+          </div>
+        </a>
+        <div class="card-actions">
+          <button class="btn primary full add-btn" data-id="${p.id}" ${p.stock <= 0 ? "disabled" : ""}>
+            ${p.stock <= 0 ? (lang === 'ar' ? 'نفد المخزون' : 'Out of stock') : (lang === 'ar' ? 'أضف إلى السلة' : 'Add to cart')}
+          </button>
+        </div>
+      </div>`;
+    }).join("");
+
+    const bind = (grid) => grid.querySelectorAll(".add-btn").forEach((b) => b.onclick = (ev) => {
+      ev.preventDefault();
+      const prod = Store.products.byId(b.dataset.id);
+      if (prod) {
+        Cart.add(prod, 1);
+        UI.toast(
+          lang === "ar" ? `أُضيف "${prod.nameAr}" إلى السلة` : `"${prod.nameEn}" added to cart`,
+          "success"
+        );
+        b.textContent = lang === "ar" ? "✓ أُضيف" : "✓ Added";
+        setTimeout(() => { b.textContent = lang === "ar" ? "أضف إلى السلة" : "Add to cart"; }, 1100);
+      }
+    });
+
+    const all = Store.products.all().filter(p => p.active);
+    document.getElementById("featuredGrid").innerHTML = gridHTML(all.slice(0, 4));
+    bind(document.getElementById("featuredGrid"));
+
+    document.getElementById("glassGrid").innerHTML = gridHTML(all.filter(p => p.type === "GLASS").slice(0, 4));
+    bind(document.getElementById("glassGrid"));
+
+    document.getElementById("rubberGrid").innerHTML = gridHTML(all.filter(p => p.type === "RUBBER").slice(0, 4));
+    bind(document.getElementById("rubberGrid"));
+
+    const nl = document.getElementById("newsletterForm");
+    if (nl) nl.onsubmit = (e) => {
+      e.preventDefault();
+      const email = e.target.querySelector("input").value.trim();
+      if (!email) return;
+      const list = JSON.parse(localStorage.getItem("sawwa_newsletter") || "[]");
+      if (!list.includes(email)) list.push(email);
+      localStorage.setItem("sawwa_newsletter", JSON.stringify(list));
+      UI.toast(lang === "ar" ? "شكرًا! تم الاشتراك." : "Thanks! Subscribed.", "success");
+      e.target.reset();
+    };
+
+    setTimeout(() => {
+      document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+      initHeroSlider();
+    }, 100);
+  }
+});
+</script>
+<script>
+  // كشف Supabase على الصفحة الرئيسية
+  setTimeout(() => {
+    if (window.SB && SB.isEnabled && SB.isEnabled()) {
+      SB.init().then((c) => {
+        if (c) console.log("[SAWWA] Supabase connected ✓");
+      });
+    } else {
+      console.log("[SAWWA] Supabase not enabled");
+    }
+  }, 500);
+</script>
+</body>
+</html>

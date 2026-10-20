@@ -1,0 +1,26 @@
+{
+  "name": "SaWWA Souq — سوّا سوق",
+  "short_name": "SaWWA Souq",
+  "description": "ماوس باد مطاطي وزجاجي في الأردن — جودة تستحقّها، بسعر يناسبك.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EDF1EE",
+  "theme_color": "#0A3D38",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    { "name": "المتجر", "url": "/shop.html" },
+    { "name": "تتبع الطلب", "url": "/track.html" },
+    { "name": "حسابي", "url": "/account.html" }
+  ]
+}

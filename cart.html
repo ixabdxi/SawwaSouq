@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>السلة — SaWWA Souq</title>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+</head>
+<body>
+<main class="container">
+  <h1 class="page-title" data-i18n="cart.title"></h1>
+  <div id="cartWrap"></div>
+</main>
+
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const wrap = document.getElementById("cartWrap");
+    const render = () => {
+      const lang = window.SAWWA.lang;
+      const items = Cart.get();
+      if (items.length === 0) {
+        wrap.innerHTML = `
+          <div class="empty-cart">
+            <p class="muted">${lang === 'ar' ? 'سلتك فارغة.' : 'Your cart is empty.'}</p>
+            <a href="shop.html" class="btn primary">${lang === 'ar' ? 'تسوّق الآن' : 'Shop now'}</a>
+          </div>`;
+        return;
+      }
+      const sub = Cart.subtotal();
+      const shipping = window.SAWWA.shipping * 100;
+      const total = sub + shipping;
+      wrap.innerHTML = `
+        <div class="cart-list">
+          ${items.map((it) => `
+            <div class="cart-item" data-id="${it.id}">
+              <div class="ci-img" style="background:var(--grad-1)"></div>
+              <div class="ci-info">
+                <h3>${lang === 'ar' ? it.nameAr : it.nameEn}</h3>
+                <div class="price">${UI.fmt(it.price)}</div>
+              </div>
+              <div class="ci-qty">
+                <button data-act="dec">−</button>
+                <input type="number" min="1" value="${it.qty}" data-act="set" />
+                <button data-act="inc">+</button>
+              </div>
+              <div class="ci-total price">${UI.fmt(it.price * it.qty)}</div>
+              <button class="link danger" data-act="rm">${lang === 'ar' ? 'إزالة' : 'Remove'}</button>
+            </div>`).join("")}
+        </div>
+        <div class="cart-summary reveal">
+          <div class="row"><span>${lang === 'ar' ? 'المجموع' : 'Subtotal'}</span><span>${UI.fmt(sub)}</span></div>
+          <div class="row"><span>${lang === 'ar' ? 'الشحن' : 'Shipping'}</span><span>${UI.fmt(shipping)}</span></div>
+          <div class="row total"><span>${lang === 'ar' ? 'الإجمالي' : 'Total'}</span><span>${UI.fmt(total)}</span></div>
+          <a href="checkout.html" class="btn primary full" style="margin-top:16px">${lang === 'ar' ? 'إتمام الشراء' : 'Checkout'}</a>
+        </div>`;
+      setTimeout(() => wrap.querySelectorAll(".reveal").forEach(el => el.classList.add("in")), 30);
+      wrap.querySelectorAll("[data-act]").forEach((el) => {
+        el.onclick = () => {
+          const id = el.closest(".cart-item").dataset.id;
+          const it = Cart.get().find((x) => x.id === id);
+          if (!it) return;
+          if (el.dataset.act === "inc") Cart.setQty(id, it.qty + 1);
+          else if (el.dataset.act === "dec") Cart.setQty(id, it.qty - 1);
+          else if (el.dataset.act === "rm") {
+            Cart.remove(id);
+            UI.toast(
+              lang === "ar" ? `أُزيل "${it.nameAr}"` : `"${it.nameEn}" removed`,
+              "info", null, 2000
+            );
+          }
+          else if (el.dataset.act === "set") Cart.setQty(id, parseInt(el.value, 10) || 1);
+          render();
+        };
+      });
+    };
+    render();
+  }
+});
+</script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

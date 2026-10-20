@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>الدفع — SaWWA Souq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/identity.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/alerts.css" />
+<link rel="stylesheet" href="css/rtl.css" />
+<link rel="stylesheet" href="css/mobile.css" />
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<style>
+  [hidden] { display: none !important; }
+
+  .cliq-summary {
+    background: color-mix(in srgb, var(--brand) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent);
+    border-radius: var(--r-sm);
+    padding: 14px 16px;
+    margin: 12px 0 18px;
+  }
+  .cs-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .cs-label { font-weight: 700; color: var(--brand); font-size: 14px; }
+  .cs-edit {
+    background: none; border: none; cursor: pointer;
+    color: var(--brand); font-size: 13px; font-weight: 600;
+    text-decoration: underline; font-family: inherit;
+  }
+  .cs-file { font-size: 13px; color: var(--text-2); }
+
+  #cliqModal {
+    position: fixed; inset: 0; z-index: 9998;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: cliqFade .2s ease-out;
+  }
+  #cliqModal[hidden] { display: none !important; }
+  @keyframes cliqFade { from { opacity: 0; } to { opacity: 1; } }
+
+  .cliq-modal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 32px 28px 26px;
+    max-width: 500px; width: 100%;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: cliqPop .3s cubic-bezier(.34, 1.56, .64, 1);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    text-align: start;
+  }
+  html.dark .cliq-modal-card { background: var(--surface-2); }
+  @keyframes cliqPop {
+    0% { transform: scale(0.92); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .cliq-x {
+    position: absolute; top: 14px; inset-inline-end: 14px;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-2); cursor: pointer;
+    font-size: 22px; font-weight: 400; line-height: 1;
+    display: grid; place-items: center;
+    transition: all .15s; font-family: inherit; padding: 0; z-index: 2;
+  }
+  .cliq-x:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  html.dark .cliq-x { background: var(--surface-3); }
+  .cliq-modal-card h3 {
+    font-size: 20px; font-weight: 800;
+    color: var(--text); margin-bottom: 18px;
+    letter-spacing: -0.01em; padding-inline-end: 44px;
+  }
+  .cliq-info {
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+    padding: 16px; margin-bottom: 16px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .cliq-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+  .cliq-row span { color: var(--text-2); font-weight: 600; }
+  .cliq-row code {
+    background: var(--brand); color: #fff;
+    padding: 5px 14px; border-radius: var(--r-sm);
+    font-family: var(--font-en); letter-spacing: .08em;
+    font-weight: 700; font-size: 14px;
+  }
+  .cliq-row strong { color: var(--text); font-weight: 800; font-size: 17px; }
+  .cliq-hint { font-size: 14px; color: var(--text-2); line-height: 1.7; margin-bottom: 18px; }
+  .cliq-file-label > span {
+    display: block; font-size: 13px;
+    color: var(--text-2); font-weight: 600; margin-bottom: 8px;
+  }
+  .cliq-file-box {
+    border: 2px dashed var(--border-2);
+    border-radius: var(--r-sm);
+    padding: 22px 16px; text-align: center;
+    cursor: pointer; transition: all .15s;
+    background: var(--surface-2);
+  }
+  .cliq-file-box:hover {
+    border-color: var(--brand);
+    background: color-mix(in srgb, var(--brand) 6%, transparent);
+  }
+  .cliq-file-box.has-file {
+    border-style: solid; border-color: var(--brand);
+    background: color-mix(in srgb, var(--brand) 8%, transparent);
+  }
+  .cfb-icon { font-size: 30px; display: block; margin-bottom: 6px; }
+  .cfb-text { font-size: 14px; color: var(--text-2); font-weight: 600; word-break: break-all; }
+  .cliq-file-box.has-file .cfb-text { color: var(--brand); }
+  .cliq-modal-actions {
+    display: flex; gap: 10px;
+    margin-top: 22px; padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .cliq-modal-actions .btn { flex: 1; }
+  @media (max-width: 640px) {
+    .cliq-modal-card { padding: 26px 20px 20px; border-radius: var(--r-md); }
+    .cliq-modal-card h3 { font-size: 18px; }
+    .cliq-modal-actions { flex-direction: column-reverse; }
+  }
+</style>
+</head>
+<body>
+<canvas id="aurora"></canvas>
+<div id="grain"></div>
+
+<main class="container">
+  <h1 class="page-title" data-i18n="checkout.title"></h1>
+  <form id="checkoutForm" class="checkout-grid">
+    <section class="form-col reveal">
+      <label><span data-i18n="checkout.name"></span><input name="name" required minlength="2" /></label>
+      <label><span data-i18n="checkout.email"></span><input name="email" type="email" required /></label>
+      <label><span data-i18n="checkout.phone"></span><input name="phone" required minlength="7" /></label>
+      <label><span data-i18n="checkout.city"></span>
+        <select name="city" id="citySelect" required></select>
+      </label>
+      <label><span data-i18n="checkout.address"></span><textarea name="address" required minlength="5"></textarea></label>
+      <label><span data-i18n="checkout.notes"></span><textarea name="notes"></textarea></label>
+
+      <fieldset class="pay">
+        <legend data-i18n="checkout.payment"></legend>
+        <label class="radio">
+          <input type="radio" name="pay" value="COD" checked />
+          <span data-i18n="checkout.cod"></span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="pay" value="CLIQ" />
+          <span data-i18n="checkout.cliq"></span>
+        </label>
+      </fieldset>
+
+      <div id="cliqSummary" class="cliq-summary" hidden>
+        <div class="cs-row">
+          <span class="cs-label">✓ دفع Cliq مُفعّل</span>
+          <button type="button" class="cs-edit" id="cliqEdit">تعديل</button>
+        </div>
+        <div class="cs-file" id="cliqFileName">— لم يتم رفع إشعار —</div>
+      </div>
+
+      <label class="points-box">
+        <input type="checkbox" id="usePoints" />
+        <span data-i18n="checkout.points"></span>
+        <small data-i18n="checkout.pointsHint"></small>
+        <em id="pointsBalance"></em>
+      </label>
+    </section>
+
+    <aside class="summary-col reveal">
+      <h3 data-i18n="cart.title"></h3>
+      <div id="summaryItems"></div>
+
+      <div class="coupon-row">
+        <input type="text" id="couponInput" placeholder="كود الخصم" />
+        <button type="button" class="btn ghost" id="couponApply">تطبيق</button>
+      </div>
+      <div id="couponStatus"></div>
+
+      <div class="row"><span data-i18n="cart.subtotal"></span><span id="sumSub"></span></div>
+      <div class="row" id="discountRow" style="display:none"><span data-i18n="checkout.points"></span><span id="sumDisc"></span></div>
+      <div class="row" id="couponRow" style="display:none"><span>كود الخصم</span><span id="sumCoupon"></span></div>
+      <div class="row"><span data-i18n="cart.shipping"></span><span id="sumShip"></span></div>
+      <div class="row total"><span data-i18n="cart.total"></span><span id="sumTotal"></span></div>
+      <button class="btn primary full" data-i18n="checkout.placeOrder" type="submit" style="margin-top:16px"></button>
+    </aside>
+  </form>
+
+  <div id="successBox" class="success-box" hidden></div>
+</main>
+
+<div id="cliqModal" hidden>
+  <div class="cliq-modal-card">
+    <button type="button" class="cliq-x" id="cliqX" aria-label="close">×</button>
+    <h3>دفع Cliq</h3>
+    <div class="cliq-info">
+      <div class="cliq-row">
+        <span>معرّف Cliq</span>
+        <code id="cliqCode" class="font-en">SAWWA1</code>
+      </div>
+      <div class="cliq-row">
+        <span>المبلغ المطلوب</span>
+        <strong id="cliqAmount" class="font-en">0.00 JOD</strong>
+      </div>
+    </div>
+    <p class="cliq-hint">حوّل المبلغ إلى المعرّف أعلاه من تطبيق بنكك، ثم ارفع صورة إشعار التحويل.</p>
+    <label class="cliq-file-label">
+      <span>صورة إشعار التحويل</span>
+      <input type="file" id="cliqFileInput" accept="image/*" hidden />
+      <div class="cliq-file-box" id="cliqFileBox">
+        <span class="cfb-icon">📷</span>
+        <span class="cfb-text" id="cliqFileText">اضغط لاختيار صورة</span>
+      </div>
+    </label>
+    <div class="cliq-modal-actions">
+      <button type="button" class="btn primary" id="cliqConfirm">تأكيد الدفع</button>
+      <button type="button" class="btn ghost" id="cliqCancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/supabase-config.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/design-tokens.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/shipping.js"></script>
+<script src="js/coupons.js"></script>
+<script src="js/tracking.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/aurora.js"></script>
+<script src="js/ui.js"></script>
+<script>
+UI.init({
+  after: () => {
+    const lang = window.SAWWA.lang;
+
+    const cliqModal      = document.getElementById("cliqModal");
+    const cliqSummary    = document.getElementById("cliqSummary");
+    const cliqFileName   = document.getElementById("cliqFileName");
+    const cliqFileInput  = document.getElementById("cliqFileInput");
+    const cliqFileBox    = document.getElementById("cliqFileBox");
+    const cliqFileText   = document.getElementById("cliqFileText");
+    const cliqCode       = document.getElementById("cliqCode");
+    const cliqAmount     = document.getElementById("cliqAmount");
+    const codRadio       = document.querySelector('input[name=pay][value="COD"]');
+    const cliqRadio      = document.querySelector('input[name=pay][value="CLIQ"]');
+    const citySel        = document.getElementById("citySelect");
+
+    if (cliqCode) cliqCode.textContent = window.SAWWA.cliqId || "SAWWA1";
+    citySel.innerHTML = `<option value="">--</option>` + Shipping.list().map((c) => `<option>${c}</option>`).join("");
+
+    let appliedCoupon = null;
+    let cliqProofFile = null;
+
+    const openCliqModal = () => {
+      sum();
+      cliqModal.hidden = false;
+      document.body.style.overflow = "hidden";
+    };
+    const closeCliqModal = () => {
+      cliqModal.hidden = true;
+      document.body.style.overflow = "";
+    };
+
+    cliqRadio.addEventListener("change", () => {
+      if (cliqRadio.checked) openCliqModal();
+    });
+    codRadio.addEventListener("change", () => {
+      if (codRadio.checked) cliqSummary.hidden = true;
+    });
+
+    document.getElementById("cliqEdit").onclick = () => openCliqModal();
+
+    document.getElementById("cliqX").onclick = () => {
+      if (!cliqProofFile) {
+        codRadio.checked = true;
+        cliqSummary.hidden = true;
+      }
+      closeCliqModal();
+    };
+
+    document.getElementById("cliqCancel").onclick = () => {
+      if (!cliqProofFile) {
+        codRadio.checked = true;
+        cliqSummary.hidden = true;
+      }
+      closeCliqModal();
+    };
+
+    document.getElementById("cliqConfirm").onclick = () => {
+      if (!cliqProofFile) {
+        if (window.UI?.toast) UI.toast(lang === "ar" ? "ارفع صورة الإشعار أولاً" : "Upload receipt first", "warn");
+        return;
+      }
+      cliqRadio.checked = true;
+      cliqSummary.hidden = false;
+      cliqFileName.textContent = cliqProofFile.name || "صورة";
+      closeCliqModal();
+    };
+
+    cliqModal.addEventListener("click", (e) => {
+      if (e.target === cliqModal) {
+        if (!cliqProofFile) {
+          codRadio.checked = true;
+          cliqSummary.hidden = true;
+        }
+        closeCliqModal();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !cliqModal.hidden) {
+        if (!cliqProofFile) {
+          codRadio.checked = true;
+          cliqSummary.hidden = true;
+        }
+        closeCliqModal();
+      }
+    });
+
+    cliqFileBox.onclick = () => cliqFileInput.click();
+    cliqFileInput.onchange = (e) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+      cliqProofFile = f;
+      cliqFileBox.classList.add("has-file");
+      cliqFileText.textContent = f.name;
+    };
+
+    const sum = () => {
+      const sub = Cart.subtotal();
+      const city = citySel.value;
+      const ship = city ? Shipping.getFee(city) : (window.SAWWA.shipping * 100);
+      const pts = Store.points.get();
+      const use = document.getElementById("usePoints").checked && pts >= window.SAWWA.loyalty.minRedeem;
+      const discPts = use ? Math.min(Math.floor(pts / 100) * 100, sub) : 0;
+      const discCoupon = appliedCoupon ? Coupons.discountFor(appliedCoupon, sub - discPts) : 0;
+      const total = Math.max(0, sub + ship - discPts - discCoupon);
+
+      document.getElementById("sumSub").textContent = UI.fmt(sub);
+      document.getElementById("sumShip").textContent = UI.fmt(ship);
+      document.getElementById("sumTotal").textContent = UI.fmt(total);
+
+      const dRow = document.getElementById("discountRow");
+      if (discPts > 0) { dRow.style.display = "flex"; document.getElementById("sumDisc").textContent = "- " + UI.fmt(discPts); }
+      else dRow.style.display = "none";
+
+      const cRow = document.getElementById("couponRow");
+      if (discCoupon > 0) { cRow.style.display = "flex"; document.getElementById("sumCoupon").textContent = "- " + UI.fmt(discCoupon); }
+      else cRow.style.display = "none";
+
+      document.getElementById("pointsBalance").textContent = `${pts} ${lang === "ar" ? "نقطة" : "pts"}`;
+      if (cliqAmount) cliqAmount.textContent = UI.fmt(total);
+
+      return { sub, ship, discPts, discCoupon, total };
+    };
+
+    const renderItems = () => {
+      const items = Cart.get();
+      document.getElementById("summaryItems").innerHTML = items.length === 0
+        ? `<p class="muted">${lang === "ar" ? "لا منتجات." : "No items."}</p>`
+        : items.map((it) => `
+          <div class="row small"><span>${lang === "ar" ? it.nameAr : it.nameEn} × ${it.qty}</span><span>${UI.fmt(it.price * it.qty)}</span></div>
+        `).join("");
+    };
+
+    document.getElementById("couponApply").onclick = () => {
+      const code = document.getElementById("couponInput").value.trim();
+      const status = document.getElementById("couponStatus");
+      if (!code) { status.innerHTML = ""; appliedCoupon = null; Coupons.clear(); sum(); return; }
+      const res = Coupons.apply(code, Cart.subtotal());
+      if (!res.ok) {
+        const reasons = {
+          not_found: lang === "ar" ? "الكود غير موجود" : "Code not found",
+          inactive: lang === "ar" ? "الكود غير مفعّل" : "Code inactive",
+          expired: lang === "ar" ? "انتهت صلاحية الكود" : "Code expired",
+          max_uses: lang === "ar" ? "انتهى استخدام الكود" : "Code max uses reached",
+          min_cart: lang === "ar" ? "الحد الأدنى للسلة لم يتحقق" : "Minimum cart not met"
+        };
+        status.innerHTML = `<div class="coupon-error">${reasons[res.reason] || "خطأ"}</div>`;
+        appliedCoupon = null;
+        sum();
+        return;
+      }
+      appliedCoupon = res.coupon;
+      status.innerHTML = `
+        <div class="coupon-applied">
+          <span>✓</span>
+          <span>${res.coupon.code} ${lang === "ar" ? "مُطبَّق" : "applied"}</span>
+          <button type="button" id="couponRemove">×</button>
+        </div>`;
+      document.getElementById("couponRemove").onclick = () => {
+        appliedCoupon = null;
+        Coupons.clear();
+        status.innerHTML = "";
+        document.getElementById("couponInput").value = "";
+        sum();
+      };
+      sum();
+    };
+
+    document.getElementById("usePoints").onchange = sum;
+    citySel.onchange = sum;
+    renderItems();
+    sum();
+
+    document.getElementById("checkoutForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const pay = fd.get("pay");
+      const city = fd.get("city");
+
+      if (Cart.get().length === 0) { UI.toast(lang === "ar" ? "سلتك فارغة" : "Cart is empty", "warn"); return; }
+      if (!city) { UI.toast(lang === "ar" ? "اختر المحافظة" : "Choose governorate", "warn"); return; }
+
+      if (pay === "CLIQ" && !cliqProofFile) {
+        UI.toast(lang === "ar" ? "ارفع صورة إشعار التحويل" : "Upload receipt", "warn");
+        openCliqModal();
+        return;
+      }
+
+      const ok = await UI.confirm(
+        lang === "ar" ? "تأكيد الطلب" : "Confirm order",
+        lang === "ar" ? "سيتم إرسال طلبك الآن." : "Your order will be placed now.",
+        { icon: "✓", okLabel: lang === "ar" ? "تأكيد" : "Confirm" }
+      );
+      if (!ok) return;
+
+      const t = sum();
+      const earned = Math.floor((t.total / 100) * window.SAWWA.loyalty.earnPerJOD);
+      const usedPts = document.getElementById("usePoints").checked && Store.points.get() >= window.SAWWA.loyalty.minRedeem
+        ? Math.min(Store.points.get(), Math.floor(Store.points.get() / 100) * 100)
+        : 0;
+      const id = "SW-" + Date.now().toString(36).toUpperCase();
+
+      const order = {
+        id, createdAt: Date.now(),
+        name: fd.get("name"), email: fd.get("email"), phone: fd.get("phone"),
+        city: fd.get("city"), address: fd.get("address"), notes: fd.get("notes"),
+        items: Cart.get(),
+        subtotal: t.sub, shipping: t.ship, discount: t.discPts + t.discCoupon, total: t.total,
+        couponCode: appliedCoupon ? appliedCoupon.code : null,
+        paymentMethod: pay,
+        paymentStatus: pay === "CLIQ" ? "AWAITING_VERIFICATION" : "PENDING",
+        status: "PENDING",
+        cliqProofName: pay === "CLIQ" && cliqProofFile ? cliqProofFile.name : null,
+        pointsEarned: earned, pointsUsed: usedPts
+      };
+
+      // 1. حفظ محلي
+      Store.orders.create(order);
+
+      // 2. حفظ في Supabase (cloud)
+      if (window.SB && SB.isEnabled && SB.isEnabled()) {
+        SB.orders.create(order).then((ok) => {
+          if (ok) console.log("[Checkout] Order synced to cloud:", order.id);
+          else console.warn("[Checkout] Cloud save failed — saved locally only");
+        });
+      }
+
+      order.items.forEach((it) => Store.products.decrementStock(it.id, it.qty));
+      if (usedPts > 0) Store.points.subtract(usedPts);
+      if (pay === "COD") Store.points.add(earned);
+      if (appliedCoupon) Coupons.incrementUse();
+
+      if (window.Notifications) {
+        Notifications.add(
+          lang === "ar" ? `طلب جديد ${id}` : `New order ${id}`,
+          lang === "ar" ? "شكرًا لطلبك! سنتواصل معك لتأكيد التفاصيل." : "Thanks! We'll contact you to confirm."
+        );
+      }
+
+      Cart.clear();
+      Coupons.clear();
+
+      UI.toast(
+        lang === "ar" ? `تم استلام طلبك ${id}` : `Order ${id} received!`,
+        "success", null, 5000
+      );
+
+      const waMsg = encodeURIComponent(
+        `طلب جديد ${id}\nالاسم: ${order.name}\nالهاتف: ${order.phone}\nالمدينة: ${order.city}\nالطريقة: ${pay}\nالمجموع: ${(order.total / 100).toFixed(2)} دينار`
+      );
+      const box = document.getElementById("successBox");
+      box.hidden = false;
+      box.innerHTML = `
+        <h2>${lang === 'ar' ? '✓ تم استلام طلبك!' : '✓ Order received!'}</h2>
+        <p>${lang === 'ar' ? 'رقم الطلب' : 'Order ID'}: <strong class="font-en">${id}</strong></p>
+        <a class="btn primary" href="track.html">${lang === 'ar' ? 'تتبع الطلب' : 'Track order'}</a>
+        <a class="btn" href="https://wa.me/${window.SAWWA.whatsapp}?text=${waMsg}" target="_blank" rel="noopener">
+          ${lang === 'ar' ? 'تواصل عبر واتساب' : 'Contact on WhatsApp'}
+        </a>
+        <a class="btn ghost" href="shop.html">${lang === 'ar' ? 'متابعة التسوق' : 'Continue shopping'}</a>`;
+      e.target.style.display = "none";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+  }
+});
+</script>
+</body>
+</html>
