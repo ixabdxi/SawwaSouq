@@ -106,7 +106,6 @@ window.SB = (() => {
     }
   };
 
-  /* ============ REALTIME SUBSCRIPTION ============ */
   const subscribeOrders = (onUpdate) => {
     init().then((c) => {
       if (!c) return;
