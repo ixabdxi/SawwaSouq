@@ -292,8 +292,9 @@
           <td>${esc(o.paymentMethod || "")}</td>
           <td><span class="status-pill ${o.paymentStatus}">${esc(o.paymentStatus)}</span></td>
           <td><span class="status-pill ${o.status}">${esc(o.status)}</span></td>
-          <td class="actions-cell">
-            ${o.paymentStatus === "AWAITING_VERIFICATION" ? `<button class="btn xs success" data-verify="${o.id}">تأكيد الدفع</button><button class="btn xs danger" data-reject="${o.id}">رفض</button>` : ""}
+                    <td class="actions-cell">
+            ${o.paymentStatus !== "PAID" && o.paymentStatus !== "FAILED" ? `<button class="btn xs success" data-verify="${o.id}">تأكيد استلام المبلغ</button>` : ""}
+            ${o.paymentStatus === "AWAITING_VERIFICATION" ? `<button class="btn xs danger" data-reject="${o.id}">رفض</button>` : ""}
             ${o.status !== "SHIPPED" && o.status !== "DELIVERED" ? `<button class="btn xs" data-ship="${o.id}">شحن</button>` : ""}
             ${o.status !== "DELIVERED" ? `<button class="btn xs success" data-deliver="${o.id}">تسليم</button>` : ""}
             <button class="btn xs danger" data-del="${o.id}">حذف</button>
