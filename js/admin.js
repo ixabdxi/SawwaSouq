@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Admin Panel (Sequential Flow & Safety)
+   SaWWA Souq — Admin Panel (Sequential Flow & Safety Fixed)
    ============================================================ */
 (() => {
   const $ = (sel) => document.querySelector(sel);
@@ -295,7 +295,7 @@
 
         if (isCliq) {
           if (!isPaid) {
-             actionBtns += `<button class="btn xs success" data-verify="${o.id}">استلام المبلغ</button> `;
+             actionBtns += `<button class="btn xs success" data-verify-cliq="${o.id}">استلام المبلغ</button> `;
           } else if (isPaid && isPending) {
              actionBtns += `<button class="btn xs" data-ship="${o.id}">شحن</button> `;
           } else if (isPaid && isShipped) {
@@ -307,7 +307,7 @@
           } else if (isShipped) {
              actionBtns += `<button class="btn xs success" data-deliver="${o.id}">تسليم</button> `;
           } else if (isDelivered && !isPaid) {
-             actionBtns += `<button class="btn xs success" data-verify="${o.id}">استلام المبلغ</button> `;
+             actionBtns += `<button class="btn xs success" data-verify-cod="${o.id}">استلام المبلغ</button> `;
           }
         }
 
@@ -327,8 +327,9 @@
           </td>
         </tr>`}).join("")}</tbody></table>`;
 
-    // ربط الأزرار
-    el.querySelectorAll("[data-verify]").forEach((b) => b.onclick = () => updateOrder(b.dataset.verify, { paymentStatus: "PAID", status: "CONFIRMED" }));
+    // ربط الأزرار بالتحديثات الصحيحة
+    el.querySelectorAll("[data-verify-cliq]").forEach((b) => b.onclick = () => updateOrder(b.dataset.verifyCliq, { paymentStatus: "PAID", status: "CONFIRMED" }));
+    el.querySelectorAll("[data-verify-cod]").forEach((b) => b.onclick = () => updateOrder(b.dataset.verifyCod, { paymentStatus: "PAID" }));
     el.querySelectorAll("[data-ship]").forEach((b) => b.onclick = () => updateOrder(b.dataset.ship, { status: "SHIPPED" }));
     el.querySelectorAll("[data-deliver]").forEach((b) => b.onclick = () => updateOrder(b.dataset.deliver, { status: "DELIVERED" }));
     
