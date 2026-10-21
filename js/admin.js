@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Admin Panel (Full & Optimized)
+   SaWWA Souq — Admin Panel (Sequential Flow & Safety)
    ============================================================ */
 (() => {
   const $ = (sel) => document.querySelector(sel);
@@ -240,7 +240,7 @@
       <div class="admin-list-item" style="border-inline-start:4px solid ${a.type === "danger" ? "#C03030" : a.type === "warn" ? "#E8A33D" : "#1565C0"}"><span class="label">${esc(a.text)}</span></div>`).join("")}</div>`;
   };
 
-  /* ============ ORDERS (Async + Supabase) ============ */
+  /* ============ ORDERS (SEQUENTIAL FLOW) ============ */
   let orderSearchQ = "", orderFilterStatus = "", orderFilterPay = "";
   const oSearch = $("#orderSearch"), oFS = $("#orderFilterStatus"), oFP = $("#orderFilterPay"), oExp = $("#exportOrders");
   if (oSearch) oSearch.oninput = (e) => { orderSearchQ = e.target.value.toLowerCase(); renderOrders(); };
@@ -267,7 +267,7 @@
           const map = new Map();
           [...remote, ...orders].forEach((o) => map.set(o.id, o));
           orders = [...map.values()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-          write(K.orders, orders); // تحديث المتصفح
+          write(K.orders, orders);
         }
       } catch (e) {
         console.warn("[Admin] Supabase fetch failed:", e);
@@ -282,7 +282,36 @@
 
     el.innerHTML = `<table class="admin-table">
       <thead><tr><th>رقم</th><th>العميل</th><th>الهاتف</th><th>المدينة</th><th>المجموع</th><th>الدفع</th><th>حالة الدفع</th><th>الحالة</th><th>إجراءات</th></tr></thead>
-      <tbody>${orders.map((o) => `
+      <tbody>${orders.map((o) => {
+        
+        // بناء الأزرار بناءً على التسلسل المطلوب
+        let actionBtns = "";
+        const isCliq = o.paymentMethod === "CLIQ";
+        const isCod = o.paymentMethod === "COD";
+        const isPaid = o.paymentStatus === "PAID";
+        const isPending = o.status === "PENDING" || o.status === "CONFIRMED";
+        const isShipped = o.status === "SHIPPED";
+        const isDelivered = o.status === "DELIVERED";
+
+        if (isCliq) {
+          if (!isPaid) {
+             actionBtns += `<button class="btn xs success" data-verify="${o.id}">استلام المبلغ</button> `;
+          } else if (isPaid && isPending) {
+             actionBtns += `<button class="btn xs" data-ship="${o.id}">شحن</button> `;
+          } else if (isPaid && isShipped) {
+             actionBtns += `<button class="btn xs success" data-deliver="${o.id}">تسليم</button> `;
+          }
+        } else if (isCod) {
+          if (isPending) {
+             actionBtns += `<button class="btn xs" data-ship="${o.id}">شحن</button> `;
+          } else if (isShipped) {
+             actionBtns += `<button class="btn xs success" data-deliver="${o.id}">تسليم</button> `;
+          } else if (isDelivered && !isPaid) {
+             actionBtns += `<button class="btn xs success" data-verify="${o.id}">استلام المبلغ</button> `;
+          }
+        }
+
+        return `
         <tr>
           <td class="font-en"><strong>${esc(o.id)}</strong></td>
           <td>${esc(o.name || "")}</td>
@@ -292,23 +321,32 @@
           <td>${esc(o.paymentMethod || "")}</td>
           <td><span class="status-pill ${o.paymentStatus}">${esc(o.paymentStatus)}</span></td>
           <td><span class="status-pill ${o.status}">${esc(o.status)}</span></td>
-                    <td class="actions-cell">
-            ${o.paymentStatus !== "PAID" && o.paymentStatus !== "FAILED" ? `<button class="btn xs success" data-verify="${o.id}">تأكيد استلام المبلغ</button>` : ""}
-            ${o.paymentStatus === "AWAITING_VERIFICATION" ? `<button class="btn xs danger" data-reject="${o.id}">رفض</button>` : ""}
-            ${o.status !== "SHIPPED" && o.status !== "DELIVERED" ? `<button class="btn xs" data-ship="${o.id}">شحن</button>` : ""}
-            ${o.status !== "DELIVERED" ? `<button class="btn xs success" data-deliver="${o.id}">تسليم</button>` : ""}
+          <td class="actions-cell">
+            ${actionBtns}
             <button class="btn xs danger" data-del="${o.id}">حذف</button>
           </td>
-        </tr>`).join("")}</tbody></table>`;
+        </tr>`}).join("")}</tbody></table>`;
 
+    // ربط الأزرار
     el.querySelectorAll("[data-verify]").forEach((b) => b.onclick = () => updateOrder(b.dataset.verify, { paymentStatus: "PAID", status: "CONFIRMED" }));
-    el.querySelectorAll("[data-reject]").forEach((b) => b.onclick = () => updateOrder(b.dataset.reject, { paymentStatus: "FAILED", status: "CANCELLED" }));
     el.querySelectorAll("[data-ship]").forEach((b) => b.onclick = () => updateOrder(b.dataset.ship, { status: "SHIPPED" }));
     el.querySelectorAll("[data-deliver]").forEach((b) => b.onclick = () => updateOrder(b.dataset.deliver, { status: "DELIVERED" }));
-    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => {
-      if (!confirm("حذف الطلب؟")) return;
-      write(K.orders, read(K.orders, []).filter((o) => o.id !== b.dataset.del));
-      if (window.SB && SB.isEnabled()) SB.orders.remove(b.dataset.del);
+    
+    // تأكيد الحذف
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+      const id = b.dataset.del;
+      let confirmDel = false;
+      
+      if (window.UI && UI.confirm) {
+        confirmDel = await UI.confirm("تأكيد الحذف", `هل أنت متأكد من حذف الطلب رقم ${id} نهائياً؟`, { danger: true, icon: "⚠️" });
+      } else {
+        confirmDel = confirm(`هل أنت متأكد من حذف الطلب ${id}؟`);
+      }
+      
+      if (!confirmDel) return;
+      
+      write(K.orders, read(K.orders, []).filter((o) => o.id !== id));
+      if (window.SB && SB.isEnabled()) SB.orders.remove(id);
       renderOrders(); renderDash();
     });
   };
@@ -319,6 +357,7 @@
     if (i >= 0) { orders[i] = { ...orders[i], ...patch }; write(K.orders, orders); }
     if (window.SB && SB.isEnabled()) SB.orders.update(id, patch);
     renderOrders(); renderDash();
+    if (window.UI && UI.toast) UI.toast("تم تحديث حالة الطلب", "success");
   };
 
   /* ============ PRODUCTS ============ */
@@ -478,8 +517,15 @@
         renderProducts(); 
       }
     });
-    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => {
-      if (!confirm("تأكيد الحذف؟")) return;
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+      let confirmDel = false;
+      if (window.UI && UI.confirm) {
+        confirmDel = await UI.confirm("تأكيد الحذف", "هل أنت متأكد من حذف هذا المنتج؟", { danger: true, icon: "⚠️" });
+      } else {
+        confirmDel = confirm("تأكيد الحذف؟");
+      }
+      if (!confirmDel) return;
+      
       write(K.products, read(K.products, []).filter((x) => x.id !== b.dataset.del));
       if (window.SB && SB.isEnabled()) SB.products.remove(b.dataset.del);
       renderProducts();
@@ -632,8 +678,12 @@
       const i = list.findIndex((r) => r.id === b.dataset.approve);
       if (i >= 0) { list[i].approved = true; write(K.reviews, list); renderReviews(); renderDash(); }
     });
-    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => {
-      if (!confirm("حذف؟")) return;
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+      let confirmDel = false;
+      if (window.UI && UI.confirm) confirmDel = await UI.confirm("حذف المراجعة", "هل أنت متأكد؟", { danger: true });
+      else confirmDel = confirm("حذف؟");
+      
+      if (!confirmDel) return;
       write(K.reviews, read(K.reviews, []).filter((r) => r.id !== b.dataset.del));
       renderReviews();
     });
@@ -678,8 +728,12 @@
       const i = list.findIndex((m) => m.id === b.dataset.read);
       if (i >= 0) { list[i].read = true; write(K.messages, list); renderMessages(); renderDash(); }
     });
-    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => {
-      if (!confirm("حذف؟")) return;
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+      let confirmDel = false;
+      if (window.UI && UI.confirm) confirmDel = await UI.confirm("حذف الرسالة", "هل أنت متأكد؟", { danger: true });
+      else confirmDel = confirm("حذف؟");
+      
+      if (!confirmDel) return;
       write(K.messages, read(K.messages, []).filter((m) => m.id !== b.dataset.del));
       renderMessages();
     });
@@ -739,8 +793,12 @@
       const i = list.findIndex((c) => c.id === b.dataset.toggle);
       if (i >= 0) { list[i].active = !list[i].active; write(K.coupons, list); renderCoupons(); }
     });
-    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => {
-      if (!confirm("حذف؟")) return;
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+      let confirmDel = false;
+      if (window.UI && UI.confirm) confirmDel = await UI.confirm("حذف الكوبون", "هل أنت متأكد؟", { danger: true });
+      else confirmDel = confirm("حذف؟");
+      
+      if (!confirmDel) return;
       write(K.coupons, read(K.coupons, []).filter((c) => c.id !== b.dataset.del));
       renderCoupons();
     });
