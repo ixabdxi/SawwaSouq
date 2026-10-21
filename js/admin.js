@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Admin Panel (Sequential Flow & Safety Fixed)
+   SaWWA Souq — Admin Panel (Full, Realtime & Sequential)
    ============================================================ */
 (() => {
   const $ = (sel) => document.querySelector(sel);
@@ -984,6 +984,14 @@
     bindNav();
     renderDash();
     switchTab("dash");
+
+    if (window.SB && SB.isEnabled()) {
+      SB.subscribeOrders((payload) => {
+        console.log("[Real-time] Order updated!", payload);
+        renderOrders();
+        renderDash();
+      });
+    }
   };
 
   if (sessionValid()) showPanel();
