@@ -467,7 +467,7 @@ UI.init({
       Store.orders.create(order);
 
       // 2. حفظ في Supabase (cloud)
-      if (window.SB && SB.isEnabled && SB.isEnabled()) {
+      if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
         SB.orders.create(order).then((ok) => {
           if (ok) console.log("[Checkout] Order synced to cloud:", order.id);
           else console.warn("[Checkout] Cloud save failed — saved locally only");
