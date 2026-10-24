@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Supabase Wrapper (With Realtime)
+   SaWWA Souq — Supabase Wrapper (Full)
    ============================================================ */
 window.SB = (() => {
   const cfg = window.SUPABASE_CONFIG || {};
@@ -47,17 +47,20 @@ window.SB = (() => {
     list: async () => {
       const c = await init(); if (!c) return null;
       const { data, error } = await c.from("products").select("*").order("created_at", { ascending: true });
-      if (error) return null; return data.map(normalizeProduct);
+      if (error) { console.warn("[SB] products.list:", error); return null; }
+      return data.map(normalizeProduct);
     },
     save: async (p) => {
       const c = await init(); if (!c) return null;
       const { error } = await c.from("products").upsert(denormalizeProduct(p));
-      return error ? null : true;
+      if (error) { console.warn("[SB] products.save:", error); return null; }
+      return true;
     },
     remove: async (id) => {
       const c = await init(); if (!c) return null;
       const { error } = await c.from("products").delete().eq("id", id);
-      return error ? null : true;
+      if (error) return null;
+      return true;
     }
   };
 
@@ -84,12 +87,15 @@ window.SB = (() => {
     list: async () => {
       const c = await init(); if (!c) return null;
       const { data, error } = await c.from("orders").select("*").order("created_at", { ascending: false });
-      if (error) return null; return data.map(normalizeOrder);
+      if (error) { console.warn("[SB] orders.list:", error); return null; }
+      return data.map(normalizeOrder);
     },
     create: async (o) => {
       const c = await init(); if (!c) return null;
       const { error } = await c.from("orders").insert(denormalizeOrder(o));
-      return error ? null : true;
+      if (error) { console.warn("[SB] orders.create:", error); return null; }
+      console.log("[SB] Order saved to cloud:", o.id);
+      return true;
     },
     update: async (id, patch) => {
       const c = await init(); if (!c) return null;
@@ -97,12 +103,14 @@ window.SB = (() => {
       if (patch.status) row.status = patch.status;
       if (patch.paymentStatus) row.payment_status = patch.paymentStatus;
       const { error } = await c.from("orders").update(row).eq("id", id);
-      return error ? null : true;
+      if (error) return null;
+      return true;
     },
     remove: async (id) => {
       const c = await init(); if (!c) return null;
       const { error } = await c.from("orders").delete().eq("id", id);
-      return error ? null : true;
+      if (error) return null;
+      return true;
     }
   };
 
