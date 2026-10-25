@@ -132,6 +132,11 @@
     .cliq-modal-card h3 { font-size: 18px; }
     .cliq-modal-actions { flex-direction: column-reverse; }
   }
+  /* إخفاء زر باي بال الافتراضي عشان نستخدم التصميم تبعنا */
+  .paypal-buttons-container {
+    position: relative;
+    z-index: 1;
+  }
 </style>
 </head>
 <body>
@@ -202,14 +207,17 @@
       <!-- صندوق باي بال -->
       <div id="paypalBox" style="display:none; margin-top: 20px;">
         <div id="paypal-button-container"></div>
-        <p style="text-align: center; font-size: 12px; color: var(--text-3); margin-top: 10px;">ادفع بأمان عبر PayPal أو البطاقة</p>
+        <p style="text-align: center; font-size: 12px; color: var(--text-3); margin-top: 10px;">ادفع بأمان عبر PayPal أو البطاقات</p>
       </div>
 
       <button class="btn primary full" data-i18n="checkout.placeOrder" type="submit" id="submitBtn" style="margin-top:16px"></button>
     </aside>
   </form>
 
-  <div id="successBox" class="success-box" hidden></div>
+  <!-- صندوق النجاح -->
+  <div id="successBox" class="success-box" hidden style="text-align: center; padding: 40px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border);">
+    <!-- سيتم تعبئته بالجافاسكريبت -->
+  </div>
 </main>
 
 <div id="cliqModal" hidden>
@@ -243,7 +251,7 @@
 </div>
 
 <!-- سكربت باي بال -->
-<script src="https://www.paypal.com/sdk/js?client-id=BAAtMFdRIAJ4WEp4L7-smhFsvU4uXti9FlWhntsJyzjFjQpCTxs1On6xZ94aJq0zmKzK7bAvLpAuWWsMBY&currency=USD&components=buttons&disable-funding=credit,card"></script>
+<script src="https://www.paypal.com/sdk/js?client-id=BAAtMFdRIAJ4WEp4L7-smhFsvU4uXti9FlWhntsJyzjFjQpCTxs1On6xZ94aJq0zmKzK7bAvLpAuWWsMBY&currency=USD&components=buttons"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/design-tokens.js"></script>
@@ -273,7 +281,6 @@ UI.init({
     const cliqAmount     = document.getElementById("cliqAmount");
     const codRadio       = document.querySelector('input[name=pay][value="COD"]');
     const cliqRadio      = document.querySelector('input[name=pay][value="CLIQ"]');
-    const paypalRadio    = document.querySelector('input[name=pay][value="PAYPAL"]');
     const citySel        = document.getElementById("citySelect");
     const paypalBox      = document.getElementById("paypalBox");
     const submitBtn      = document.getElementById("submitBtn");
@@ -311,7 +318,7 @@ UI.init({
       radio.addEventListener('change', (e) => {
         if (e.target.value === 'PAYPAL') {
           paypalBox.style.display = 'block';
-          submitBtn.style.display = 'none'; // نخفي زر التأكيد العادي عشان نستخدم زر باي بال
+          submitBtn.style.display = 'none'; 
           initPayPal();
         } else {
           paypalBox.style.display = 'none';
@@ -343,7 +350,6 @@ UI.init({
             });
             const data = await res.json();
             if (data.status === 'COMPLETED') {
-              // نجاح الدفع
               completeOrder("PAYPAL", "PAID");
             }
           },
@@ -414,11 +420,9 @@ UI.init({
     renderItems();
     sum();
 
-    /* ============ COMPLETE ORDER ============ */
+    /* ============ COMPLETE ORDER & SUCCESS UI ============ */
     const completeOrder = async (payMethod, payStatus) => {
       const fd = new FormData(document.getElementById("checkoutForm"));
-      const city = fd.get("city");
-      
       const t = sum();
       const earned = Math.floor((t.total / 100) * window.SAWWA.loyalty.earnPerJOD);
       const usedPts = document.getElementById("usePoints").checked && Store.points.get() >= window.SAWWA.loyalty.minRedeem
@@ -439,7 +443,10 @@ UI.init({
         pointsEarned: earned, pointsUsed: usedPts
       };
 
+      // 1. حفظ محلي
       Store.orders.create(order);
+
+      // 2. حفظ في Supabase
       if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
         SB.orders.create(order).then((ok) => {
           if (ok) console.log("[Checkout] Order synced to cloud:", order.id);
@@ -454,18 +461,60 @@ UI.init({
 
       Cart.clear();
       Coupons.clear();
-      UI.toast(`تم استلام طلبك ${id}`, "success", null, 5000);
+      
+      if (window.Notifications) {
+        Notifications.add(
+          lang === "ar" ? `طلب جديد ${id}` : `New order ${id}`,
+          lang === "ar" ? "تم الدفع بنجاح وسنتواصل معك قريباً." : "Payment successful, we'll contact you soon."
+        );
+      }
 
+      // إخفاء الفورم وإظهار رسالة النجاح الفخمة
+      document.getElementById("checkoutForm").style.display = "none";
       const box = document.getElementById("successBox");
       box.hidden = false;
-      box.innerHTML = `
-        <h2>${lang === 'ar' ? '✓ تم استلام طلبك!' : '✓ Order received!'}</h2>
-        <p>${lang === 'ar' ? 'رقم الطلب' : 'Order ID'}: <strong class="font-en">${id}</strong></p>
-        <p>${lang === 'ar' ? 'طريقة الدفع' : 'Payment'}: <strong>${payMethod}</strong></p>
-        <a class="btn primary" href="track.html">${lang === 'ar' ? 'تتبع الطلب' : 'Track order'}</a>`;
       
-      document.getElementById("checkoutForm").style.display = "none";
+      let successMessage = "";
+      let successIcon = "";
+      
+      if (payMethod === "PAYPAL") {
+        successIcon = "💳";
+        successMessage = lang === "ar" ? "تم الدفع بنجاح عبر PayPal / البطاقة!" : "Payment successful via PayPal/Card!";
+      } else if (payMethod === "CLIQ") {
+        successIcon = "📱";
+        successMessage = lang === "ar" ? "تم استلام طلبك، سنتحقق من إشعار Cliq قريباً." : "Order received, we'll verify the Cliq receipt soon.";
+      } else {
+        successIcon = "💵";
+        successMessage = lang === "ar" ? "تم استلام طلبك بنجاح، الدفع عند الاستلام." : "Order received successfully, Cash on Delivery.";
+      }
+
+      const waMsg = encodeURIComponent(
+        `طلب جديد ${id}\nالاسم: ${order.name}\nالهاتف: ${order.phone}\nالمدينة: ${order.city}\nالطريقة: ${payMethod}\nالمجموع: ${(order.total / 100).toFixed(2)} دينار`
+      );
+
+      box.innerHTML = `
+        <div style="font-size: 64px; margin-bottom: 16px;">${successIcon}</div>
+        <h2 style="color: var(--brand); font-size: 24px; font-weight: 800; margin-bottom: 12px;">
+          ${lang === 'ar' ? '✓ تم استلام طلبك بنجاح!' : '✓ Order received successfully!'}
+        </h2>
+        <p style="color: var(--text-2); font-size: 16px; margin-bottom: 20px; font-weight: 600;">
+          ${successMessage}
+        </p>
+        
+        <div style="background: var(--surface-2); padding: 16px; border-radius: var(--r-sm); margin-bottom: 24px; display: inline-block; text-align: start;">
+          <div style="margin-bottom: 8px;"><span style="color: var(--text-3); font-size: 13px;">${lang === 'ar' ? 'رقم الطلب:' : 'Order ID:'}</span> <strong class="font-en" style="color: var(--text); font-size: 16px;">${id}</strong></div>
+          <div><span style="color: var(--text-3); font-size: 13px;">${lang === 'ar' ? 'طريقة الدفع:' : 'Payment Method:'}</span> <strong style="color: var(--text); font-size: 15px;">${payMethod}</strong></div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <a class="btn primary" href="track.html" style="min-width: 140px;">${lang === 'ar' ? 'تتبع الطلب' : 'Track order'}</a>
+          <a class="btn ghost" href="https://wa.me/${window.SAWWA.whatsapp}?text=${waMsg}" target="_blank" rel="noopener" style="min-width: 140px;">
+            ${lang === 'ar' ? 'تواصل واتساب' : 'WhatsApp'}
+          </a>
+        </div>`;
+      
       window.scrollTo({ top: 0, behavior: "smooth" });
+      UI.toast(lang === "ar" ? "تم استلام طلبك بنجاح!" : "Order placed successfully!", "success", null, 5000);
     };
 
     /* ============ SUBMIT (COD / Cliq) ============ */
