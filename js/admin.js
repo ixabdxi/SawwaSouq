@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Admin Panel (Full + Realtime + Auto-Refresh + Chart Fix)
+   SaWWA Souq — Admin Panel (Full + Realtime + Chart Fix)
    ============================================================ */
 (() => {
   const $ = (sel) => document.querySelector(sel);
@@ -82,8 +82,8 @@
     
     if (id === "dash") { 
       renderDash(); 
-      // تأخير بسيط لضمان ظهور التبويب قبل رسم الشارت
-      setTimeout(() => drawSalesChart(read(K.orders, [])), 300); 
+      // تأخير بسيط جداً عشان العنصر ياخد مساحته قبل ما نرسم
+      setTimeout(() => drawSalesChart(read(K.orders, [])), 100); 
     }
     if (id === "orders") renderOrders();
     if (id === "products") renderProducts();
@@ -154,19 +154,32 @@
     renderSmartAlerts(orders, products);
   };
 
-  /* ============ FIXED CHART FUNCTION ============ */
+  /* ============ FIXED CHART FUNCTION (ResizeObserver) ============ */
   const drawSalesChart = (orders) => {
     const canvas = $("#chartSales");
-    if (!canvas) return;
-    
-    // فحص إذا كان العنصر مخفي أو عرضه صفر (لأننا في تبويب آخر)
-    const cssW = canvas.clientWidth;
-    const cssH = 220;
-    if (!cssW || cssW < 50) { 
-      // ننتظر 300 مللي ثانية ونحاول مرة أخرى حتى تظهر الشاشة
-      setTimeout(() => drawSalesChart(orders), 300); 
-      return; 
+    const container = $("#chartContainer");
+    if (!canvas || !container) return;
+
+    // مراقبة حجم الحاوية عشان نرسم الشارت لما تظهر
+    if (!canvas._resizeObserver) {
+      canvas._resizeObserver = new ResizeObserver(() => {
+        if (container.clientWidth > 0) {
+          renderChartLogic(canvas, orders);
+        }
+      });
+      canvas._resizeObserver.observe(container);
     }
+
+    // نحاول نرسم على طول لو العرض موجود
+    if (container.clientWidth > 0) {
+      renderChartLogic(canvas, orders);
+    }
+  };
+
+  const renderChartLogic = (canvas, orders) => {
+    const cssW = canvas.clientWidth || canvas.parentElement.clientWidth;
+    const cssH = 220;
+    if (cssW < 50) return;
 
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
@@ -187,10 +200,10 @@
     });
 
     const max = Math.max(...days.map((d) => d.total), 100);
-    const padL = 45, padR = 10, padT = 20, padB = 30;
+    const padL = 40, padR = 10, padT = 20, padB = 30;
     const w = cssW - padL - padR, h = cssH - padT - padB, barW = w / days.length - 10;
 
-    // رسم خطوط الخلفية
+    // Grid lines
     ctx.strokeStyle = "rgba(143,169,165,.3)"; 
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -201,7 +214,7 @@
     }
     ctx.stroke();
 
-    // رسم الأعمدة
+    // Bars
     const grad = ctx.createLinearGradient(0, padT, 0, padT + h);
     grad.addColorStop(0, "#5FD0C5"); 
     grad.addColorStop(1, "#0F5C56");
@@ -224,7 +237,7 @@
       ctx.fill();
     });
 
-    // رسم التواريخ في الأسفل
+    // Dates
     ctx.fillStyle = "#4A5654"; 
     ctx.font = "11px 'Baloo Bhaijaan 2', sans-serif"; 
     ctx.textAlign = "center";
@@ -1021,7 +1034,6 @@
     renderDash();
     switchTab("dash");
 
-    // تفعيل البث الحي
     if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
       SB.subscribeOrders((payload) => {
         console.log("[Real-time] Order updated!", payload);
