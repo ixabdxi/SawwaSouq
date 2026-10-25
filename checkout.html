@@ -161,6 +161,10 @@
           <input type="radio" name="pay" value="CLIQ" />
           <span data-i18n="checkout.cliq"></span>
         </label>
+        <label class="radio">
+          <input type="radio" name="pay" value="PAYPAL" />
+          <span>الدفع بالبطاقة / PayPal</span>
+        </label>
       </fieldset>
 
       <div id="cliqSummary" class="cliq-summary" hidden>
@@ -194,7 +198,14 @@
       <div class="row" id="couponRow" style="display:none"><span>كود الخصم</span><span id="sumCoupon"></span></div>
       <div class="row"><span data-i18n="cart.shipping"></span><span id="sumShip"></span></div>
       <div class="row total"><span data-i18n="cart.total"></span><span id="sumTotal"></span></div>
-      <button class="btn primary full" data-i18n="checkout.placeOrder" type="submit" style="margin-top:16px"></button>
+      
+      <!-- صندوق باي بال -->
+      <div id="paypalBox" style="display:none; margin-top: 20px;">
+        <div id="paypal-button-container"></div>
+        <p style="text-align: center; font-size: 12px; color: var(--text-3); margin-top: 10px;">ادفع بأمان عبر PayPal أو البطاقة</p>
+      </div>
+
+      <button class="btn primary full" data-i18n="checkout.placeOrder" type="submit" id="submitBtn" style="margin-top:16px"></button>
     </aside>
   </form>
 
@@ -231,6 +242,8 @@
   </div>
 </div>
 
+<!-- سكربت باي بال -->
+<script src="https://www.paypal.com/sdk/js?client-id=BAAtMFdRIAJ4WEp4L7-smhFsvU4uXti9FlWhntsJyzjFjQpCTxs1On6xZ94aJq0zmKzK7bAvLpAuWWsMBY&currency=USD&components=buttons&disable-funding=credit,card"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/supabase.js"></script>
 <script src="js/design-tokens.js"></script>
@@ -260,89 +273,89 @@ UI.init({
     const cliqAmount     = document.getElementById("cliqAmount");
     const codRadio       = document.querySelector('input[name=pay][value="COD"]');
     const cliqRadio      = document.querySelector('input[name=pay][value="CLIQ"]');
+    const paypalRadio    = document.querySelector('input[name=pay][value="PAYPAL"]');
     const citySel        = document.getElementById("citySelect");
+    const paypalBox      = document.getElementById("paypalBox");
+    const submitBtn      = document.getElementById("submitBtn");
 
     if (cliqCode) cliqCode.textContent = window.SAWWA.cliqId || "SAWWA1";
     citySel.innerHTML = `<option value="">--</option>` + Shipping.list().map((c) => `<option>${c}</option>`).join("");
 
     let appliedCoupon = null;
     let cliqProofFile = null;
+    let paypalOrderId = null;
 
-    const openCliqModal = () => {
-      sum();
-      cliqModal.hidden = false;
-      document.body.style.overflow = "hidden";
-    };
-    const closeCliqModal = () => {
-      cliqModal.hidden = true;
-      document.body.style.overflow = "";
-    };
+    /* ============ MODAL CLIQ ============ */
+    const openCliqModal = () => { sum(); cliqModal.hidden = false; document.body.style.overflow = "hidden"; };
+    const closeCliqModal = () => { cliqModal.hidden = true; document.body.style.overflow = ""; };
 
-    cliqRadio.addEventListener("change", () => {
-      if (cliqRadio.checked) openCliqModal();
-    });
-    codRadio.addEventListener("change", () => {
-      if (codRadio.checked) cliqSummary.hidden = true;
-    });
-
+    cliqRadio.addEventListener("change", () => { if (cliqRadio.checked) openCliqModal(); });
+    codRadio.addEventListener("change", () => { if (codRadio.checked) { cliqSummary.hidden = true; } });
     document.getElementById("cliqEdit").onclick = () => openCliqModal();
-
-    document.getElementById("cliqX").onclick = () => {
-      if (!cliqProofFile) {
-        codRadio.checked = true;
-        cliqSummary.hidden = true;
-      }
-      closeCliqModal();
-    };
-
-    document.getElementById("cliqCancel").onclick = () => {
-      if (!cliqProofFile) {
-        codRadio.checked = true;
-        cliqSummary.hidden = true;
-      }
-      closeCliqModal();
-    };
-
+    document.getElementById("cliqX").onclick = () => { if (!cliqProofFile) { codRadio.checked = true; cliqSummary.hidden = true; } closeCliqModal(); };
+    document.getElementById("cliqCancel").onclick = () => { if (!cliqProofFile) { codRadio.checked = true; cliqSummary.hidden = true; } closeCliqModal(); };
+    
     document.getElementById("cliqConfirm").onclick = () => {
-      if (!cliqProofFile) {
-        if (window.UI?.toast) UI.toast(lang === "ar" ? "ارفع صورة الإشعار أولاً" : "Upload receipt first", "warn");
-        return;
-      }
-      cliqRadio.checked = true;
-      cliqSummary.hidden = false;
-      cliqFileName.textContent = cliqProofFile.name || "صورة";
-      closeCliqModal();
+      if (!cliqProofFile) { if (window.UI?.toast) UI.toast(lang === "ar" ? "ارفع صورة الإشعار أولاً" : "Upload receipt first", "warn"); return; }
+      cliqRadio.checked = true; cliqSummary.hidden = false; cliqFileName.textContent = cliqProofFile.name || "صورة"; closeCliqModal();
     };
-
-    cliqModal.addEventListener("click", (e) => {
-      if (e.target === cliqModal) {
-        if (!cliqProofFile) {
-          codRadio.checked = true;
-          cliqSummary.hidden = true;
-        }
-        closeCliqModal();
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !cliqModal.hidden) {
-        if (!cliqProofFile) {
-          codRadio.checked = true;
-          cliqSummary.hidden = true;
-        }
-        closeCliqModal();
-      }
-    });
 
     cliqFileBox.onclick = () => cliqFileInput.click();
     cliqFileInput.onchange = (e) => {
-      const f = e.target.files?.[0];
-      if (!f) return;
-      cliqProofFile = f;
-      cliqFileBox.classList.add("has-file");
-      cliqFileText.textContent = f.name;
+      const f = e.target.files?.[0]; if (!f) return;
+      cliqProofFile = f; cliqFileBox.classList.add("has-file"); cliqFileText.textContent = f.name;
     };
 
+    /* ============ PAYPAL LOGIC ============ */
+    document.querySelectorAll('input[name="pay"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        if (e.target.value === 'PAYPAL') {
+          paypalBox.style.display = 'block';
+          submitBtn.style.display = 'none'; // نخفي زر التأكيد العادي عشان نستخدم زر باي بال
+          initPayPal();
+        } else {
+          paypalBox.style.display = 'none';
+          submitBtn.style.display = 'block';
+        }
+      });
+    });
+
+    const initPayPal = () => {
+      if (window.paypal) {
+        window.paypal.Buttons({
+          style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
+          createOrder: async () => {
+            const t = sum();
+            const res = await fetch('/api/paypal-create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ totalJOD: t.total })
+            });
+            const data = await res.json();
+            paypalOrderId = data.id;
+            return data.id;
+          },
+          onApprove: async () => {
+            const res = await fetch('/api/paypal-capture', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderID: paypalOrderId })
+            });
+            const data = await res.json();
+            if (data.status === 'COMPLETED') {
+              // نجاح الدفع
+              completeOrder("PAYPAL", "PAID");
+            }
+          },
+          onError: (err) => {
+            console.error("PayPal Error:", err);
+            if (window.UI?.toast) UI.toast("حدث خطأ أثناء الدفع", "error");
+          }
+        }).render('#paypal-button-container');
+      }
+    };
+
+    /* ============ SUM ============ */
     const sum = () => {
       const sub = Cart.subtotal();
       const city = citySel.value;
@@ -386,32 +399,13 @@ UI.init({
       if (!code) { status.innerHTML = ""; appliedCoupon = null; Coupons.clear(); sum(); return; }
       const res = Coupons.apply(code, Cart.subtotal());
       if (!res.ok) {
-        const reasons = {
-          not_found: lang === "ar" ? "الكود غير موجود" : "Code not found",
-          inactive: lang === "ar" ? "الكود غير مفعّل" : "Code inactive",
-          expired: lang === "ar" ? "انتهت صلاحية الكود" : "Code expired",
-          max_uses: lang === "ar" ? "انتهى استخدام الكود" : "Code max uses reached",
-          min_cart: lang === "ar" ? "الحد الأدنى للسلة لم يتحقق" : "Minimum cart not met"
-        };
+        const reasons = { not_found: "الكود غير موجود", inactive: "غير مفعّل", expired: "انتهت صلاحيته", max_uses: "انتهى استخدامه", min_cart: "الحد الأدنى لم يتحقق" };
         status.innerHTML = `<div class="coupon-error">${reasons[res.reason] || "خطأ"}</div>`;
-        appliedCoupon = null;
-        sum();
-        return;
+        appliedCoupon = null; sum(); return;
       }
       appliedCoupon = res.coupon;
-      status.innerHTML = `
-        <div class="coupon-applied">
-          <span>✓</span>
-          <span>${res.coupon.code} ${lang === "ar" ? "مُطبَّق" : "applied"}</span>
-          <button type="button" id="couponRemove">×</button>
-        </div>`;
-      document.getElementById("couponRemove").onclick = () => {
-        appliedCoupon = null;
-        Coupons.clear();
-        status.innerHTML = "";
-        document.getElementById("couponInput").value = "";
-        sum();
-      };
+      status.innerHTML = `<div class="coupon-applied"><span>✓</span><span>${res.coupon.code} مُطبَّق</span><button type="button" id="couponRemove">×</button></div>`;
+      document.getElementById("couponRemove").onclick = () => { appliedCoupon = null; Coupons.clear(); status.innerHTML = ""; document.getElementById("couponInput").value = ""; sum(); };
       sum();
     };
 
@@ -420,33 +414,15 @@ UI.init({
     renderItems();
     sum();
 
-    document.getElementById("checkoutForm").onsubmit = async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const pay = fd.get("pay");
+    /* ============ COMPLETE ORDER ============ */
+    const completeOrder = async (payMethod, payStatus) => {
+      const fd = new FormData(document.getElementById("checkoutForm"));
       const city = fd.get("city");
-
-      if (Cart.get().length === 0) { UI.toast(lang === "ar" ? "سلتك فارغة" : "Cart is empty", "warn"); return; }
-      if (!city) { UI.toast(lang === "ar" ? "اختر المحافظة" : "Choose governorate", "warn"); return; }
-
-      if (pay === "CLIQ" && !cliqProofFile) {
-        UI.toast(lang === "ar" ? "ارفع صورة إشعار التحويل" : "Upload receipt", "warn");
-        openCliqModal();
-        return;
-      }
-
-      const ok = await UI.confirm(
-        lang === "ar" ? "تأكيد الطلب" : "Confirm order",
-        lang === "ar" ? "سيتم إرسال طلبك الآن." : "Your order will be placed now.",
-        { icon: "✓", okLabel: lang === "ar" ? "تأكيد" : "Confirm" }
-      );
-      if (!ok) return;
-
+      
       const t = sum();
       const earned = Math.floor((t.total / 100) * window.SAWWA.loyalty.earnPerJOD);
       const usedPts = document.getElementById("usePoints").checked && Store.points.get() >= window.SAWWA.loyalty.minRedeem
-        ? Math.min(Store.points.get(), Math.floor(Store.points.get() / 100) * 100)
-        : 0;
+        ? Math.min(Store.points.get(), Math.floor(Store.points.get() / 100) * 100) : 0;
       const id = "SW-" + Date.now().toString(36).toUpperCase();
 
       const order = {
@@ -456,59 +432,59 @@ UI.init({
         items: Cart.get(),
         subtotal: t.sub, shipping: t.ship, discount: t.discPts + t.discCoupon, total: t.total,
         couponCode: appliedCoupon ? appliedCoupon.code : null,
-        paymentMethod: pay,
-        paymentStatus: pay === "CLIQ" ? "AWAITING_VERIFICATION" : "PENDING",
+        paymentMethod: payMethod,
+        paymentStatus: payStatus,
         status: "PENDING",
-        cliqProofName: pay === "CLIQ" && cliqProofFile ? cliqProofFile.name : null,
+        cliqProofName: payMethod === "CLIQ" && cliqProofFile ? cliqProofFile.name : null,
         pointsEarned: earned, pointsUsed: usedPts
       };
 
-      // 1. حفظ محلي
       Store.orders.create(order);
-
-      // 2. حفظ في Supabase (cloud)
       if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
         SB.orders.create(order).then((ok) => {
           if (ok) console.log("[Checkout] Order synced to cloud:", order.id);
-          else console.warn("[Checkout] Cloud save failed — saved locally only");
+          else console.warn("[Checkout] Cloud save failed");
         });
       }
 
       order.items.forEach((it) => Store.products.decrementStock(it.id, it.qty));
       if (usedPts > 0) Store.points.subtract(usedPts);
-      if (pay === "COD") Store.points.add(earned);
+      if (payMethod === "COD") Store.points.add(earned);
       if (appliedCoupon) Coupons.incrementUse();
-
-      if (window.Notifications) {
-        Notifications.add(
-          lang === "ar" ? `طلب جديد ${id}` : `New order ${id}`,
-          lang === "ar" ? "شكرًا لطلبك! سنتواصل معك لتأكيد التفاصيل." : "Thanks! We'll contact you to confirm."
-        );
-      }
 
       Cart.clear();
       Coupons.clear();
+      UI.toast(`تم استلام طلبك ${id}`, "success", null, 5000);
 
-      UI.toast(
-        lang === "ar" ? `تم استلام طلبك ${id}` : `Order ${id} received!`,
-        "success", null, 5000
-      );
-
-      const waMsg = encodeURIComponent(
-        `طلب جديد ${id}\nالاسم: ${order.name}\nالهاتف: ${order.phone}\nالمدينة: ${order.city}\nالطريقة: ${pay}\nالمجموع: ${(order.total / 100).toFixed(2)} دينار`
-      );
       const box = document.getElementById("successBox");
       box.hidden = false;
       box.innerHTML = `
         <h2>${lang === 'ar' ? '✓ تم استلام طلبك!' : '✓ Order received!'}</h2>
         <p>${lang === 'ar' ? 'رقم الطلب' : 'Order ID'}: <strong class="font-en">${id}</strong></p>
-        <a class="btn primary" href="track.html">${lang === 'ar' ? 'تتبع الطلب' : 'Track order'}</a>
-        <a class="btn" href="https://wa.me/${window.SAWWA.whatsapp}?text=${waMsg}" target="_blank" rel="noopener">
-          ${lang === 'ar' ? 'تواصل عبر واتساب' : 'Contact on WhatsApp'}
-        </a>
-        <a class="btn ghost" href="shop.html">${lang === 'ar' ? 'متابعة التسوق' : 'Continue shopping'}</a>`;
-      e.target.style.display = "none";
+        <p>${lang === 'ar' ? 'طريقة الدفع' : 'Payment'}: <strong>${payMethod}</strong></p>
+        <a class="btn primary" href="track.html">${lang === 'ar' ? 'تتبع الطلب' : 'Track order'}</a>`;
+      
+      document.getElementById("checkoutForm").style.display = "none";
       window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    /* ============ SUBMIT (COD / Cliq) ============ */
+    document.getElementById("checkoutForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const pay = document.querySelector('input[name="pay"]:checked').value;
+      if (pay === "PAYPAL") return; // زر باي بال هو اللي بيتصرف
+
+      const fd = new FormData(e.target);
+      const city = fd.get("city");
+
+      if (Cart.get().length === 0) { UI.toast("سلتك فارغة", "warn"); return; }
+      if (!city) { UI.toast("اختر المحافظة", "warn"); return; }
+      if (pay === "CLIQ" && !cliqProofFile) { UI.toast("ارفع صورة الإشعار", "warn"); openCliqModal(); return; }
+
+      const ok = await UI.confirm("تأكيد الطلب", "سيتم إرسال طلبك الآن.", { icon: "✓" });
+      if (!ok) return;
+
+      completeOrder(pay, pay === "CLIQ" ? "AWAITING_VERIFICATION" : "PENDING");
     };
   }
 });
