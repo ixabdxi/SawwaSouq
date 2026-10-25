@@ -14,38 +14,30 @@
 <link rel="stylesheet" href="css/rtl.css" />
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
 <style>
-  .hidden,
-  .modal-backdrop.hidden,
-  #loginScreen.hidden,
-  #adminApp.hidden,
-  #productModal.hidden,
-  #couponModal.hidden {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
+  .hidden, .modal-backdrop.hidden, #loginScreen.hidden, #adminApp.hidden, #productModal.hidden, #couponModal.hidden {
+    display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;
   }
-  /* إزالة أي خلفيات متحركة */
-  #aurora, #grain, body::before { display: none !important; }
+  /* تصغير الحجم العام للموقع */
+  body.admin-body { font-size: 13px; }
 </style>
 </head>
 <body class="admin-body">
 
 <div id="loginScreen" class="login-wrap">
   <div class="login-card">
-    <img src="assets/logo.svg" alt="SaWWA Souq" style="height:60px;margin:0 auto 20px;display:block" />
+    <img src="assets/logo.svg" alt="SaWWA Souq" style="height:50px;margin:0 auto 16px;display:block" />
     <h1 class="font-en">ADMIN PANEL</h1>
-    <p class="muted">أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
+    <p class="muted" style="font-size:12px;">أدخل كلمة المرور للدخول</p>
     <input type="password" id="pwd" placeholder="كلمة المرور" />
-    <button class="btn primary full" id="loginBtn">دخول</button>
+    <button class="btn primary full" id="loginBtn" style="padding:10px;">دخول</button>
     <p id="loginErr" class="error"></p>
   </div>
 </div>
 
 <div id="adminApp" class="hidden">
-  <aside class="admin-sidebar">
+  <aside class="admin-sidebar" id="adminSidebar">
     <div class="sidebar-head">
-      <a href="index.html" class="logo" aria-label="SaWWA Souq"><img src="assets/logo.svg" alt="SaWWA Souq" /></a>
+      <a href="index.html" class="logo" aria-label="SaWWA Souq"><img src="assets/logo.svg" alt="SaWWA Souq" style="height:36px;" /></a>
       <button class="sidebar-close" id="sidebarClose">×</button>
     </div>
     <nav class="sidebar-nav">
@@ -89,7 +81,7 @@
           <div class="stat"><div class="stat-ico">⚠️</div><span>مخزون منخفض</span><strong id="stLow">0</strong><small class="muted">≤ 10 وحدات</small></div>
         </div>
         <div class="dash-grid">
-          <div class="dash-card"><h3>مبيعات آخر 7 أيام</h3><canvas id="chartSales" height="220"></canvas></div>
+          <div class="dash-card"><h3>مبيعات آخر 7 أيام</h3><canvas id="chartSales" height="200"></canvas></div>
           <div class="dash-card"><h3>أفضل 5 منتجات</h3><div id="topProducts"></div></div>
         </div>
         <div class="dash-grid">
@@ -177,10 +169,10 @@
         <div class="dash-grid">
           <div class="dash-card">
             <h3>إعدادات نظام النقاط</h3>
-            <label style="display:block;margin-bottom:14px"><span>نقاط لكل دينار</span><input type="number" id="loyEarn" step="0.1" /></label>
-            <label style="display:block;margin-bottom:14px"><span>قيمة 100 نقطة (قرش)</span><input type="number" id="loyRedeem" /></label>
-            <label style="display:block;margin-bottom:14px"><span>الحد الأدنى</span><input type="number" id="loyMin" /></label>
-            <button class="btn primary" id="saveLoyalty">حفظ</button>
+            <label style="display:block;margin-bottom:10px"><span>نقاط لكل دينار</span><input type="number" id="loyEarn" step="0.1" /></label>
+            <label style="display:block;margin-bottom:10px"><span>قيمة 100 نقطة (قرش)</span><input type="number" id="loyRedeem" /></label>
+            <label style="display:block;margin-bottom:10px"><span>الحد الأدنى</span><input type="number" id="loyMin" /></label>
+            <button class="btn primary small" id="saveLoyalty">حفظ</button>
           </div>
           <div class="dash-card"><h3>سجل الحركات</h3><div id="loyaltyLedger"></div></div>
         </div>
@@ -202,8 +194,8 @@
         <div class="dash-card">
           <h3>إرسال إشعار للعملاء</h3>
           <label><span>العنوان</span><input type="text" id="notifTitle" /></label>
-          <label><span>النص</span><textarea id="notifBody" rows="3"></textarea></label>
-          <button class="btn primary" id="sendNotif">إرسال</button>
+          <label><span>النص</span><textarea id="notifBody" rows="2"></textarea></label>
+          <button class="btn primary small" id="sendNotif">إرسال</button>
         </div>
       </section>
 
@@ -213,7 +205,7 @@
           <label><span>النص العربي</span><input type="text" id="annAr" /></label>
           <label><span>النص الإنجليزي</span><input type="text" id="annEn" /></label>
           <label><span>مفعّل؟</span><select id="annEnabled"><option value="1">نعم</option><option value="0">لا</option></select></label>
-          <button class="btn primary" id="saveAnnounce">حفظ</button>
+          <button class="btn primary small" id="saveAnnounce">حفظ</button>
         </div>
       </section>
 
@@ -224,28 +216,28 @@
           <label><span>اسم (إنجليزي)</span><input type="text" id="setNameEn" /></label>
           <label><span>رقم واتساب</span><input type="text" id="setWhatsapp" /></label>
           <label><span>معرّف Cliq</span><input type="text" id="setCliq" /></label>
-          <button class="btn primary" id="saveSettings">حفظ</button>
+          <button class="btn primary small" id="saveSettings">حفظ</button>
         </div>
         <div class="dash-card">
           <h3>أمان اللوحة</h3>
           <label><span>كلمة مرور جديدة</span><input type="password" id="newPwd" /></label>
-          <button class="btn primary" id="savePwd">تحديث</button>
+          <button class="btn primary small" id="savePwd">تحديث</button>
         </div>
       </section>
 
       <section class="tab-panel" id="tab-backup">
         <div class="dash-card">
           <h3>تصدير البيانات</h3>
-          <button class="btn primary" id="exportAll">تحميل نسخة</button>
+          <button class="btn primary small" id="exportAll">تحميل نسخة</button>
         </div>
         <div class="dash-card">
           <h3>استيراد البيانات</h3>
           <input type="file" id="importFile" accept=".json" />
-          <button class="btn ghost" id="importAll">استيراد</button>
+          <button class="btn ghost small" id="importAll">استيراد</button>
         </div>
         <div class="dash-card">
           <h3>إعادة ضبط</h3>
-          <button class="btn ghost" style="color:#C03030;border-color:#C03030" id="factoryReset">إعادة ضبط</button>
+          <button class="btn ghost small" style="color:#C03030;border-color:#C03030" id="factoryReset">إعادة ضبط</button>
         </div>
       </section>
     </div>
@@ -258,8 +250,8 @@
     <div class="modal-form">
       <label><span>الاسم (عربي)</span><input type="text" id="pm_nameAr" /></label>
       <label><span>الاسم (إنجليزي)</span><input type="text" id="pm_nameEn" /></label>
-      <label><span>الوصف (عربي)</span><textarea id="pm_descAr" rows="3"></textarea></label>
-      <label><span>الوصف (إنجليزي)</span><textarea id="pm_descEn" rows="3"></textarea></label>
+      <label><span>الوصف (عربي)</span><textarea id="pm_descAr" rows="2"></textarea></label>
+      <label><span>الوصف (إنجليزي)</span><textarea id="pm_descEn" rows="2"></textarea></label>
       <label><span>النوع</span><select id="pm_type"><option value="RUBBER">مطاطي</option><option value="GLASS">زجاجي</option></select></label>
       <label><span>السعر (قرش)</span><input type="number" id="pm_price" /></label>
       <label><span>سعر قبل الخصم (قرش)</span><input type="number" id="pm_compare" /></label>
@@ -281,8 +273,8 @@
       </label>
     </div>
     <div class="modal-actions">
-      <button class="btn primary" id="pm_save">حفظ</button>
-      <button class="btn ghost" id="pm_cancel">إلغاء</button>
+      <button class="btn primary small" id="pm_save">حفظ</button>
+      <button class="btn ghost small" id="pm_cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -299,8 +291,8 @@
       <label><span>تاريخ الانتهاء</span><input type="date" id="cp_expires" /></label>
     </div>
     <div class="modal-actions">
-      <button class="btn primary" id="cp_save">حفظ</button>
-      <button class="btn ghost" id="cp_cancel">إلغاء</button>
+      <button class="btn primary small" id="cp_save">حفظ</button>
+      <button class="btn ghost small" id="cp_cancel">إلغاء</button>
     </div>
   </div>
 </div>
@@ -312,5 +304,25 @@
 <script src="js/store.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/admin.js"></script>
+
+<script>
+  // تشغيل القائمة الجانبية للموبايل
+  document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.querySelector('.admin-sidebar');
+    const sidebarClose = document.getElementById('sidebarClose');
+    
+    if (menuToggle) {
+      menuToggle.addEventListener('click', () => {
+        sidebar.classList.add('open');
+      });
+    }
+    if (sidebarClose) {
+      sidebarClose.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+      });
+    }
+  });
+</script>
 </body>
 </html>
