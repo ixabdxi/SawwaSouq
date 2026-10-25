@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>لوحة التحكم — SaWWA Souq</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,8 +17,6 @@
   .hidden, .modal-backdrop.hidden, #loginScreen.hidden, #adminApp.hidden, #productModal.hidden, #couponModal.hidden {
     display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important;
   }
-  /* تصغير الحجم العام للموقع */
-  body.admin-body { font-size: 13px; }
 </style>
 </head>
 <body class="admin-body">
@@ -81,7 +79,12 @@
           <div class="stat"><div class="stat-ico">⚠️</div><span>مخزون منخفض</span><strong id="stLow">0</strong><small class="muted">≤ 10 وحدات</small></div>
         </div>
         <div class="dash-grid">
-          <div class="dash-card"><h3>مبيعات آخر 7 أيام</h3><canvas id="chartSales" height="200"></canvas></div>
+          <div class="dash-card">
+            <h3>مبيعات آخر 7 أيام</h3>
+            <div class="chart-container" id="chartContainer">
+              <canvas id="chartSales"></canvas>
+            </div>
+          </div>
           <div class="dash-card"><h3>أفضل 5 منتجات</h3><div id="topProducts"></div></div>
         </div>
         <div class="dash-grid">
@@ -108,7 +111,7 @@
           </select>
           <button class="btn ghost small" id="exportOrders">تصدير CSV</button>
         </div>
-        <div id="ordersTable"></div>
+        <div id="ordersTable" class="table-wrapper"></div>
       </section>
 
       <section class="tab-panel" id="tab-products">
@@ -121,7 +124,7 @@
             <option value="GLASS">زجاجي</option>
           </select>
         </div>
-        <div id="prodTable"></div>
+        <div id="prodTable" class="table-wrapper"></div>
       </section>
 
       <section class="tab-panel" id="tab-inventory">
@@ -129,12 +132,12 @@
           <button class="btn primary small" id="bulkUpdate">تعديل جماعي</button>
           <button class="btn ghost small" id="exportInventory">تصدير CSV</button>
         </div>
-        <div id="inventoryTable"></div>
+        <div id="inventoryTable" class="table-wrapper"></div>
       </section>
 
       <section class="tab-panel" id="tab-customers">
         <div class="panel-toolbar"><input type="search" id="custSearch" placeholder="ابحث..." /></div>
-        <div id="customersTable"></div>
+        <div id="customersTable" class="table-wrapper"></div>
       </section>
 
       <section class="tab-panel" id="tab-reviews">
@@ -145,7 +148,7 @@
             <option value="">الكل</option>
           </select>
         </div>
-        <div id="reviewsTable"></div>
+        <div id="reviewsTable" class="table-wrapper"></div>
       </section>
 
       <section class="tab-panel" id="tab-messages">
@@ -157,12 +160,12 @@
           </select>
           <button class="btn ghost small" id="exportMessages">تصدير CSV</button>
         </div>
-        <div id="messagesTable"></div>
+        <div id="messagesTable" class="table-wrapper"></div>
       </section>
 
       <section class="tab-panel" id="tab-coupons">
         <div class="panel-toolbar"><button class="btn primary small" id="newCouponBtn">+ كوبون جديد</button></div>
-        <div id="couponsTable"></div>
+        <div id="couponsTable" class="table-wrapper"></div>
       </section>
 
       <section class="tab-panel" id="tab-loyalty">
@@ -174,7 +177,7 @@
             <label style="display:block;margin-bottom:10px"><span>الحد الأدنى</span><input type="number" id="loyMin" /></label>
             <button class="btn primary small" id="saveLoyalty">حفظ</button>
           </div>
-          <div class="dash-card"><h3>سجل الحركات</h3><div id="loyaltyLedger"></div></div>
+          <div class="dash-card"><h3>سجل الحركات</h3><div id="loyaltyLedger" class="table-wrapper"></div></div>
         </div>
       </section>
 
@@ -306,22 +309,12 @@
 <script src="js/admin.js"></script>
 
 <script>
-  // تشغيل القائمة الجانبية للموبايل
   document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.querySelector('.admin-sidebar');
     const sidebarClose = document.getElementById('sidebarClose');
-    
-    if (menuToggle) {
-      menuToggle.addEventListener('click', () => {
-        sidebar.classList.add('open');
-      });
-    }
-    if (sidebarClose) {
-      sidebarClose.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-      });
-    }
+    if (menuToggle) menuToggle.addEventListener('click', () => sidebar.classList.add('open'));
+    if (sidebarClose) sidebarClose.addEventListener('click', () => sidebar.classList.remove('open'));
   });
 </script>
 </body>
