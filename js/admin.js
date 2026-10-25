@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Admin Panel (Full + Realtime + Auto-Refresh)
+   SaWWA Souq — Admin Panel (Full + Realtime + Auto-Refresh + Chart Fix)
    ============================================================ */
 (() => {
   const $ = (sel) => document.querySelector(sel);
@@ -80,7 +80,11 @@
     const title = $("#topbarTitle");
     if (title) title.textContent = TITLES[id] || id;
     
-    if (id === "dash") { renderDash(); setTimeout(() => drawSalesChart(read(K.orders, [])), 100); }
+    if (id === "dash") { 
+      renderDash(); 
+      // تأخير بسيط لضمان ظهور التبويب قبل رسم الشارت
+      setTimeout(() => drawSalesChart(read(K.orders, [])), 300); 
+    }
     if (id === "orders") renderOrders();
     if (id === "products") renderProducts();
     if (id === "inventory") renderInventory();
@@ -150,15 +154,24 @@
     renderSmartAlerts(orders, products);
   };
 
+  /* ============ FIXED CHART FUNCTION ============ */
   const drawSalesChart = (orders) => {
     const canvas = $("#chartSales");
     if (!canvas) return;
+    
+    // فحص إذا كان العنصر مخفي أو عرضه صفر (لأننا في تبويب آخر)
     const cssW = canvas.clientWidth;
     const cssH = 220;
-    if (!cssW || cssW < 100) { setTimeout(() => drawSalesChart(orders), 200); return; }
+    if (!cssW || cssW < 50) { 
+      // ننتظر 300 مللي ثانية ونحاول مرة أخرى حتى تظهر الشاشة
+      setTimeout(() => drawSalesChart(orders), 300); 
+      return; 
+    }
+
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+    canvas.width = cssW * dpr; 
+    canvas.height = cssH * dpr;
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, cssW, cssH);
 
@@ -167,37 +180,54 @@
       const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - i);
       days.push({ start: d.getTime(), end: d.getTime() + 86400000, total: 0 });
     }
+    
     orders.forEach((o) => {
       if (o.paymentStatus !== "PAID" && o.paymentMethod !== "COD") return;
       days.forEach((d) => { if (o.createdAt >= d.start && o.createdAt < d.end) d.total += o.total || 0; });
     });
 
     const max = Math.max(...days.map((d) => d.total), 100);
-    const padL = 50, padR = 12, padT = 20, padB = 30;
+    const padL = 45, padR = 10, padT = 20, padB = 30;
     const w = cssW - padL - padR, h = cssH - padT - padB, barW = w / days.length - 10;
 
-    ctx.strokeStyle = "rgba(143,169,165,.3)"; ctx.lineWidth = 1;
+    // رسم خطوط الخلفية
+    ctx.strokeStyle = "rgba(143,169,165,.3)"; 
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    for (let i = 0; i <= 4; i++) { const y = padT + (h / 4) * i; ctx.moveTo(padL, y); ctx.lineTo(padL + w, y); }
+    for (let i = 0; i <= 4; i++) { 
+      const y = padT + (h / 4) * i; 
+      ctx.moveTo(padL, y); 
+      ctx.lineTo(padL + w, y); 
+    }
     ctx.stroke();
 
+    // رسم الأعمدة
     const grad = ctx.createLinearGradient(0, padT, 0, padT + h);
-    grad.addColorStop(0, "#5FD0C5"); grad.addColorStop(1, "#0F5C56");
+    grad.addColorStop(0, "#5FD0C5"); 
+    grad.addColorStop(1, "#0F5C56");
 
     days.forEach((d, i) => {
       const bh = (d.total / max) * h;
       const x = padL + i * (w / days.length) + 5;
       const y = padT + h - bh;
-      ctx.fillStyle = grad; ctx.beginPath();
+      ctx.fillStyle = grad; 
+      ctx.beginPath();
       const r = 6;
-      ctx.moveTo(x + r, y); ctx.lineTo(x + barW - r, y);
+      ctx.moveTo(x + r, y); 
+      ctx.lineTo(x + barW - r, y);
       ctx.quadraticCurveTo(x + barW, y, x + barW, y + r);
-      ctx.lineTo(x + barW, padT + h); ctx.lineTo(x, padT + h);
-      ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
-      ctx.closePath(); ctx.fill();
+      ctx.lineTo(x + barW, padT + h); 
+      ctx.lineTo(x, padT + h);
+      ctx.lineTo(x, y + r); 
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath(); 
+      ctx.fill();
     });
 
-    ctx.fillStyle = "#4A5654"; ctx.font = "11px 'Baloo Bhaijaan 2', sans-serif"; ctx.textAlign = "center";
+    // رسم التواريخ في الأسفل
+    ctx.fillStyle = "#4A5654"; 
+    ctx.font = "11px 'Baloo Bhaijaan 2', sans-serif"; 
+    ctx.textAlign = "center";
     days.forEach((d, i) => {
       const date = new Date(d.start);
       ctx.fillText(date.getDate() + "/" + (date.getMonth() + 1), padL + i * (w / days.length) + barW / 2 + 5, cssH - 10);
@@ -468,7 +498,7 @@
       <thead><tr><th>الصورة</th><th>AR</th><th>EN</th><th>النوع</th><th>السعر</th><th>قبل الخصم</th><th>المخزون</th><th>مفعّل</th><th>إجراءات</th></tr></thead>
       <tbody>${list.map((p) => `
         <tr>
-          <td>${p.images && p.images[0] ? `<img src="${p.images[0]}" style="width:48px;height:48px;object-fit:cover;border-radius:8px" />` : `<span style="display:inline-block;width:48px;height:48px;background:var(--surface-2);border-radius:8px"></span>`}</td>
+          <td>${p.images && p.images[0] ? `<img src="${p.images[0]}" style="width:36px;height:36px;object-fit:cover;border-radius:6px" />` : `<span style="display:inline-block;width:36px;height:36px;background:var(--surface-2);border-radius:6px"></span>`}</td>
           <td>${esc(p.nameAr)}</td>
           <td>${esc(p.nameEn)}</td>
           <td>${esc(p.type)}</td>
@@ -991,6 +1021,7 @@
     renderDash();
     switchTab("dash");
 
+    // تفعيل البث الحي
     if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
       SB.subscribeOrders((payload) => {
         console.log("[Real-time] Order updated!", payload);
