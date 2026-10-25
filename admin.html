@@ -108,7 +108,6 @@
             <option value="">كل طرق الدفع</option>
             <option value="COD">COD</option>
             <option value="CLIQ">CLIQ</option>
-            <option value="PAYPAL">PAYPAL</option>
           </select>
           <button class="btn ghost small" id="exportOrders">تصدير CSV</button>
         </div>
@@ -174,7 +173,7 @@
           <div class="dash-card">
             <h3>إعدادات نظام النقاط</h3>
             <label style="display:block;margin-bottom:10px"><span>نقاط لكل دينار</span><input type="number" id="loyEarn" step="0.1" /></label>
-            <label style="display:block;margin-bottom:10px"><span>قيمة 100 نقطة (دينار)</span><input type="number" id="loyRedeem" /></label>
+            <label style="display:block;margin-bottom:10px"><span>قيمة 100 نقطة (قرش)</span><input type="number" id="loyRedeem" /></label>
             <label style="display:block;margin-bottom:10px"><span>الحد الأدنى</span><input type="number" id="loyMin" /></label>
             <button class="btn primary small" id="saveLoyalty">حفظ</button>
           </div>
@@ -257,12 +256,9 @@
       <label><span>الوصف (عربي)</span><textarea id="pm_descAr" rows="2"></textarea></label>
       <label><span>الوصف (إنجليزي)</span><textarea id="pm_descEn" rows="2"></textarea></label>
       <label><span>النوع</span><select id="pm_type"><option value="RUBBER">مطاطي</option><option value="GLASS">زجاجي</option></select></label>
-      
-      <!-- الأسعار بالدينار -->
-      <label><span>السعر (دينار)</span><input type="number" step="0.01" id="pm_price" placeholder="مثال: 12.00" /></label>
-      <label><span>سعر قبل الخصم (دينار)</span><input type="number" step="0.01" id="pm_compare" placeholder="مثال: 18.00" /></label>
-      <label><span>سعر التكلفة (دينار)</span><input type="number" step="0.01" id="pm_cost" placeholder="مثال: 5.00" /></label>
-      
+      <label><span>السعر (قرش)</span><input type="number" id="pm_price" /></label>
+      <label><span>سعر قبل الخصم (قرش)</span><input type="number" id="pm_compare" /></label>
+      <label><span>سعر التكلفة (قرش)</span><input type="number" id="pm_cost" /></label>
       <label><span>المخزون</span><input type="number" id="pm_stock" /></label>
       <label><span>الحزمة</span><input type="text" id="pm_pkg" /></label>
       <label>
@@ -291,10 +287,10 @@
     <h3>كوبون جديد</h3>
     <div class="modal-form">
       <label><span>الكود</span><input type="text" id="cp_code" placeholder="SAWWA10" /></label>
-      <label><span>النوع</span><select id="cp_type"><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت (دينار)</option></select></label>
+      <label><span>النوع</span><select id="cp_type"><option value="percent">نسبة %</option><option value="fixed">مبلغ ثابت (قرش)</option></select></label>
       <label><span>القيمة</span><input type="number" id="cp_value" /></label>
       <label><span>حد الاستخدام</span><input type="number" id="cp_maxUses" /></label>
-      <label><span>الحد الأدنى للسلة (دينار)</span><input type="number" id="cp_minCart" /></label>
+      <label><span>الحد الأدنى للسلة</span><input type="number" id="cp_minCart" /></label>
       <label><span>تاريخ الانتهاء</span><input type="date" id="cp_expires" /></label>
     </div>
     <div class="modal-actions">
