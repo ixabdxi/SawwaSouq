@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Admin Panel (Full + Realtime + Chart Fix)
+   SaWWA Souq — Admin Panel (Full + Realtime + JOD Prices Fix)
    ============================================================ */
 (() => {
   const $ = (sel) => document.querySelector(sel);
@@ -82,7 +82,6 @@
     
     if (id === "dash") { 
       renderDash(); 
-      // تأخير بسيط جداً عشان العنصر ياخد مساحته قبل ما نرسم
       setTimeout(() => drawSalesChart(read(K.orders, [])), 100); 
     }
     if (id === "orders") renderOrders();
@@ -154,13 +153,12 @@
     renderSmartAlerts(orders, products);
   };
 
-  /* ============ FIXED CHART FUNCTION (ResizeObserver) ============ */
+  /* ============ FIXED CHART FUNCTION ============ */
   const drawSalesChart = (orders) => {
     const canvas = $("#chartSales");
     const container = $("#chartContainer");
     if (!canvas || !container) return;
 
-    // مراقبة حجم الحاوية عشان نرسم الشارت لما تظهر
     if (!canvas._resizeObserver) {
       canvas._resizeObserver = new ResizeObserver(() => {
         if (container.clientWidth > 0) {
@@ -170,7 +168,6 @@
       canvas._resizeObserver.observe(container);
     }
 
-    // نحاول نرسم على طول لو العرض موجود
     if (container.clientWidth > 0) {
       renderChartLogic(canvas, orders);
     }
@@ -203,7 +200,6 @@
     const padL = 40, padR = 10, padT = 20, padB = 30;
     const w = cssW - padL - padR, h = cssH - padT - padB, barW = w / days.length - 10;
 
-    // Grid lines
     ctx.strokeStyle = "rgba(143,169,165,.3)"; 
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -214,7 +210,6 @@
     }
     ctx.stroke();
 
-    // Bars
     const grad = ctx.createLinearGradient(0, padT, 0, padT + h);
     grad.addColorStop(0, "#5FD0C5"); 
     grad.addColorStop(1, "#0F5C56");
@@ -237,7 +232,6 @@
       ctx.fill();
     });
 
-    // Dates
     ctx.fillStyle = "#4A5654"; 
     ctx.font = "11px 'Baloo Bhaijaan 2', sans-serif"; 
     ctx.textAlign = "center";
@@ -472,15 +466,20 @@
 
   const pmSave = $("#pm_save");
   if (pmSave) pmSave.onclick = () => {
+    // تحويل الأسعار من دينار إلى قروش (ضرب في 100)
+    const priceJOD = parseFloat(($("#pm_price") || {}).value) || 0;
+    const compareJOD = parseFloat(($("#pm_compare") || {}).value) || 0;
+    const costJOD = parseFloat(($("#pm_cost") || {}).value) || 0;
+
     const data = {
       nameAr: ($("#pm_nameAr") || {}).value?.trim() || "",
       nameEn: ($("#pm_nameEn") || {}).value?.trim() || "",
       descAr: ($("#pm_descAr") || {}).value?.trim() || "",
       descEn: ($("#pm_descEn") || {}).value?.trim() || "",
       type: ($("#pm_type") || {}).value || "RUBBER",
-      price: parseInt(($("#pm_price") || {}).value, 10) || 0,
-      compareAtPrice: parseInt(($("#pm_compare") || {}).value, 10) || null,
-      costPrice: parseInt(($("#pm_cost") || {}).value, 10) || 0,
+      price: Math.round(priceJOD * 100), // بالسنت
+      compareAtPrice: compareJOD > 0 ? Math.round(compareJOD * 100) : null,
+      costPrice: Math.round(costJOD * 100),
       stock: parseInt(($("#pm_stock") || {}).value, 10) || 0,
       packaging: ($("#pm_pkg") || {}).value?.trim() || "",
       images: currentProductImage ? [currentProductImage] : [],
@@ -535,9 +534,12 @@
       $("#pm_descAr").value = p.descAr || "";
       $("#pm_descEn").value = p.descEn || "";
       $("#pm_type").value = p.type || "RUBBER";
-      $("#pm_price").value = p.price || 0;
-      $("#pm_compare").value = p.compareAtPrice || "";
-      $("#pm_cost").value = p.costPrice || 0;
+      
+      // تحويل الأسعار من قروش إلى دينار للعرض
+      $("#pm_price").value = (p.price / 100).toFixed(2);
+      $("#pm_compare").value = p.compareAtPrice ? (p.compareAtPrice / 100).toFixed(2) : "";
+      $("#pm_cost").value = (p.costPrice / 100).toFixed(2);
+      
       $("#pm_stock").value = p.stock || 0;
       $("#pm_pkg").value = p.packaging || "";
       currentProductImage = (p.images && p.images[0]) || "";
