@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Admin Panel (Full + Realtime + JOD Prices Fix)
+   SaWWA Souq — Admin Panel (Full + Realtime + Chart Fix)
    ============================================================ */
 (() => {
   const $ = (sel) => document.querySelector(sel);
@@ -82,6 +82,7 @@
     
     if (id === "dash") { 
       renderDash(); 
+      // تأخير بسيط جداً عشان العنصر ياخد مساحته قبل ما نرسم
       setTimeout(() => drawSalesChart(read(K.orders, [])), 100); 
     }
     if (id === "orders") renderOrders();
@@ -153,12 +154,13 @@
     renderSmartAlerts(orders, products);
   };
 
-  /* ============ FIXED CHART FUNCTION ============ */
+  /* ============ FIXED CHART FUNCTION (ResizeObserver) ============ */
   const drawSalesChart = (orders) => {
     const canvas = $("#chartSales");
     const container = $("#chartContainer");
     if (!canvas || !container) return;
 
+    // مراقبة حجم الحاوية عشان نرسم الشارت لما تظهر
     if (!canvas._resizeObserver) {
       canvas._resizeObserver = new ResizeObserver(() => {
         if (container.clientWidth > 0) {
@@ -168,6 +170,7 @@
       canvas._resizeObserver.observe(container);
     }
 
+    // نحاول نرسم على طول لو العرض موجود
     if (container.clientWidth > 0) {
       renderChartLogic(canvas, orders);
     }
@@ -200,6 +203,7 @@
     const padL = 40, padR = 10, padT = 20, padB = 30;
     const w = cssW - padL - padR, h = cssH - padT - padB, barW = w / days.length - 10;
 
+    // Grid lines
     ctx.strokeStyle = "rgba(143,169,165,.3)"; 
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -210,6 +214,7 @@
     }
     ctx.stroke();
 
+    // Bars
     const grad = ctx.createLinearGradient(0, padT, 0, padT + h);
     grad.addColorStop(0, "#5FD0C5"); 
     grad.addColorStop(1, "#0F5C56");
@@ -232,6 +237,7 @@
       ctx.fill();
     });
 
+    // Dates
     ctx.fillStyle = "#4A5654"; 
     ctx.font = "11px 'Baloo Bhaijaan 2', sans-serif"; 
     ctx.textAlign = "center";
@@ -466,20 +472,15 @@
 
   const pmSave = $("#pm_save");
   if (pmSave) pmSave.onclick = () => {
-    // تحويل الأسعار من دينار إلى قروش (ضرب في 100)
-    const priceJOD = parseFloat(($("#pm_price") || {}).value) || 0;
-    const compareJOD = parseFloat(($("#pm_compare") || {}).value) || 0;
-    const costJOD = parseFloat(($("#pm_cost") || {}).value) || 0;
-
     const data = {
       nameAr: ($("#pm_nameAr") || {}).value?.trim() || "",
       nameEn: ($("#pm_nameEn") || {}).value?.trim() || "",
       descAr: ($("#pm_descAr") || {}).value?.trim() || "",
       descEn: ($("#pm_descEn") || {}).value?.trim() || "",
       type: ($("#pm_type") || {}).value || "RUBBER",
-      price: Math.round(priceJOD * 100), // بالسنت
-      compareAtPrice: compareJOD > 0 ? Math.round(compareJOD * 100) : null,
-      costPrice: Math.round(costJOD * 100),
+      price: parseInt(($("#pm_price") || {}).value, 10) || 0,
+      compareAtPrice: parseInt(($("#pm_compare") || {}).value, 10) || null,
+      costPrice: parseInt(($("#pm_cost") || {}).value, 10) || 0,
       stock: parseInt(($("#pm_stock") || {}).value, 10) || 0,
       packaging: ($("#pm_pkg") || {}).value?.trim() || "",
       images: currentProductImage ? [currentProductImage] : [],
@@ -534,12 +535,9 @@
       $("#pm_descAr").value = p.descAr || "";
       $("#pm_descEn").value = p.descEn || "";
       $("#pm_type").value = p.type || "RUBBER";
-      
-      // تحويل الأسعار من قروش إلى دينار للعرض
-      $("#pm_price").value = (p.price / 100).toFixed(2);
-      $("#pm_compare").value = p.compareAtPrice ? (p.compareAtPrice / 100).toFixed(2) : "";
-      $("#pm_cost").value = (p.costPrice / 100).toFixed(2);
-      
+      $("#pm_price").value = p.price || 0;
+      $("#pm_compare").value = p.compareAtPrice || "";
+      $("#pm_cost").value = p.costPrice || 0;
       $("#pm_stock").value = p.stock || 0;
       $("#pm_pkg").value = p.packaging || "";
       currentProductImage = (p.images && p.images[0]) || "";
@@ -759,4 +757,292 @@
           <td class="muted" style="font-size:11px">${fmtDate(m.createdAt)}</td>
           <td>${m.read ? '<span class="status-pill DELIVERED">مقروءة</span>' : '<span class="status-pill PENDING">جديدة</span>'}</td>
           <td class="actions-cell">
-            ${!m.read ? `<
+            ${!m.read ? `<button class="btn xs success" data-read="${m.id}">تعليم كمقروءة</button>` : ""}
+            <button class="btn xs danger" data-del="${m.id}">حذف</button>
+          </td>
+        </tr>`).join("")}</tbody></table>`;
+    el.querySelectorAll("[data-read]").forEach((b) => b.onclick = () => {
+      const list = read(K.messages, []);
+      const i = list.findIndex((m) => m.id === b.dataset.read);
+      if (i >= 0) { list[i].read = true; write(K.messages, list); renderMessages(); renderDash(); }
+    });
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+      let confirmDel = false;
+      if (window.UI && UI.confirm) confirmDel = await UI.confirm("حذف الرسالة", "هل أنت متأكد؟", { danger: true });
+      else confirmDel = confirm("حذف؟");
+      
+      if (!confirmDel) return;
+      write(K.messages, read(K.messages, []).filter((m) => m.id !== b.dataset.del));
+      renderMessages();
+    });
+  };
+
+  /* ============ COUPONS ============ */
+  const couponModal = $("#couponModal");
+  const ncBtn = $("#newCouponBtn");
+  if (ncBtn) ncBtn.onclick = () => {
+    ["cp_code","cp_value","cp_maxUses","cp_minCart","cp_expires"].forEach((id) => { const e = $("#" + id); if (e) e.value = ""; });
+    const ct = $("#cp_type"); if (ct) ct.value = "percent";
+    couponModal.classList.remove("hidden");
+  };
+  const cpCancel = $("#cp_cancel");
+  if (cpCancel) cpCancel.onclick = () => couponModal.classList.add("hidden");
+  const cpSave = $("#cp_save");
+  if (cpSave) cpSave.onclick = () => {
+    const coupon = {
+      id: newId("cp"),
+      code: ($("#cp_code").value || "").toUpperCase().trim(),
+      type: $("#cp_type").value,
+      value: parseInt($("#cp_value").value, 10) || 0,
+      maxUses: parseInt($("#cp_maxUses").value, 10) || 0,
+      minCart: parseInt($("#cp_minCart").value, 10) || 0,
+      expires: $("#cp_expires").value || null,
+      uses: 0, active: true, createdAt: Date.now()
+    };
+    if (!coupon.code) { alert("أدخل الكود"); return; }
+    const list = read(K.coupons, []);
+    list.unshift(coupon); write(K.coupons, list);
+    couponModal.classList.add("hidden");
+    renderCoupons();
+  };
+  const renderCoupons = () => {
+    const el = $("#couponsTable");
+    if (!el) return;
+    const list = read(K.coupons, []);
+    if (!list.length) { el.innerHTML = `<p class="empty-state">لا كوبونات</p>`; return; }
+    el.innerHTML = `<table class="admin-table">
+      <thead><tr><th>الكود</th><th>النوع</th><th>القيمة</th><th>استخدامات</th><th>الحد الأدنى</th><th>الانتهاء</th><th>الحالة</th><th></th></tr></thead>
+      <tbody>${list.map((c) => `
+        <tr>
+          <td class="font-en"><strong>${esc(c.code)}</strong></td>
+          <td>${c.type === "percent" ? "%" : "ثابت"}</td>
+          <td class="font-en">${c.type === "percent" ? c.value + "%" : fmtJOD(c.value)}</td>
+          <td>${c.uses} / ${c.maxUses || "∞"}</td>
+          <td>${fmtJOD(c.minCart || 0)}</td>
+          <td>${c.expires || "—"}</td>
+          <td>${c.active ? '<span class="status-pill DELIVERED">نشط</span>' : '<span class="status-pill CANCELLED">موقوف</span>'}</td>
+          <td class="actions-cell">
+            <button class="btn xs" data-toggle="${c.id}">${c.active ? "إيقاف" : "تفعيل"}</button>
+            <button class="btn xs danger" data-del="${c.id}">حذف</button>
+          </td>
+        </tr>`).join("")}</tbody></table>`;
+    el.querySelectorAll("[data-toggle]").forEach((b) => b.onclick = () => {
+      const list = read(K.coupons, []);
+      const i = list.findIndex((c) => c.id === b.dataset.toggle);
+      if (i >= 0) { list[i].active = !list[i].active; write(K.coupons, list); renderCoupons(); }
+    });
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+      let confirmDel = false;
+      if (window.UI && UI.confirm) confirmDel = await UI.confirm("حذف الكوبون", "هل أنت متأكد؟", { danger: true });
+      else confirmDel = confirm("حذف؟");
+      
+      if (!confirmDel) return;
+      write(K.coupons, read(K.coupons, []).filter((c) => c.id !== b.dataset.del));
+      renderCoupons();
+    });
+  };
+
+  /* ============ LOYALTY ============ */
+  const renderLoyalty = () => {
+    const s = window.SAWWA?.loyalty || {};
+    const le = $("#loyEarn"); if (le) le.value = s.earnPerJOD ?? 1;
+    const lr = $("#loyRedeem"); if (lr) lr.value = s.redeemValue ?? 100;
+    const lm = $("#loyMin"); if (lm) lm.value = s.minRedeem ?? 100;
+    const led = read(K.loyaltyLedger, []);
+    const el = $("#loyaltyLedger");
+    if (!el) return;
+    if (!led.length) { el.innerHTML = `<p class="empty-state">لا حركات</p>`; return; }
+    el.innerHTML = `<div class="admin-list">${led.slice(0, 30).map((e) => `
+      <div class="admin-list-item">
+        <span class="label">${esc(e.reason)} ${e.orderId ? `<br /><small class="font-en">${esc(e.orderId)}</small>` : ""}</span>
+        <span class="value" style="color:${e.delta >= 0 ? '#2E7D32' : '#C03030'}">${e.delta >= 0 ? "+" : ""}${e.delta}</span>
+      </div>`).join("")}</div>`;
+  };
+  const saveLoy = $("#saveLoyalty");
+  if (saveLoy) saveLoy.onclick = () => {
+    if(!window.SAWWA) window.SAWWA = {};
+    window.SAWWA.loyalty = {
+      earnPerJOD: parseFloat($("#loyEarn").value) || 1,
+      redeemValue: parseInt($("#loyRedeem").value, 10) || 100,
+      minRedeem: parseInt($("#loyMin").value, 10) || 100
+    };
+    write(K.settings + "_loyalty", window.SAWWA.loyalty);
+    alert("تم");
+  };
+
+  /* ============ ANALYTICS ============ */
+  const renderAnalytics = () => {
+    const orders = read(K.orders, []);
+    const paid = orders.filter((o) => o.paymentStatus === "PAID" || o.paymentMethod === "COD");
+    const avg = paid.length ? paid.reduce((a, b) => a + b.total, 0) / paid.length : 0;
+    const aa = $("#anaAvg"); if (aa) aa.textContent = fmtJOD(Math.round(avg));
+    const conv = orders.length ? ((paid.length / orders.length) * 100).toFixed(1) : "0";
+    const ac = $("#anaConv"); if (ac) ac.textContent = conv + "%";
+
+    const counters = {};
+    orders.forEach((o) => (o.items || []).forEach((it) => { const k = it.nameAr || it.id; counters[k] = (counters[k] || 0) + it.qty; }));
+    const top = Object.entries(counters).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    const atp = $("#anaTopProducts");
+    if (atp) atp.innerHTML = top.length
+      ? `<div class="admin-list">${top.map(([n,q],i) => `<div class="admin-list-item"><span class="rank">${i+1}</span><span class="label">${esc(n)}</span><span class="value">${q}</span></div>`).join("")}</div>`
+      : `<p class="empty-state">لا بيانات</p>`;
+
+    const cities = {};
+    orders.forEach((o) => { if (o.city) cities[o.city] = (cities[o.city] || 0) + 1; });
+    const cl = Object.entries(cities).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    const aci = $("#anaCities");
+    if (aci) aci.innerHTML = cl.length
+      ? `<div class="admin-list">${cl.map(([c,n],i) => `<div class="admin-list-item"><span class="rank">${i+1}</span><span class="label">${esc(c)}</span><span class="value">${n}</span></div>`).join("")}</div>`
+      : `<p class="empty-state">لا بيانات</p>`;
+  };
+
+  /* ============ NOTIFICATIONS ============ */
+  const renderNotifications = () => {
+    const list = read(K.notifications, []);
+    const el = $("#sysNotifications");
+    if (!el) return;
+    if (!list.length) { el.innerHTML = `<p class="empty-state">لا إشعارات</p>`; return; }
+    el.innerHTML = `<div class="admin-list">${list.slice(0, 20).map((n) => `
+      <div class="admin-list-item">
+        <span class="label"><strong>${esc(n.title)}</strong><br /><small class="muted">${esc(n.body)}</small><br /><small class="muted" style="font-size:10px">${fmtDate(n.createdAt)}</small></span>
+      </div>`).join("")}</div>`;
+  };
+  const sNotif = $("#sendNotif");
+  if (sNotif) sNotif.onclick = () => {
+    const title = $("#notifTitle").value.trim();
+    const body = $("#notifBody").value.trim();
+    if (!title) { alert("أدخل العنوان"); return; }
+    const list = read(K.notifications, []);
+    list.unshift({ id: newId("n"), title, body, createdAt: Date.now() });
+    write(K.notifications, list);
+    $("#notifTitle").value = ""; $("#notifBody").value = "";
+    renderNotifications();
+    if (window.UI?.toast) UI.toast("تم الإرسال", "success");
+  };
+
+  /* ============ ANNOUNCE ============ */
+  const renderAnnounce = () => {
+    const a = read(K.announce, { ar: "شحن 3 دنانير", en: "3 JOD shipping", enabled: 1 });
+    const aa = $("#annAr"); if (aa) aa.value = a.ar || "";
+    const ae = $("#annEn"); if (ae) ae.value = a.en || "";
+    const aen = $("#annEnabled"); if (aen) aen.value = a.enabled ? "1" : "0";
+  };
+  const sAnn = $("#saveAnnounce");
+  if (sAnn) sAnn.onclick = () => {
+    const a = { ar: $("#annAr").value.trim(), en: $("#annEn").value.trim(), enabled: $("#annEnabled").value === "1" ? 1 : 0 };
+    write(K.announce, a);
+    alert("تم");
+  };
+
+  /* ============ SETTINGS ============ */
+  const renderSettings = () => {
+    const s = read(K.settings, {});
+    const sna = $("#setNameAr"); if (sna) sna.value = s.nameAr || window.SAWWA?.name?.ar || "سوّا سوق";
+    const sne = $("#setNameEn"); if (sne) sne.value = s.nameEn || window.SAWWA?.name?.en || "SaWWA Souq";
+    const sw = $("#setWhatsapp"); if (sw) sw.value = s.whatsapp || window.SAWWA?.whatsapp || "";
+    const sc = $("#setCliq"); if (sc) sc.value = s.cliq || window.SAWWA?.cliqId || "";
+  };
+  const sSet = $("#saveSettings");
+  if (sSet) sSet.onclick = () => {
+    write(K.settings, {
+      nameAr: $("#setNameAr").value.trim(),
+      nameEn: $("#setNameEn").value.trim(),
+      whatsapp: $("#setWhatsapp").value.trim(),
+      cliq: $("#setCliq").value.trim()
+    });
+    alert("تم");
+  };
+  const sPwd = $("#savePwd");
+  if (sPwd) sPwd.onclick = () => {
+    const v = $("#newPwd").value.trim();
+    if (v.length < 6) { alert("6 أحرف على الأقل"); return; }
+    setPwd(v);
+    $("#newPwd").value = "";
+    alert("تم تحديث كلمة المرور");
+  };
+
+  /* ============ BACKUP ============ */
+  const eAll = $("#exportAll");
+  if (eAll) eAll.onclick = () => {
+    const data = {
+      products: read(K.products, []),
+      orders: read(K.orders, []),
+      reviews: read(K.reviews, []),
+      customers: read(K.customers, []),
+      coupons: read(K.coupons, []),
+      loyaltyLedger: read(K.loyaltyLedger, []),
+      notifications: read(K.notifications, []),
+      messages: read(K.messages, []),
+      announce: read(K.announce, {}),
+      settings: read(K.settings, {}),
+      points: localStorage.getItem(K.points) || "0",
+      exportedAt: Date.now()
+    };
+    download("sawwa-backup-" + new Date().toISOString().slice(0,10) + ".json", JSON.stringify(data, null, 2), "application/json");
+  };
+  const iAll = $("#importAll");
+  if (iAll) iAll.onclick = () => {
+    const file = $("#importFile").files[0];
+    if (!file) { alert("اختر ملف"); return; }
+    if (!confirm("سيستبدل كل البيانات. متأكد؟")) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        ["products","orders","reviews","customers","coupons","loyaltyLedger","notifications","messages","announce","settings"].forEach((k) => {
+          if (data[k] != null) write(K[k], data[k]);
+        });
+        if (data.points != null) localStorage.setItem(K.points, String(data.points));
+        alert("تم الاستيراد");
+      } catch (err) { alert("ملف غير صالح"); }
+    };
+    reader.readAsText(file);
+  };
+  const fReset = $("#factoryReset");
+  if (fReset) fReset.onclick = () => {
+    if (!confirm("حذف كل البيانات؟")) return;
+    if (!confirm("تأكيد نهائي؟")) return;
+    Object.values(K).forEach((k) => localStorage.removeItem(k));
+    sessionStorage.clear();
+    location.reload();
+  };
+
+  /* ============ CLOCK ============ */
+  setInterval(() => {
+    const d = new Date();
+    const el = $("#currentTime");
+    if (el) el.textContent = d.toLocaleTimeString("ar-JO");
+  }, 1000);
+
+  /* ============ AUTO REFRESH & REALTIME ============ */
+  let refreshInterval = null;
+  const startAutoRefresh = () => {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => {
+      const activeTab = document.querySelector(".side-tab.active");
+      if (activeTab && activeTab.dataset.tab === "orders") {
+        renderOrders();
+      }
+      renderDash();
+    }, 15000);
+  };
+
+  const renderAll = () => {
+    if (!localStorage.getItem(K.coupons)) write(K.coupons, []);
+    if (!localStorage.getItem(K.customers)) write(K.customers, []);
+    bindNav();
+    renderDash();
+    switchTab("dash");
+
+    if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
+      SB.subscribeOrders((payload) => {
+        console.log("[Real-time] Order updated!", payload);
+        renderOrders();
+        renderDash();
+      });
+    }
+  };
+
+  if (sessionValid()) showPanel();
+
+})();
