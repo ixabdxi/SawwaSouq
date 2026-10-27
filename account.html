@@ -29,7 +29,7 @@
 
       <div style="margin-top:20px;background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--glass-border);border-radius:var(--r-md);padding:22px">
         <h4 style="font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;font-family:Orbitron,sans-serif;color:var(--deep);margin-bottom:14px">
-          ${window.SAWWA?.lang === "ar" ? "الكوبونات المتاحة" : "Available coupons"}
+          الكوبونات المتاحة
         </h4>
         <div id="couponsList"></div>
       </div>
@@ -53,13 +53,13 @@
 <script src="js/notifications.js"></script>
 <script src="js/tracking.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/invoice.js"></script>
 <script>
 UI.init({
   after: () => {
     const lang = window.SAWWA.lang;
     document.getElementById("pointsNum").textContent = Store.points.get();
 
-    // Coupons
     const coup = Coupons.all().filter((c) => c.active && (!c.expires || new Date(c.expires) > Date.now()));
     const cList = document.getElementById("couponsList");
     if (coup.length === 0) {
@@ -79,7 +79,6 @@ UI.init({
       });
     }
 
-    // Orders
     const list = Store.orders.all();
     const wrap = document.getElementById("ordersList");
     if (list.length === 0) {
@@ -90,7 +89,7 @@ UI.init({
         const idx = Tracking.statusIndex(o.status);
         const current = tl[idx];
         return `
-        <div class="order-row">
+        <div class="order-row" style="grid-template-columns: 1fr auto auto auto auto;">
           <div>
             <div class="font-en"><strong>${o.id}</strong></div>
             <small>${new Date(o.createdAt).toLocaleString(lang === "ar" ? "ar-JO" : "en-JO")}</small>
@@ -98,23 +97,19 @@ UI.init({
           <div>${o.items.length} × ${lang === "ar" ? "منتج" : "items"}</div>
           <div class="font-en">${UI.fmt(o.total)}</div>
           <div class="status ${o.status.toLowerCase()}">${current ? current.label : o.status}</div>
+          <button class="btn ghost xs invoice-btn" data-id="${o.id}">فاتورة</button>
         </div>`;
       }).join("");
+      
+      document.querySelectorAll(".invoice-btn").forEach(btn => {
+        btn.onclick = () => {
+          const order = Store.orders.byId(btn.dataset.id);
+          if (order && window.Invoice) Invoice.generatePDF(order);
+        };
+      });
     }
   }
 });
 </script>
-<script src="js/design-tokens.js"></script>
-<script src="js/config.js"></script>
-<script src="js/i18n.js"></script>
-<script src="js/wishlist.js"></script>
-<script src="js/notifications.js"></script>
-<script src="js/shipping.js"></script>
-<script src="js/coupons.js"></script>
-<script src="js/tracking.js"></script>
-<script src="js/store.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/aurora.js"></script>
-<script src="js/ui.js"></script>
 </body>
 </html>
