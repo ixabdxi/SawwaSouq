@@ -15,128 +15,38 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
 <style>
   [hidden] { display: none !important; }
-
-  .cliq-summary {
-    background: color-mix(in srgb, var(--brand) 8%, transparent);
-    border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent);
-    border-radius: var(--r-sm);
-    padding: 14px 16px;
-    margin: 12px 0 18px;
-  }
+  .cliq-summary { background: color-mix(in srgb, var(--brand) 8%, transparent); border: 1px solid color-mix(in srgb, var(--brand) 25%, transparent); border-radius: var(--r-sm); padding: 14px 16px; margin: 12px 0 18px; }
   .cs-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .cs-label { font-weight: 700; color: var(--brand); font-size: 14px; }
-  .cs-edit {
-    background: none; border: none; cursor: pointer;
-    color: var(--brand); font-size: 13px; font-weight: 600;
-    text-decoration: underline; font-family: inherit;
-  }
+  .cs-edit { background: none; border: none; cursor: pointer; color: var(--brand); font-size: 13px; font-weight: 600; text-decoration: underline; font-family: inherit; }
   .cs-file { font-size: 13px; color: var(--text-2); }
-
-  #cliqModal {
-    position: fixed; inset: 0; z-index: 9998;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-    animation: cliqFade .2s ease-out;
-  }
+  #cliqModal { position: fixed; inset: 0; z-index: 9998; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 20px; animation: cliqFade .2s ease-out; }
   #cliqModal[hidden] { display: none !important; }
   @keyframes cliqFade { from { opacity: 0; } to { opacity: 1; } }
-
-  .cliq-modal-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r-lg);
-    padding: 32px 28px 26px;
-    max-width: 500px; width: 100%;
-    box-shadow: var(--shadow-lg);
-    position: relative;
-    animation: cliqPop .3s cubic-bezier(.34, 1.56, .64, 1);
-    max-height: calc(100vh - 40px);
-    overflow-y: auto;
-    text-align: start;
-  }
+  .cliq-modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 32px 28px 26px; max-width: 500px; width: 100%; box-shadow: var(--shadow-lg); position: relative; animation: cliqPop .3s cubic-bezier(.34, 1.56, .64, 1); max-height: calc(100vh - 40px); overflow-y: auto; text-align: start; }
   html.dark .cliq-modal-card { background: var(--surface-2); }
-  @keyframes cliqPop {
-    0% { transform: scale(0.92); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-  .cliq-x {
-    position: absolute; top: 14px; inset-inline-end: 14px;
-    width: 34px; height: 34px; border-radius: 50%;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text-2); cursor: pointer;
-    font-size: 22px; font-weight: 400; line-height: 1;
-    display: grid; place-items: center;
-    transition: all .15s; font-family: inherit; padding: 0; z-index: 2;
-  }
-  .cliq-x:hover {
-    background: var(--danger-soft);
-    color: var(--danger);
-    border-color: var(--danger);
-  }
+  @keyframes cliqPop { 0% { transform: scale(0.92); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .cliq-x { position: absolute; top: 14px; inset-inline-end: 14px; width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; font-size: 22px; font-weight: 400; line-height: 1; display: grid; place-items: center; transition: all .15s; font-family: inherit; padding: 0; z-index: 2; }
+  .cliq-x:hover { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); }
   html.dark .cliq-x { background: var(--surface-3); }
-  .cliq-modal-card h3 {
-    font-size: 20px; font-weight: 800;
-    color: var(--text); margin-bottom: 18px;
-    letter-spacing: -0.01em; padding-inline-end: 44px;
-  }
-  .cliq-info {
-    background: var(--surface-2);
-    border-radius: var(--r-sm);
-    padding: 16px; margin-bottom: 16px;
-    display: flex; flex-direction: column; gap: 12px;
-  }
+  .cliq-modal-card h3 { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 18px; letter-spacing: -0.01em; padding-inline-end: 44px; }
+  .cliq-info { background: var(--surface-2); border-radius: var(--r-sm); padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px; }
   .cliq-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
   .cliq-row span { color: var(--text-2); font-weight: 600; }
-  .cliq-row code {
-    background: var(--brand); color: #fff;
-    padding: 5px 14px; border-radius: var(--r-sm);
-    font-family: var(--font-en); letter-spacing: .08em;
-    font-weight: 700; font-size: 14px;
-  }
+  .cliq-row code { background: var(--brand); color: #fff; padding: 5px 14px; border-radius: var(--r-sm); font-family: var(--font-en); letter-spacing: .08em; font-weight: 700; font-size: 14px; }
   .cliq-row strong { color: var(--text); font-weight: 800; font-size: 17px; }
   .cliq-hint { font-size: 14px; color: var(--text-2); line-height: 1.7; margin-bottom: 18px; }
-  .cliq-file-label > span {
-    display: block; font-size: 13px;
-    color: var(--text-2); font-weight: 600; margin-bottom: 8px;
-  }
-  .cliq-file-box {
-    border: 2px dashed var(--border-2);
-    border-radius: var(--r-sm);
-    padding: 22px 16px; text-align: center;
-    cursor: pointer; transition: all .15s;
-    background: var(--surface-2);
-  }
-  .cliq-file-box:hover {
-    border-color: var(--brand);
-    background: color-mix(in srgb, var(--brand) 6%, transparent);
-  }
-  .cliq-file-box.has-file {
-    border-style: solid; border-color: var(--brand);
-    background: color-mix(in srgb, var(--brand) 8%, transparent);
-  }
+  .cliq-file-label > span { display: block; font-size: 13px; color: var(--text-2); font-weight: 600; margin-bottom: 8px; }
+  .cliq-file-box { border: 2px dashed var(--border-2); border-radius: var(--r-sm); padding: 22px 16px; text-align: center; cursor: pointer; transition: all .15s; background: var(--surface-2); }
+  .cliq-file-box:hover { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 6%, transparent); }
+  .cliq-file-box.has-file { border-style: solid; border-color: var(--brand); background: color-mix(in srgb, var(--brand) 8%, transparent); }
   .cfb-icon { font-size: 30px; display: block; margin-bottom: 6px; }
   .cfb-text { font-size: 14px; color: var(--text-2); font-weight: 600; word-break: break-all; }
   .cliq-file-box.has-file .cfb-text { color: var(--brand); }
-  .cliq-modal-actions {
-    display: flex; gap: 10px;
-    margin-top: 22px; padding-top: 20px;
-    border-top: 1px solid var(--border);
-  }
+  .cliq-modal-actions { display: flex; gap: 10px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--border); }
   .cliq-modal-actions .btn { flex: 1; }
-  @media (max-width: 640px) {
-    .cliq-modal-card { padding: 26px 20px 20px; border-radius: var(--r-md); }
-    .cliq-modal-card h3 { font-size: 18px; }
-    .cliq-modal-actions { flex-direction: column-reverse; }
-  }
-  /* إخفاء زر باي بال الافتراضي عشان نستخدم التصميم تبعنا */
-  .paypal-buttons-container {
-    position: relative;
-    z-index: 1;
-  }
+  @media (max-width: 640px) { .cliq-modal-card { padding: 26px 20px 20px; border-radius: var(--r-md); } .cliq-modal-card h3 { font-size: 18px; } .cliq-modal-actions { flex-direction: column-reverse; } }
+  .paypal-buttons-container { position: relative; z-index: 1; }
 </style>
 </head>
 <body>
@@ -204,19 +114,17 @@
       <div class="row"><span data-i18n="cart.shipping"></span><span id="sumShip"></span></div>
       <div class="row total"><span data-i18n="cart.total"></span><span id="sumTotal"></span></div>
       
-      <!-- صندوق باي بال -->
       <div id="paypalBox" style="display:none; margin-top: 20px;">
         <div id="paypal-button-container"></div>
         <p style="text-align: center; font-size: 12px; color: var(--text-3); margin-top: 10px;">ادفع بأمان عبر PayPal أو البطاقات</p>
       </div>
 
       <button class="btn primary full" data-i18n="checkout.placeOrder" type="submit" id="submitBtn" style="margin-top:16px"></button>
+      <button class="btn ghost full" type="button" id="waOrderBtn" style="margin-top:10px; border-color:#25D366; color:#25D366;">اطلب سريعاً عبر واتساب 💬</button>
     </aside>
   </form>
 
-  <!-- صندوق النجاح -->
   <div id="successBox" class="success-box" hidden style="text-align: center; padding: 40px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border);">
-    <!-- سيتم تعبئته بالجافاسكريبت -->
   </div>
 </main>
 
@@ -250,7 +158,6 @@
   </div>
 </div>
 
-<!-- سكربت باي بال -->
 <script src="https://www.paypal.com/sdk/js?client-id=BAAtMFdRIAJ4WEp4L7-smhFsvU4uXti9FlWhntsJyzjFjQpCTxs1On6xZ94aJq0zmKzK7bAvLpAuWWsMBY&currency=USD&components=buttons"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/supabase.js"></script>
@@ -270,20 +177,20 @@
 UI.init({
   after: () => {
     const lang = window.SAWWA.lang;
-
-    const cliqModal      = document.getElementById("cliqModal");
-    const cliqSummary    = document.getElementById("cliqSummary");
-    const cliqFileName   = document.getElementById("cliqFileName");
-    const cliqFileInput  = document.getElementById("cliqFileInput");
-    const cliqFileBox    = document.getElementById("cliqFileBox");
-    const cliqFileText   = document.getElementById("cliqFileText");
-    const cliqCode       = document.getElementById("cliqCode");
-    const cliqAmount     = document.getElementById("cliqAmount");
-    const codRadio       = document.querySelector('input[name=pay][value="COD"]');
-    const cliqRadio      = document.querySelector('input[name=pay][value="CLIQ"]');
-    const citySel        = document.getElementById("citySelect");
-    const paypalBox      = document.getElementById("paypalBox");
-    const submitBtn      = document.getElementById("submitBtn");
+    const cliqModal = document.getElementById("cliqModal");
+    const cliqSummary = document.getElementById("cliqSummary");
+    const cliqFileName = document.getElementById("cliqFileName");
+    const cliqFileInput = document.getElementById("cliqFileInput");
+    const cliqFileBox = document.getElementById("cliqFileBox");
+    const cliqFileText = document.getElementById("cliqFileText");
+    const cliqCode = document.getElementById("cliqCode");
+    const cliqAmount = document.getElementById("cliqAmount");
+    const codRadio = document.querySelector('input[name=pay][value="COD"]');
+    const cliqRadio = document.querySelector('input[name=pay][value="CLIQ"]');
+    const citySel = document.getElementById("citySelect");
+    const paypalBox = document.getElementById("paypalBox");
+    const submitBtn = document.getElementById("submitBtn");
+    const waOrderBtn = document.getElementById("waOrderBtn");
 
     if (cliqCode) cliqCode.textContent = window.SAWWA.cliqId || "SAWWA1";
     citySel.innerHTML = `<option value="">--</option>` + Shipping.list().map((c) => `<option>${c}</option>`).join("");
@@ -292,7 +199,6 @@ UI.init({
     let cliqProofFile = null;
     let paypalOrderId = null;
 
-    /* ============ MODAL CLIQ ============ */
     const openCliqModal = () => { sum(); cliqModal.hidden = false; document.body.style.overflow = "hidden"; };
     const closeCliqModal = () => { cliqModal.hidden = true; document.body.style.overflow = ""; };
 
@@ -313,31 +219,35 @@ UI.init({
       cliqProofFile = f; cliqFileBox.classList.add("has-file"); cliqFileText.textContent = f.name;
     };
 
-    /* ============ PAYPAL LOGIC ============ */
+    let isPayPalRendered = false;
     document.querySelectorAll('input[name="pay"]').forEach(radio => {
       radio.addEventListener('change', (e) => {
         if (e.target.value === 'PAYPAL') {
           paypalBox.style.display = 'block';
           submitBtn.style.display = 'none'; 
+          waOrderBtn.style.display = 'none';
           initPayPal();
         } else {
           paypalBox.style.display = 'none';
           submitBtn.style.display = 'block';
+          waOrderBtn.style.display = 'block';
         }
       });
     });
 
     const initPayPal = () => {
-      if (window.paypal) {
+      if (window.paypal && !isPayPalRendered) {
+        isPayPalRendered = true;
         window.paypal.Buttons({
           style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'paypal' },
           createOrder: async () => {
-            const t = sum();
+            const items = Cart.get().map(it => ({ id: it.id, qty: it.qty, price: it.price }));
             const res = await fetch('/api/paypal-create', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ totalJOD: t.total })
+              body: JSON.stringify({ items, couponCode: appliedCoupon?.code, usePoints: document.getElementById("usePoints").checked, city: citySel.value })
             });
+            if (!res.ok) throw new Error("Error creating order");
             const data = await res.json();
             paypalOrderId = data.id;
             return data.id;
@@ -351,6 +261,8 @@ UI.init({
             const data = await res.json();
             if (data.status === 'COMPLETED') {
               completeOrder("PAYPAL", "PAID");
+            } else {
+              UI.toast("فشل التحقق من الدفع", "error");
             }
           },
           onError: (err) => {
@@ -361,7 +273,6 @@ UI.init({
       }
     };
 
-    /* ============ SUM ============ */
     const sum = () => {
       const sub = Cart.subtotal();
       const city = citySel.value;
@@ -415,12 +326,24 @@ UI.init({
       sum();
     };
 
+    waOrderBtn.onclick = () => {
+      if (Cart.get().length === 0) { UI.toast("سلتك فارغة", "warn"); return; }
+      const fd = new FormData(document.getElementById("checkoutForm"));
+      if (!fd.get("name") || !fd.get("phone") || !fd.get("city")) {
+        UI.toast("الرجاء إكمال الاسم، الهاتف، والمحافظة أولاً", "warn");
+        return;
+      }
+      const t = sum();
+      const itemsText = Cart.get().map(it => `- ${it.nameAr} × ${it.qty} (${UI.fmt(it.price * it.qty)})`).join("\n");
+      const msg = `مرحباً سوّا سوق، أريد تأكيد الطلب التالي:\n\n*الاسم:* ${fd.get("name")}\n*الهاتف:* ${fd.get("phone")}\n*المدينة:* ${fd.get("city")}\n*العنوان:* ${fd.get("address")}\n\n*المنتجات:*\n${itemsText}\n\n*الإجمالي:* ${UI.fmt(t.total)}\n\n(الدفع عند الاستلام)`;
+      window.open(`https://wa.me/${window.SAWWA.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
+    };
+
     document.getElementById("usePoints").onchange = sum;
     citySel.onchange = sum;
     renderItems();
     sum();
 
-    /* ============ COMPLETE ORDER & SUCCESS UI ============ */
     const completeOrder = async (payMethod, payStatus) => {
       const fd = new FormData(document.getElementById("checkoutForm"));
       const t = sum();
@@ -443,14 +366,11 @@ UI.init({
         pointsEarned: earned, pointsUsed: usedPts
       };
 
-      // 1. حفظ محلي
       Store.orders.create(order);
 
-      // 2. حفظ في Supabase
       if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
         SB.orders.create(order).then((ok) => {
           if (ok) console.log("[Checkout] Order synced to cloud:", order.id);
-          else console.warn("[Checkout] Cloud save failed");
         });
       }
 
@@ -469,59 +389,34 @@ UI.init({
         );
       }
 
-      // إخفاء الفورم وإظهار رسالة النجاح الفخمة
       document.getElementById("checkoutForm").style.display = "none";
       const box = document.getElementById("successBox");
       box.hidden = false;
       
-      let successMessage = "";
-      let successIcon = "";
-      
-      if (payMethod === "PAYPAL") {
-        successIcon = "💳";
-        successMessage = lang === "ar" ? "تم الدفع بنجاح عبر PayPal / البطاقة!" : "Payment successful via PayPal/Card!";
-      } else if (payMethod === "CLIQ") {
-        successIcon = "📱";
-        successMessage = lang === "ar" ? "تم استلام طلبك، سنتحقق من إشعار Cliq قريباً." : "Order received, we'll verify the Cliq receipt soon.";
-      } else {
-        successIcon = "💵";
-        successMessage = lang === "ar" ? "تم استلام طلبك بنجاح، الدفع عند الاستلام." : "Order received successfully, Cash on Delivery.";
-      }
-
-      const waMsg = encodeURIComponent(
-        `طلب جديد ${id}\nالاسم: ${order.name}\nالهاتف: ${order.phone}\nالمدينة: ${order.city}\nالطريقة: ${payMethod}\nالمجموع: ${(order.total / 100).toFixed(2)} دينار`
-      );
+      let successMessage = payMethod === "PAYPAL" ? "تم الدفع بنجاح عبر PayPal!" : (payMethod === "CLIQ" ? "تم استلام طلبك، سنتحقق من إشعار Cliq قريباً." : "تم استلام طلبك بنجاح، الدفع عند الاستلام.");
+      let successIcon = payMethod === "PAYPAL" ? "💳" : (payMethod === "CLIQ" ? "📱" : "💵");
 
       box.innerHTML = `
         <div style="font-size: 64px; margin-bottom: 16px;">${successIcon}</div>
-        <h2 style="color: var(--brand); font-size: 24px; font-weight: 800; margin-bottom: 12px;">
-          ${lang === 'ar' ? '✓ تم استلام طلبك بنجاح!' : '✓ Order received successfully!'}
-        </h2>
-        <p style="color: var(--text-2); font-size: 16px; margin-bottom: 20px; font-weight: 600;">
-          ${successMessage}
-        </p>
-        
+        <h2 style="color: var(--brand); font-size: 24px; font-weight: 800; margin-bottom: 12px;">✓ تم استلام طلبك بنجاح!</h2>
+        <p style="color: var(--text-2); font-size: 16px; margin-bottom: 20px; font-weight: 600;">${successMessage}</p>
         <div style="background: var(--surface-2); padding: 16px; border-radius: var(--r-sm); margin-bottom: 24px; display: inline-block; text-align: start;">
-          <div style="margin-bottom: 8px;"><span style="color: var(--text-3); font-size: 13px;">${lang === 'ar' ? 'رقم الطلب:' : 'Order ID:'}</span> <strong class="font-en" style="color: var(--text); font-size: 16px;">${id}</strong></div>
-          <div><span style="color: var(--text-3); font-size: 13px;">${lang === 'ar' ? 'طريقة الدفع:' : 'Payment Method:'}</span> <strong style="color: var(--text); font-size: 15px;">${payMethod}</strong></div>
+          <div style="margin-bottom: 8px;"><span style="color: var(--text-3); font-size: 13px;">رقم الطلب:</span> <strong class="font-en" style="color: var(--text); font-size: 16px;">${id}</strong></div>
+          <div><span style="color: var(--text-3); font-size: 13px;">طريقة الدفع:</span> <strong style="color: var(--text); font-size: 15px;">${payMethod}</strong></div>
         </div>
-        
         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-          <a class="btn primary" href="track.html" style="min-width: 140px;">${lang === 'ar' ? 'تتبع الطلب' : 'Track order'}</a>
-          <a class="btn ghost" href="https://wa.me/${window.SAWWA.whatsapp}?text=${waMsg}" target="_blank" rel="noopener" style="min-width: 140px;">
-            ${lang === 'ar' ? 'تواصل واتساب' : 'WhatsApp'}
-          </a>
+          <a class="btn primary" href="track.html" style="min-width: 140px;">تتبع الطلب</a>
+          <button class="btn ghost" onclick="Invoice.generatePDF(${JSON.stringify(order).replace(/"/g, '&quot;')})" style="min-width: 140px;">تحميل الفاتورة 🧾</button>
         </div>`;
       
       window.scrollTo({ top: 0, behavior: "smooth" });
-      UI.toast(lang === "ar" ? "تم استلام طلبك بنجاح!" : "Order placed successfully!", "success", null, 5000);
+      UI.toast("تم استلام طلبك بنجاح!", "success", null, 5000);
     };
 
-    /* ============ SUBMIT (COD / Cliq) ============ */
     document.getElementById("checkoutForm").onsubmit = async (e) => {
       e.preventDefault();
       const pay = document.querySelector('input[name="pay"]:checked').value;
-      if (pay === "PAYPAL") return; // زر باي بال هو اللي بيتصرف
+      if (pay === "PAYPAL") return; 
 
       const fd = new FormData(e.target);
       const city = fd.get("city");
@@ -538,5 +433,6 @@ UI.init({
   }
 });
 </script>
+<script src="js/invoice.js"></script>
 </body>
 </html>
