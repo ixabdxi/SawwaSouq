@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Design Tokens v4
+   SaWWA Souq — Design Tokens v4 (Logo Dark Mode Support)
    ============================================================ */
 (function () {
   const DEPLOYED = (typeof window.SAWWA_DESIGN_CONFIG === "object" && window.SAWWA_DESIGN_CONFIG !== null)
@@ -10,7 +10,7 @@
     identity: {
       nameAr: "سوّا سوق", nameEn: "SaWWA Souq",
       taglineAr: "جودة تستحقّها، بسعر يناسبك.", taglineEn: "Quality you deserve, price you love.",
-      logo: "assets/logo.png", logoDark: "assets/logo.png", favicon: "assets/favicon.png", logoHeight: 44
+      logo: "assets/logo.png", logoDark: "assets/logo-white.png", favicon: "assets/favicon.png", logoHeight: 44
     },
     colors: {
       teal: "#0F5C56", teal2: "#12A89B", amber: "#E8A33D", deep: "#0A3D38",
@@ -294,17 +294,19 @@
   }
 
   function applyLogo() {
+    const isDark = document.documentElement.classList.contains("dark");
     const logoLight = D.identity.logo;
     const logoDark = D.identity.logoDark;
     const defaultLight = "assets/logo.png";
+    const defaultDark = "assets/logo-white.png";
 
     document.querySelectorAll(".site-header .logo img, nav .logo img, .dp-side-head img, .sidebar-head .logo img").forEach((img) => {
-      const target = logoLight || defaultLight;
+      const target = isDark ? (logoDark || defaultDark) : (logoLight || defaultLight);
       if (img.getAttribute("src") !== target) img.setAttribute("src", target);
     });
 
     document.querySelectorAll(".site-footer .logo img, .logo-footer img").forEach((img) => {
-      const target = logoDark || logoLight || defaultLight;
+      const target = isDark ? (logoDark || defaultDark) : (logoLight || defaultLight);
       if (img.getAttribute("src") !== target) img.setAttribute("src", target);
     });
 
@@ -322,6 +324,7 @@
   };
 
   applyDesign();
+  applyLogo(); // تطبيق الشعار فوراً عند التحميل
 
   let logoTimeout;
   const scheduleApplyLogo = () => {
@@ -342,6 +345,12 @@
   };
   if (document.body) startObserver();
   else window.addEventListener("DOMContentLoaded", startObserver);
+
+  // مراقبة تغيير الكلاس في الـ html عشان يتفعل الشعار الداكن أوتوماتيك
+  new MutationObserver(scheduleApplyLogo).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
 
   const isDesign = document.documentElement.classList.contains("design-body") ||
     (document.body && document.body.classList.contains("design-body"));
