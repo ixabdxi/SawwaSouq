@@ -4,7 +4,7 @@ window.Store = (() => {
     orders: "sawwa_orders",
     reviews: "sawwa_reviews",
     points: "sawwa_points",
-    seeded: "sawwa_seeded_v3"
+    seeded: "sawwa_seeded_v5" // تحديث النسخة
   };
 
   const seedProducts = () => {
@@ -21,9 +21,8 @@ window.Store = (() => {
       type: "RUBBER",
       stock: 12,
       images: [
-        "https://images.unsplash.com/photo-1616763355603-9755a640a287?w=800&q=80",
-        "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&q=80",
-        "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=800&q=80"
+        "assets/rubber-main.jpg",
+        "assets/rubber-main.jpg"
       ],
       packaging: "رول — 40×90 سم، كرتون 42×10×10 سم",
       warranty: true,
@@ -44,9 +43,8 @@ window.Store = (() => {
       type: "GLASS",
       stock: 7,
       images: [
-        "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&q=80",
-        "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=800&q=80",
-        "https://images.unsplash.com/photo-1595044426077-d36d9236d54a?w=800&q=80"
+        "assets/glass-main.jpg",
+        "assets/glass-main.jpg"
       ],
       packaging: "علبة صلبة 48×43×4 سم",
       warranty: true,
