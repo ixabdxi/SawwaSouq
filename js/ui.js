@@ -129,7 +129,6 @@ window.UI = (() => {
     });
   };
 
-  /* ============ NOTIFICATIONS BELL ============ */
   const openNotifPanel = () => {
     const existing = document.getElementById("notifPanel");
     if (existing) { existing.remove(); return; }
@@ -160,7 +159,6 @@ window.UI = (() => {
       p.remove();
     };
 
-    // close on outside click
     setTimeout(() => {
       const off = (e) => {
         if (!p.contains(e.target) && !e.target.closest("#notifBtn")) {
@@ -252,7 +250,7 @@ window.UI = (() => {
       <div class="footer-inner">
         <div>
           <a href="index.html" class="logo logo-footer" aria-label="SaWWA Souq">
-            <img src="assets/logo.svg" alt="SaWWA Souq" />
+            <img src="assets/logo.png" alt="SaWWA Souq" />
           </a>
           <p data-i18n="hero.tagline"></p>
         </div>
