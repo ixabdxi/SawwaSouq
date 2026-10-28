@@ -1,10 +1,8 @@
 /* ============================================================
-   SaWWA Souq — Design Tokens v5 (3 New Presets)
+   SaWWA Souq — Design Tokens v6 (Glassmorphism Focus)
    ============================================================ */
 (function () {
-  const DEPLOYED = (typeof window.SAWWA_DESIGN_CONFIG === "object" && window.SAWWA_DESIGN_CONFIG !== null)
-    ? window.SAWWA_DESIGN_CONFIG
-    : {};
+  const DEPLOYED = (typeof window.SAWWA_DESIGN_CONFIG === "object" && window.SAWWA_DESIGN_CONFIG !== null) ? window.SAWWA_DESIGN_CONFIG : {};
 
   const DEFAULT = {
     identity: {
@@ -24,7 +22,7 @@
     effects: {
       aurora: { enabled: true, blobs: 5, particles: 60, speed: 100 },
       glass: { enabled: true, blur: 16 },
-      radius: 16, shadows: "medium",
+      radius: 16, shadows: "soft",
       tilt: true, magnetic: true, splitText: true
     },
     animation: {
@@ -39,7 +37,7 @@
     },
     components: {
       buttonStyle: "gradient", cardStyle: "glass",
-      inputStyle: "rounded", toastPosition: "bottom-center", modalSize: "md"
+      inputStyle: "glass", toastPosition: "bottom-center", modalSize: "md"
     },
     images: { coverGlass: "", coverRubber: "", ogImage: "", heroSlides: [] },
     sections: {
@@ -109,11 +107,11 @@
 
     const SH = {
       none: { sm: "none", md: "none", lg: "none" },
-      soft: { sm: "0 2px 8px rgba(0,0,0,.05)", md: "0 8px 24px rgba(0,0,0,.08)", lg: "0 20px 60px rgba(0,0,0,.12)" },
+      soft: { sm: "0 4px 12px rgba(0,0,0,.03)", md: "0 8px 32px rgba(0,0,0,.06)", lg: "0 20px 60px rgba(0,0,0,.1)" },
       medium: { sm: "0 4px 16px rgba(10,61,56,.06)", md: "0 12px 40px rgba(10,61,56,.10)", lg: "0 30px 80px rgba(10,61,56,.16)" },
       strong: { sm: "0 8px 24px rgba(0,0,0,.15)", md: "0 20px 60px rgba(0,0,0,.2)", lg: "0 40px 100px rgba(0,0,0,.3)" }
     };
-    const sh = SH[D.effects.shadows] || SH.medium;
+    const sh = SH[D.effects.shadows] || SH.soft;
     root.style.setProperty("--sh-sm", sh.sm);
     root.style.setProperty("--sh", sh.md);
     root.style.setProperty("--sh-lg", sh.lg);
@@ -137,13 +135,6 @@
     const darkInk = adjust(C.ink, 0.85);
     const darkMuted = adjust(C.muted, 0.30);
 
-    const glassOff = D.effects.glass.enabled ? "" : `
-      .card, .site-header, .btn.ghost, .icon-btn, input, textarea, select,
-      .trust-item, .feature, .dash-card, .summary-col, .points-card {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-      }`;
-
     const revealMap = { fade: "translateY(0)", slide: "translateY(28px)", zoom: "scale(.9)", rotate: "perspective(1000px) rotateY(-10deg) translateY(28px)" };
     const revealFrom = revealMap[D.animation.revealType] || "translateY(28px)";
 
@@ -156,31 +147,6 @@
 
     const containerMap = { narrow: "1000px", normal: "1320px", wide: "1600px", full: "100%" };
     const CW = containerMap[D.layout.containerWidth] || "1320px";
-
-    const headerMap = {
-      glass: { bg: "var(--glass)", blur: "blur(20px) saturate(180%)", border: "1px solid var(--glass-border)" },
-      solid: { bg: "var(--bg)", blur: "none", border: "none" },
-      transparent: { bg: "transparent", blur: "none", border: "none" },
-      gradient: { bg: "linear-gradient(135deg, " + C.deep + ", " + C.teal + ")", blur: "none", border: "none" }
-    };
-    const HDR = headerMap[D.layout.headerStyle] || headerMap.glass;
-
-    const buttonMap = {
-      gradient: "",
-      solid: ".btn.primary { background: var(--teal) !important; box-shadow: none !important; }",
-      outlined: ".btn.primary { background: transparent !important; color: var(--teal) !important; border: 2px solid var(--teal) !important; box-shadow: none !important; }",
-      glass: ".btn.primary { background: var(--glass) !important; color: var(--ink) !important; border: 1px solid var(--glass-border) !important; backdrop-filter: blur(12px) !important; box-shadow: none !important; }",
-      "3d": ".btn.primary { box-shadow: 0 6px 0 var(--deep) !important; } .btn.primary:active { box-shadow: 0 2px 0 var(--deep) !important; transform: translateY(4px); }"
-    };
-    const BTN = buttonMap[D.components.buttonStyle] || "";
-
-    const inputMap = {
-      rounded: "",
-      flat: "input, textarea, select { border-radius: 0 !important; }",
-      underlined: "input, textarea, select { border-radius: 0 !important; border: none !important; border-bottom: 2px solid var(--line) !important; background: transparent !important; }",
-      glass: "input, textarea, select { background: var(--glass) !important; backdrop-filter: blur(10px) !important; border: 1px solid var(--glass-border) !important; }"
-    };
-    const INP = inputMap[D.components.inputStyle] || "";
 
     const modalSizeMap = { sm: "380px", md: "620px", lg: "840px", full: "100%" };
     const MS = modalSizeMap[D.components.modalSize] || "620px";
@@ -196,10 +162,11 @@
         --muted: ${C.muted};
         --stone: ${C.muted};
         --sage: ${C.muted};
-        --line: rgba(0,0,0,0.08);
-        --glass: rgba(255,255,255,0.55);
-        --glass-strong: rgba(255,255,255,0.75);
-        --glass-border: rgba(255,255,255,0.65);
+        
+        --glass-bg: rgba(255, 255, 255, 0.45);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --glass-blur: ${D.effects.blur || 20}px;
+
         --h1-size: ${D.typography.h1}px;
         --h2-size: ${D.typography.h2}px;
         --h3-size: ${D.typography.h3}px;
@@ -217,17 +184,25 @@
         --muted: ${darkMuted};
         --stone: ${darkMuted};
         --sage: ${darkMuted};
-        --line: rgba(255,255,255,0.08);
-        --glass: rgba(13,30,27,0.55);
-        --glass-strong: rgba(13,30,27,0.75);
-        --glass-border: rgba(95,208,197,0.18);
+
+        --glass-bg: rgba(13, 30, 27, 0.55);
+        --glass-border: rgba(95, 208, 197, 0.15);
+        --glass-blur: ${D.effects.blur || 20}px;
+
         --shadow-sm: 0 4px 16px rgba(0,0,0,.4);
         --shadow: 0 12px 40px rgba(0,0,0,.5);
         --shadow-lg: 0 30px 80px rgba(0,0,0,.6);
-        --sh-sm: 0 4px 16px rgba(0,0,0,.4);
-        --sh: 0 12px 40px rgba(0,0,0,.5);
-        --sh-lg: 0 30px 80px rgba(0,0,0,.6);
       }
+      
+      /* تطبيق الزجاج على البطاقات والهيدر */
+      .card, .site-header, .btn.ghost, .icon-btn, input, textarea, select, .trust-item, .feature, .dash-card, .summary-col, .points-card, .modal-card {
+        background: var(--glass-bg) !important;
+        backdrop-filter: blur(var(--glass-blur)) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%) !important;
+        border: 1px solid var(--glass-border) !important;
+        box-shadow: var(--sh-sm) !important;
+      }
+
       body {
         font-family: var(--font-ar) !important;
         font-size: var(--body-size);
@@ -242,12 +217,7 @@
       h1 { font-size: var(--h1-size); font-weight: var(--heading-weight); }
       h2 { font-size: var(--h2-size); font-weight: var(--heading-weight); }
       h3 { font-size: var(--h3-size); font-weight: var(--heading-weight); }
-      .site-header {
-        background: ${HDR.bg} !important;
-        backdrop-filter: ${HDR.blur} !important;
-        -webkit-backdrop-filter: ${HDR.blur} !important;
-        border-bottom: ${HDR.border} !important;
-      }
+      
       .container { max-width: ${CW}; padding: ${SP.container}; }
       .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: ${SP.gap}; }
       .logo { height: ${D.identity.logoHeight}px; }
@@ -260,9 +230,6 @@
         animation-direction: ${D.animation.marquee.direction === "reverse" ? "reverse" : "normal"} !important;
       }
       ${(D.sections.hidden || []).map((id) => '[data-section="' + id + '"] { display: none !important; }').join("\n")}
-      ${glassOff}
-      ${BTN}
-      ${INP}
       ${D.custom.css || ""}
     `;
 
@@ -309,12 +276,6 @@
       const target = isDark ? (logoDark || defaultDark) : (logoLight || defaultLight);
       if (img.getAttribute("src") !== target) img.setAttribute("src", target);
     });
-
-    if (D.identity.favicon) {
-      let fav = document.querySelector('link[rel="icon"]');
-      if (!fav) { fav = document.createElement("link"); fav.rel = "icon"; document.head.appendChild(fav); }
-      if (fav.getAttribute("href") !== D.identity.favicon) fav.setAttribute("href", D.identity.favicon);
-    }
   }
 
   window.DESIGN_APPLY = function () {
@@ -326,63 +287,19 @@
   applyDesign();
   applyLogo();
 
-  let logoTimeout;
-  const scheduleApplyLogo = () => {
-    clearTimeout(logoTimeout);
-    logoTimeout = setTimeout(applyLogo, 80);
-  };
+  const scheduleApplyLogo = () => setTimeout(applyLogo, 80);
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", scheduleApplyLogo);
-  } else {
-    scheduleApplyLogo();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", scheduleApplyLogo);
+  else scheduleApplyLogo();
 
   const startObserver = () => {
     if (!document.body) return;
-    const obs = new MutationObserver(scheduleApplyLogo);
-    obs.observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(scheduleApplyLogo).observe(document.body, { childList: true, subtree: true });
   };
   if (document.body) startObserver();
   else window.addEventListener("DOMContentLoaded", startObserver);
 
-  new MutationObserver(scheduleApplyLogo).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["class"]
-  });
-
-  const isDesign = document.documentElement.classList.contains("design-body") ||
-    (document.body && document.body.classList.contains("design-body"));
-
-  if (!isDesign) {
-    if (D.analytics.ga4) {
-      const s1 = document.createElement("script");
-      s1.async = true;
-      s1.src = "https://www.googletagmanager.com/gtag/js?id=" + D.analytics.ga4;
-      document.head.appendChild(s1);
-      const s2 = document.createElement("script");
-      s2.textContent = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','" + D.analytics.ga4 + "');";
-      document.head.appendChild(s2);
-    }
-    if (D.analytics.metaPixel) {
-      const s = document.createElement("script");
-      s.textContent = "!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','" + D.analytics.metaPixel + "');fbq('track','PageView');";
-      document.head.appendChild(s);
-    }
-    if (D.analytics.tiktok) {
-      const s = document.createElement("script");
-      s.textContent = "!function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie'];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.load=function(e,n){var i='https://analytics.tiktok.com/i18n/pixel/events.js';ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=i;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};var o=document.createElement('script');o.type='text/javascript';o.async=!0;o.src=i+'?sdkid='+e+'&lib='+t;var a=document.getElementsByTagName('script')[0];a.parentNode.insertBefore(o,a)};ttq.load('" + D.analytics.tiktok + "');ttq.page();}(window,document,'ttq');";
-      document.head.appendChild(s);
-    }
-    if (D.analytics.headScript) {
-      try { const s = document.createElement("script"); s.textContent = D.analytics.headScript; document.head.appendChild(s); } catch {}
-    }
-    if (D.analytics.bodyScript) {
-      window.addEventListener("DOMContentLoaded", () => {
-        try { const s = document.createElement("script"); s.textContent = D.analytics.bodyScript; document.body.appendChild(s); } catch {}
-      });
-    }
-  }
+  new MutationObserver(scheduleApplyLogo).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
   window.DESIGN_TOKENS_APPLY = applyDesign;
 })();
