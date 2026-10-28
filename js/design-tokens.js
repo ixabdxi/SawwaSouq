@@ -1,5 +1,5 @@
 /* ============================================================
-   SaWWA Souq — Design Tokens v4 (Logo Dark Mode Support)
+   SaWWA Souq — Design Tokens v5 (3 New Presets)
    ============================================================ */
 (function () {
   const DEPLOYED = (typeof window.SAWWA_DESIGN_CONFIG === "object" && window.SAWWA_DESIGN_CONFIG !== null)
@@ -324,7 +324,7 @@
   };
 
   applyDesign();
-  applyLogo(); // تطبيق الشعار فوراً عند التحميل
+  applyLogo();
 
   let logoTimeout;
   const scheduleApplyLogo = () => {
@@ -346,7 +346,6 @@
   if (document.body) startObserver();
   else window.addEventListener("DOMContentLoaded", startObserver);
 
-  // مراقبة تغيير الكلاس في الـ html عشان يتفعل الشعار الداكن أوتوماتيك
   new MutationObserver(scheduleApplyLogo).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ["class"]
@@ -385,5 +384,5 @@
     }
   }
 
-  window.DESIGN_TOKENS_APPLIED = true;
+  window.DESIGN_TOKENS_APPLY = applyDesign;
 })();
