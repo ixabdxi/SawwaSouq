@@ -82,7 +82,6 @@
     
     if (id === "dash") { 
       renderDash(); 
-      // تأخير بسيط جداً عشان العنصر ياخد مساحته قبل ما نرسم
       setTimeout(() => drawSalesChart(read(K.orders, [])), 100); 
     }
     if (id === "orders") renderOrders();
@@ -160,7 +159,6 @@
     const container = $("#chartContainer");
     if (!canvas || !container) return;
 
-    // مراقبة حجم الحاوية عشان نرسم الشارت لما تظهر
     if (!canvas._resizeObserver) {
       canvas._resizeObserver = new ResizeObserver(() => {
         if (container.clientWidth > 0) {
@@ -170,7 +168,6 @@
       canvas._resizeObserver.observe(container);
     }
 
-    // نحاول نرسم على طول لو العرض موجود
     if (container.clientWidth > 0) {
       renderChartLogic(canvas, orders);
     }
@@ -203,7 +200,6 @@
     const padL = 40, padR = 10, padT = 20, padB = 30;
     const w = cssW - padL - padR, h = cssH - padT - padB, barW = w / days.length - 10;
 
-    // Grid lines
     ctx.strokeStyle = "rgba(143,169,165,.3)"; 
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -214,7 +210,6 @@
     }
     ctx.stroke();
 
-    // Bars
     const grad = ctx.createLinearGradient(0, padT, 0, padT + h);
     grad.addColorStop(0, "#5FD0C5"); 
     grad.addColorStop(1, "#0F5C56");
@@ -237,7 +232,6 @@
       ctx.fill();
     });
 
-    // Dates
     ctx.fillStyle = "#4A5654"; 
     ctx.font = "11px 'Baloo Bhaijaan 2', sans-serif"; 
     ctx.textAlign = "center";
@@ -327,7 +321,7 @@
       <thead><tr><th>رقم</th><th>العميل</th><th>الهاتف</th><th>المدينة</th><th>المجموع</th><th>الدفع</th><th>حالة الدفع</th><th>الحالة</th><th>إجراءات</th></tr></thead>
       <tbody>${orders.map((o) => {
         
-        let actionBtns = "";
+        let actionBtns = `<button class="btn xs" data-invoice="${o.id}">فاتورة</button> `;
         const isCliq = o.paymentMethod === "CLIQ";
         const isCod = o.paymentMethod === "COD";
         const isPaid = o.paymentStatus === "PAID";
@@ -369,6 +363,10 @@
           </td>
         </tr>`}).join("")}</tbody></table>`;
 
+    el.querySelectorAll("[data-invoice]").forEach((b) => b.onclick = () => {
+      const order = read(K.orders, []).find(o => o.id === b.dataset.invoice);
+      if (order && window.Invoice) Invoice.generatePDF(order);
+    });
     el.querySelectorAll("[data-verify-cliq]").forEach((b) => b.onclick = () => updateOrder(b.dataset.verifyCliq, { paymentStatus: "PAID", status: "CONFIRMED" }));
     el.querySelectorAll("[data-verify-cod]").forEach((b) => b.onclick = () => updateOrder(b.dataset.verifyCod, { paymentStatus: "PAID" }));
     el.querySelectorAll("[data-ship]").forEach((b) => b.onclick = () => updateOrder(b.dataset.ship, { status: "SHIPPED" }));
