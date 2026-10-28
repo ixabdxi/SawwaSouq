@@ -5,8 +5,11 @@ export default async function handler(req, res) {
 
   const { orderID } = req.body;
 
+  if (!orderID) {
+    return res.status(400).json({ error: 'Order ID is required' });
+  }
+
   try {
-    // 1. الحصول على التوكن
     const auth = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');
     const tokenRes = await fetch('https://api-m.paypal.com/v1/oauth2/token', {
       method: 'POST',
@@ -20,7 +23,6 @@ export default async function handler(req, res) {
     if (!tokenRes.ok) throw new Error('Failed to get PayPal token');
     const tokenData = await tokenRes.json();
 
-    // 2. تأكيد سحب المبلغ
     const captureRes = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderID}/capture`, {
       method: 'POST',
       headers: { 
@@ -31,6 +33,10 @@ export default async function handler(req, res) {
     
     if (!captureRes.ok) throw new Error('Failed to capture PayPal order');
     const captureData = await captureRes.json();
+    
+    if (captureData.status !== 'COMPLETED') {
+      return res.status(400).json({ error: 'Payment not completed', status: captureData.status });
+    }
     
     return res.status(200).json(captureData);
   } catch (error) {
