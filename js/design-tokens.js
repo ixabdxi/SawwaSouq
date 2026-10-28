@@ -1,22 +1,16 @@
 /* ============================================================
    SaWWA Souq — Design Tokens v4
-   - يُحمَّل أول سكربت في كل صفحة
-   - يقرأ sawwa_design-config.js إن وُجد (للنشر)
-   - ثم يُطبّق sawwa_design من localStorage (معاينة)
-   - يربط الشعار تلقائيًا
    ============================================================ */
 (function () {
-  /* ============ 1. LOAD FROM DEPLOYED CONFIG FILE (if present) ============ */
   const DEPLOYED = (typeof window.SAWWA_DESIGN_CONFIG === "object" && window.SAWWA_DESIGN_CONFIG !== null)
     ? window.SAWWA_DESIGN_CONFIG
     : {};
 
-  /* ============ 2. DEFAULT ============ */
   const DEFAULT = {
     identity: {
       nameAr: "سوّا سوق", nameEn: "SaWWA Souq",
       taglineAr: "جودة تستحقّها، بسعر يناسبك.", taglineEn: "Quality you deserve, price you love.",
-      logo: "", logoDark: "", favicon: "", logoHeight: 44
+      logo: "assets/logo.png", logoDark: "assets/logo.png", favicon: "assets/favicon.png", logoHeight: 44
     },
     colors: {
       teal: "#0F5C56", teal2: "#12A89B", amber: "#E8A33D", deep: "#0A3D38",
@@ -74,14 +68,11 @@
     return out;
   }
 
-  /* ============ 3. LAYERED MERGE ============ */
   let local = {};
   try { local = JSON.parse(localStorage.getItem("sawwa_design") || "{}"); } catch {}
-  // DEFAULT ← DEPLOYED ← LOCAL (الأخير يفوز)
   const D = merge(merge(DEFAULT, DEPLOYED), local);
   window.DESIGN = D;
 
-  /* ============ COLOR MATH ============ */
   const hexToRgb = (h) => {
     const x = String(h).replace("#", "");
     return [parseInt(x.substr(0, 2), 16) || 0, parseInt(x.substr(2, 2), 16) || 0, parseInt(x.substr(4, 2), 16) || 0];
@@ -93,12 +84,10 @@
     return rgbToHex(r * (1 + factor), g * (1 + factor), b * (1 + factor));
   };
 
-  /* ============ APPLY DESIGN ============ */
   function applyDesign() {
     const root = document.documentElement;
     const C = D.colors;
 
-    /* Accent colors */
     root.style.setProperty("--teal", C.teal);
     root.style.setProperty("--teal-2", C.teal2);
     root.style.setProperty("--cyan", C.teal2);
@@ -107,7 +96,6 @@
     root.style.setProperty("--deep", C.deep);
     root.style.setProperty("--deeper", C.deep);
 
-    /* Fonts */
     const fAr = D.typography.fontAr.replace(/\s+/g, "+");
     const fEn = D.typography.fontEn.replace(/\s+/g, "+");
     const fontId = "design-fonts-link";
@@ -119,7 +107,6 @@
     fontLink.href = "https://fonts.googleapis.com/css2?family=" + fAr + ":wght@400;500;600;700;800;900&family=" + fEn + ":wght@400;500;700;900&display=swap";
     document.head.appendChild(fontLink);
 
-    /* Shadows */
     const SH = {
       none: { sm: "none", md: "none", lg: "none" },
       soft: { sm: "0 2px 8px rgba(0,0,0,.05)", md: "0 8px 24px rgba(0,0,0,.08)", lg: "0 20px 60px rgba(0,0,0,.12)" },
@@ -134,7 +121,6 @@
     root.style.setProperty("--shadow", sh.md);
     root.style.setProperty("--shadow-lg", sh.lg);
 
-    /* Radius */
     const R = D.effects.radius;
     root.style.setProperty("--radius", R + "px");
     root.style.setProperty("--radius-sm", Math.max(4, R - 6) + "px");
@@ -145,14 +131,12 @@
     root.style.setProperty("--r-md", (R + 4) + "px");
     root.style.setProperty("--r-lg", (R + 12) + "px");
 
-    /* Dark derived */
     const darkBg = adjust(C.bg, -0.92);
     const darkPaper = adjust(C.bg, -0.92);
     const darkWhite = adjust(C.bg, -0.85);
     const darkInk = adjust(C.ink, 0.85);
     const darkMuted = adjust(C.muted, 0.30);
 
-    /* Glass off */
     const glassOff = D.effects.glass.enabled ? "" : `
       .card, .site-header, .btn.ghost, .icon-btn, input, textarea, select,
       .trust-item, .feature, .dash-card, .summary-col, .points-card {
@@ -160,11 +144,9 @@
         -webkit-backdrop-filter: none !important;
       }`;
 
-    /* Reveal */
     const revealMap = { fade: "translateY(0)", slide: "translateY(28px)", zoom: "scale(.9)", rotate: "perspective(1000px) rotateY(-10deg) translateY(28px)" };
     const revealFrom = revealMap[D.animation.revealType] || "translateY(28px)";
 
-    /* Spacing */
     const spacingMap = {
       tight: { container: "16px 20px 80px", gap: "16px" },
       normal: { container: "30px 26px 100px", gap: "24px" },
@@ -172,11 +154,9 @@
     };
     const SP = spacingMap[D.layout.spacing] || spacingMap.normal;
 
-    /* Container width */
     const containerMap = { narrow: "1000px", normal: "1320px", wide: "1600px", full: "100%" };
     const CW = containerMap[D.layout.containerWidth] || "1320px";
 
-    /* Header style */
     const headerMap = {
       glass: { bg: "var(--glass)", blur: "blur(20px) saturate(180%)", border: "1px solid var(--glass-border)" },
       solid: { bg: "var(--bg)", blur: "none", border: "none" },
@@ -185,7 +165,6 @@
     };
     const HDR = headerMap[D.layout.headerStyle] || headerMap.glass;
 
-    /* Button style */
     const buttonMap = {
       gradient: "",
       solid: ".btn.primary { background: var(--teal) !important; box-shadow: none !important; }",
@@ -195,7 +174,6 @@
     };
     const BTN = buttonMap[D.components.buttonStyle] || "";
 
-    /* Input style */
     const inputMap = {
       rounded: "",
       flat: "input, textarea, select { border-radius: 0 !important; }",
@@ -204,11 +182,9 @@
     };
     const INP = inputMap[D.components.inputStyle] || "";
 
-    /* Modal size */
     const modalSizeMap = { sm: "380px", md: "620px", lg: "840px", full: "100%" };
     const MS = modalSizeMap[D.components.modalSize] || "620px";
 
-    /* Build CSS */
     const dynCss = `
       :root {
         --bg: ${C.bg};
@@ -298,14 +274,12 @@
     }
     st.textContent = dynCss;
 
-    /* Favicon */
     if (D.identity.favicon) {
       let fav = document.querySelector('link[rel="icon"]');
       if (!fav) { fav = document.createElement("link"); fav.rel = "icon"; document.head.appendChild(fav); }
       fav.href = D.identity.favicon;
     }
 
-    /* Meta */
     if (D.meta.title) document.title = D.meta.title;
     const setMeta = (name, content) => {
       if (!content) return;
@@ -319,11 +293,10 @@
     window.AURORA_SETTINGS = D.effects.aurora;
   }
 
-  /* ============ APPLY LOGO ============ */
   function applyLogo() {
     const logoLight = D.identity.logo;
     const logoDark = D.identity.logoDark;
-    const defaultLight = "assets/logo.svg";
+    const defaultLight = "assets/logo.png";
 
     document.querySelectorAll(".site-header .logo img, nav .logo img, .dp-side-head img, .sidebar-head .logo img").forEach((img) => {
       const target = logoLight || defaultLight;
@@ -342,7 +315,6 @@
     }
   }
 
-  /* ============ COMBINED ============ */
   window.DESIGN_APPLY = function () {
     applyDesign();
     applyLogo();
@@ -371,7 +343,6 @@
   if (document.body) startObserver();
   else window.addEventListener("DOMContentLoaded", startObserver);
 
-  /* ============ ANALYTICS ============ */
   const isDesign = document.documentElement.classList.contains("design-body") ||
     (document.body && document.body.classList.contains("design-body"));
 
