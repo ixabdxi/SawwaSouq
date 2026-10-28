@@ -179,6 +179,14 @@ window.UI = (() => {
     }
   };
 
+  const updateLogo = () => {
+    const isDark = document.documentElement.classList.contains("dark");
+    const newLogo = isDark ? "assets/logo-white.png" : "assets/logo.png";
+    document.querySelectorAll(".logo img").forEach(img => {
+      if (img.getAttribute("src") !== newLogo) img.setAttribute("src", newLogo);
+    });
+  };
+
   const header = () => {
     const lang = window.SAWWA.lang;
     const cartCount = window.Cart ? Cart.count() : 0;
@@ -232,6 +240,7 @@ window.UI = (() => {
     });
 
     updateBell();
+    updateLogo(); // تشغيل التحديث أول ما الصفحة تفتح
   };
 
   const marquee = () => {
@@ -291,6 +300,9 @@ window.UI = (() => {
     localStorage.setItem("sawwa_theme", isDark ? "dark" : "light");
     const btn = document.getElementById("themeToggle");
     if (btn) btn.textContent = isDark ? "☀️" : "🌙";
+    
+    updateLogo(); // تغيير الصورة عند الضغط على الزر
+
     toast(
       isDark
         ? (window.SAWWA.lang === "ar" ? "الوضع الداكن" : "Dark mode on")
