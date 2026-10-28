@@ -1,4 +1,33 @@
-localStorage.removeItem("sawwa_seeded_v2");
-localStorage.removeItem("sawwa_seeded_v3");
-localStorage.removeItem("sawwa_products");
-location.reload();
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>إعادة ضبط — SaWWA Souq</title>
+<style>
+  body { font-family: 'Baloo Bhaijaan 2', sans-serif; text-align: center; padding: 50px; background: #F4F1EA; color: #0A3D38; }
+  .box { background: #fff; padding: 40px; border-radius: 16px; max-width: 400px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+  h1 { font-size: 24px; margin-bottom: 10px; }
+  p { color: #557570; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>جاري إعادة ضبط البيانات...</h1>
+    <p>سيتم مسح البيانات المحلية وإعادة توجيهك للرئيسية.</p>
+  </div>
+  <script>
+    const keys = [
+      "sawwa_seeded_v2", "sawwa_seeded_v3", "sawwa_products", 
+      "sawwa_cart", "sawwa_design", "sawwa_admin_pwd", 
+      "sawwa_orders", "sawwa_customers", "sawwa_coupons", 
+      "sawwa_wishlist", "sawwa_loyalty_ledger", "sawwa_messages",
+      "sawwa_notifications", "sawwa_announce", "sawwa_settings"
+    ];
+    keys.forEach(k => localStorage.removeItem(k));
+    sessionStorage.clear();
+    
+    setTimeout(() => { location.href = "index.html"; }, 1500);
+  </script>
+</body>
+</html>
