@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="css/alerts.css" />
 <link rel="stylesheet" href="css/rtl.css" />
 
-<link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+<link rel="icon" type="image/png" href="assets/favicon.png" />
 <meta name="theme-color" content="#0A3D38" />
 </head>
 <body>
@@ -198,7 +198,7 @@ UI.init({
     const gridHTML = (list) => list.map((p) => {
       const onSale = p.compareAtPrice && p.compareAtPrice > p.price;
       const discount = onSale ? Math.round((1 - p.price / p.compareAtPrice) * 100) : 0;
-      const img = (p.images && p.images[0]) || "assets/placeholder.svg";
+      const img = (p.images && p.images[0]) || "assets/placeholder.png";
       return `
       <div class="card reveal">
         <a href="product.html?id=${p.id}" class="card-link">
@@ -266,7 +266,6 @@ UI.init({
 });
 </script>
 <script>
-  // كشف Supabase على الصفحة الرئيسية
   setTimeout(() => {
     if (window.SB && SB.isEnabled && SB.isEnabled()) {
       SB.init().then((c) => {
