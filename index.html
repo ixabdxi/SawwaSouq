@@ -15,6 +15,11 @@
 <link rel="stylesheet" href="css/alerts.css" />
 <link rel="stylesheet" href="css/rtl.css" />
 
+<style>
+  .site-header .logo { height: 50px !important; }
+  .site-header .logo img { height: 100% !important; width: auto !important; }
+</style>
+
 <link rel="icon" type="image/png" href="assets/favicon.png" />
 <meta name="theme-color" content="#0A3D38" />
 </head>
@@ -29,9 +34,9 @@
         <span class="badge-new">NEW DROP · SS 2026</span>
         <h1 class="font-en">SAWWA<br /><span>SOUQ</span></h1>
         <p data-i18n="hero.tagline"></p>
-        <div class="hero-cta">
-          <a href="shop.html" class="btn primary" data-i18n="hero.cta"></a>
-          <a href="about.html" class="btn ghost" data-i18n="nav.about"></a>
+        <div class="hero-cta" style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <a href="shop.html" class="btn primary" style="display: inline-flex; align-items: center; justify-content: center; min-width: 140px;">تسوق الآن</a>
+          <a href="about.html" class="btn ghost" style="display: inline-flex; align-items: center; justify-content: center; min-width: 140px; border: 1px solid var(--mint); color: var(--mint);">من نحن</a>
         </div>
       </div>
 
@@ -149,7 +154,8 @@
 <script src="js/ui.js"></script>
 <script>
 UI.init({
-  after: () => {
+  after: async () => {
+    await Store.init();
     const lang = window.SAWWA.lang;
 
     const initHeroSlider = () => {
@@ -237,14 +243,14 @@ UI.init({
     });
 
     const all = Store.products.all().filter(p => p.active);
-    document.getElementById("featuredGrid").innerHTML = gridHTML(all.slice(0, 4));
-    bind(document.getElementById("featuredGrid"));
+    const fg = document.getElementById("featuredGrid");
+    if(fg) { fg.innerHTML = gridHTML(all.slice(0, 4)); bind(fg); }
+    
+    const gg = document.getElementById("glassGrid");
+    if(gg) { gg.innerHTML = gridHTML(all.filter(p => p.type === "GLASS").slice(0, 4)); bind(gg); }
 
-    document.getElementById("glassGrid").innerHTML = gridHTML(all.filter(p => p.type === "GLASS").slice(0, 4));
-    bind(document.getElementById("glassGrid"));
-
-    document.getElementById("rubberGrid").innerHTML = gridHTML(all.filter(p => p.type === "RUBBER").slice(0, 4));
-    bind(document.getElementById("rubberGrid"));
+    const rg = document.getElementById("rubberGrid");
+    if(rg) { rg.innerHTML = gridHTML(all.filter(p => p.type === "RUBBER").slice(0, 4)); bind(rg); }
 
     const nl = document.getElementById("newsletterForm");
     if (nl) nl.onsubmit = (e) => {
