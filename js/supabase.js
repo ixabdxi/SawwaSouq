@@ -103,7 +103,7 @@ window.SB = (() => {
       if (patch.status) row.status = patch.status;
       if (patch.paymentStatus) row.payment_status = patch.paymentStatus;
       const { error } = await c.from("orders").update(row).eq("id", id);
-      if (error) return null;
+      if (error) { console.warn("[SB] orders.update:", error); return null; }
       return true;
     },
     remove: async (id) => {
