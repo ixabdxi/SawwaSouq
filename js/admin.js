@@ -7,7 +7,7 @@
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   const K = {
-    products: "sawwa_products", orders: "sawwa_orders", reviews: "sawwa_reviews",
+    products: "sawwa_products_cache", orders: "sawwa_orders", reviews: "sawwa_reviews",
     points: "sawwa_points", customers: "sawwa_customers", coupons: "sawwa_coupons",
     loyaltyLedger: "sawwa_loyalty_ledger", notifications: "sawwa_notifications",
     messages: "sawwa_messages", announce: "sawwa_announce", settings: "sawwa_settings",
@@ -16,7 +16,7 @@
   const read = (k, fallback) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? fallback : v; } catch { return fallback; } };
   const write = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
-  const getPwd = () => localStorage.getItem(K.adminPwd) || (window.SAWWA?.adminPassword || "sawwa2026");
+  const getPwd = () => localStorage.getItem(K.adminPwd) || "sawwa2026";
   const setPwd = (v) => localStorage.setItem(K.adminPwd, v);
 
   /* ============ SESSION ============ */
@@ -295,20 +295,20 @@
     const el = $("#ordersTable");
     if (!el) return;
 
-    let orders = read(K.orders, []);
-
+    let orders = [];
     if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
       try {
         const remote = await SB.orders.list();
         if (remote && Array.isArray(remote)) {
-          const map = new Map();
-          [...remote, ...orders].forEach((o) => map.set(o.id, o));
-          orders = [...map.values()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          orders = remote;
           write(K.orders, orders);
         }
       } catch (e) {
-        console.warn("[Admin] Supabase fetch failed:", e);
+        console.warn("[Admin] Supabase fetch failed, using local cache:", e);
+        orders = read(K.orders, []);
       }
+    } else {
+      orders = read(K.orders, []);
     }
 
     if (orderSearchQ) orders = orders.filter((o) => (o.id + o.name + o.phone + (o.email||"")).toLowerCase().includes(orderSearchQ));
@@ -364,7 +364,7 @@
         </tr>`}).join("")}</tbody></table>`;
 
     el.querySelectorAll("[data-invoice]").forEach((b) => b.onclick = () => {
-      const order = read(K.orders, []).find(o => o.id === b.dataset.invoice);
+      const order = orders.find(x => x.id === b.dataset.invoice);
       if (order && window.Invoice) Invoice.generatePDF(order);
     });
     el.querySelectorAll("[data-verify-cliq]").forEach((b) => b.onclick = () => updateOrder(b.dataset.verifyCliq, { paymentStatus: "PAID", status: "CONFIRMED" }));
@@ -381,19 +381,37 @@
         confirmDel = confirm(`هل أنت متأكد من حذف الطلب ${id}؟`);
       }
       if (!confirmDel) return;
+      
+      if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
+        await SB.orders.remove(id);
+      }
       write(K.orders, read(K.orders, []).filter((o) => o.id !== id));
-      if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) SB.orders.remove(id);
       renderOrders(); renderDash();
     });
   };
 
-  const updateOrder = (id, patch) => {
+  const updateOrder = async (id, patch) => {
+    let success = false;
+    if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
+      const res = await SB.orders.update(id, patch);
+      if (res) success = true;
+    }
+    
     const orders = read(K.orders, []);
     const i = orders.findIndex((o) => o.id === id);
-    if (i >= 0) { orders[i] = { ...orders[i], ...patch }; write(K.orders, orders); }
-    if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) SB.orders.update(id, patch);
-    renderOrders(); renderDash();
-    if (window.UI && UI.toast) UI.toast("تم تحديث حالة الطلب", "success");
+    if (i >= 0) { 
+      orders[i] = { ...orders[i], ...patch }; 
+      write(K.orders, orders); 
+      success = true;
+    }
+    
+    renderOrders(); 
+    renderDash();
+    if (success && window.UI && UI.toast) {
+      UI.toast("تم تحديث حالة الطلب", "success");
+    } else {
+      if (window.UI && UI.toast) UI.toast("فشل تحديث الطلب", "error");
+    }
   };
 
   /* ============ PRODUCTS ============ */
@@ -485,15 +503,23 @@
       warranty: true, active: true
     };
     if (!data.nameAr || !data.nameEn) { alert("الاسم مطلوب"); return; }
-    const products = read(K.products, []);
+    
+    let finalProduct;
     if (editingProductId) {
-      const i = products.findIndex((p) => p.id === editingProductId);
-      if (i >= 0) products[i] = { ...products[i], ...data };
+      finalProduct = { ...data, id: editingProductId };
+      if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) SB.products.save(finalProduct);
+      const list = read(K.products, []);
+      const i = list.findIndex((p) => p.id === editingProductId);
+      if (i >= 0) list[i] = finalProduct;
+      write(K.products, list);
     } else {
-      products.unshift({ ...data, id: newId("p"), slug: "p-" + Date.now().toString(36), createdAt: Date.now() });
+      finalProduct = { ...data, id: newId("p"), slug: "p-" + Date.now().toString(36), createdAt: Date.now() };
+      if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) SB.products.save(finalProduct);
+      const list = read(K.products, []);
+      list.unshift(finalProduct);
+      write(K.products, list);
     }
-    write(K.products, products);
-    if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) SB.products.save(products.find(p=>p.id === (editingProductId || products[0].id)));
+    
     productModal.classList.add("hidden");
     renderProducts(); renderDash();
   };
@@ -562,8 +588,8 @@
       }
       if (!confirmDel) return;
       
-      write(K.products, read(K.products, []).filter((x) => x.id !== b.dataset.del));
       if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) SB.products.remove(b.dataset.del);
+      write(K.products, read(K.products, []).filter((x) => x.id !== b.dataset.del));
       renderProducts();
     });
   };
