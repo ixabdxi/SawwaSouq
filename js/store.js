@@ -1,91 +1,63 @@
 window.Store = (() => {
   const KEY = {
-    products: "sawwa_products",
+    products: "sawwa_products_cache",
     orders: "sawwa_orders",
     reviews: "sawwa_reviews",
-    points: "sawwa_points",
-    seeded: "sawwa_seeded_v5" // تحديث النسخة
+    points: "sawwa_points"
   };
 
-  const seedProducts = () => {
-    const rubber = Array.from({ length: 8 }).map((_, i) => ({
-      id: `rubber-${i + 1}`,
-      slug: `rubber-pad-${i + 1}`,
-      nameAr: `ماوس باد مطاطي ${i + 1}`,
-      nameEn: `Rubber Mousepad ${i + 1}`,
-      descAr: "ماوس باد مطاطي مقاس 40×90 سم، سطح أملس مضاد للانزلاق، قاعدة مطاطية تثبت على المكتب. مناسب للاعبين والمصممين والعمل المكتبي. يُشحن ملفوفًا رول ويُفتح مستويًا خلال ساعات.",
-      descEn: "Rubber mousepad 40×90 cm. Smooth anti-slip surface, rubber base. Suits gamers, designers, and office work. Ships rolled and flattens within hours.",
-      price: 1200,
-      compareAtPrice: 1800,
-      costPrice: 0,
-      type: "RUBBER",
-      stock: 12,
-      images: [
-        "assets/rubber-main.jpg",
-        "assets/rubber-main.jpg"
-      ],
-      packaging: "رول — 40×90 سم، كرتون 42×10×10 سم",
-      warranty: true,
-      active: true,
-      createdAt: Date.now() - i * 1000
-    }));
-
-    const glass = Array.from({ length: 10 }).map((_, i) => ({
-      id: `glass-${i + 1}`,
-      slug: `glass-pad-${i + 1}`,
-      nameAr: `ماوس باد زجاجي ${i + 1}`,
-      nameEn: `Glass Mousepad ${i + 1}`,
-      descAr: "ماوس باد زجاجي فاخر مقاس 48×43×4 سم. سطح مقوّى بانزلاق فائق ودقة عالية، قاعدة مضادة للانزلاق، تغليف صلب يحمي الحواف. لمسة فخمة على مكتبك.",
-      descEn: "Luxury glass mousepad 48×43×4 cm. Tempered smooth surface, precision glide, anti-slip base, rigid protective packaging.",
-      price: 2000,
-      compareAtPrice: 3500,
-      costPrice: 0,
-      type: "GLASS",
-      stock: 7,
-      images: [
-        "assets/glass-main.jpg",
-        "assets/glass-main.jpg"
-      ],
-      packaging: "علبة صلبة 48×43×4 سم",
-      warranty: true,
-      active: true,
-      createdAt: Date.now() - (i + 100) * 1000
-    }));
-
-    localStorage.setItem(KEY.products, JSON.stringify([...rubber, ...glass]));
-    localStorage.setItem(KEY.seeded, "1");
-  };
-
-  const init = () => { if (!localStorage.getItem(KEY.seeded)) seedProducts(); };
+  const getCache = () => JSON.parse(localStorage.getItem(KEY.products) || "[]");
+  const setCache = (list) => localStorage.setItem(KEY.products, JSON.stringify(list));
 
   const products = {
-    all: () => JSON.parse(localStorage.getItem(KEY.products) || "[]"),
-    byId: (id) => products.all().find((p) => p.id === id),
-    byType: (type) => products.all().filter((p) => p.type === type && p.active),
-    save: (list) => localStorage.setItem(KEY.products, JSON.stringify(list)),
-    upsert: (p) => {
-      const list = products.all();
+    all: () => getCache(),
+    byId: (id) => getCache().find((p) => p.id === id),
+    byType: (type) => getCache().filter((p) => p.type === type && p.active),
+
+    fetchFromCloud: async () => {
+      if (window.SB && SB.isEnabled()) {
+        const remote = await SB.products.list();
+        if (remote) {
+          setCache(remote);
+          return remote;
+        }
+      }
+      return getCache();
+    },
+
+    save: async (p) => {
+      if (window.SB && SB.isEnabled()) await SB.products.save(p);
+      const list = getCache();
       const i = list.findIndex((x) => x.id === p.id);
       if (i >= 0) list[i] = { ...list[i], ...p };
-      else list.unshift({ ...p, id: p.id || `p-${Date.now()}`, createdAt: Date.now(), active: true });
-      products.save(list);
+      else list.unshift(p);
+      setCache(list);
     },
-    remove: (id) => products.save(products.all().filter((p) => p.id !== id)),
-    decrementStock: (id, qty) => {
-      const list = products.all();
+
+    remove: async (id) => {
+      if (window.SB && SB.isEnabled()) await SB.products.remove(id);
+      setCache(getCache().filter((p) => p.id !== id));
+    },
+
+    decrementStock: async (id, qty) => {
+      const list = getCache();
       const i = list.findIndex((x) => x.id === id);
-      if (i >= 0) list[i].stock = Math.max(0, list[i].stock - qty);
-      products.save(list);
+      if (i >= 0) {
+        list[i].stock = Math.max(0, list[i].stock - qty);
+        setCache(list);
+        if (window.SB && SB.isEnabled()) await SB.products.save(list[i]);
+      }
     }
   };
 
   const orders = {
     all: () => JSON.parse(localStorage.getItem(KEY.orders) || "[]"),
     byId: (id) => orders.all().find((o) => o.id === id),
-    create: (o) => {
+    create: async (o) => {
       const list = orders.all();
       list.unshift(o);
       localStorage.setItem(KEY.orders, JSON.stringify(list));
+      if (window.SB && SB.isEnabled()) await SB.orders.create(o);
     },
     update: (id, patch) => {
       const list = orders.all();
@@ -120,6 +92,10 @@ window.Store = (() => {
     add: (n) => localStorage.setItem(KEY.points, String(points.get() + n)),
     subtract: (n) => localStorage.setItem(KEY.points, String(Math.max(0, points.get() - n))),
     set: (n) => localStorage.setItem(KEY.points, String(n))
+  };
+
+  const init = async () => {
+    await products.fetchFromCloud();
   };
 
   return { init, products, orders, reviews, points };
