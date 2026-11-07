@@ -130,14 +130,12 @@ window.SB = (() => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     
-    // رفع الصورة للمسار العام داخل bucket
     const { error } = await c.storage.from('products').upload(fileName, file);
     if (error) { 
       console.warn("[SB] uploadImage:", error); 
-      return null; 
+      throw new Error(error.message); 
     }
     
-    // استرجاع الرابط المباشر
     const { data } = c.storage.from('products').getPublicUrl(fileName);
     return data.publicUrl;
   };
