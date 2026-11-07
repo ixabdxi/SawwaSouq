@@ -1,6 +1,3 @@
-/* ============================================================
-   SaWWA Souq — Supabase Wrapper (Full)
-   ============================================================ */
 window.SB = (() => {
   const cfg = window.SUPABASE_CONFIG || {};
   let client = null;
@@ -137,6 +134,7 @@ window.SB = (() => {
     }
     
     const { data } = c.storage.from('products').getPublicUrl(fileName);
+    console.log("URL Returned from Supabase:", data.publicUrl);
     return data.publicUrl;
   };
 
