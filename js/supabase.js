@@ -129,12 +129,16 @@ window.SB = (() => {
     const c = await init(); if (!c) return null;
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    const filePath = `public/${fileName}`;
-
-    const { error } = await c.storage.from('products').upload(filePath, file);
-    if (error) { console.warn("[SB] uploadImage:", error); return null; }
     
-    const { data } = c.storage.from('products').getPublicUrl(filePath);
+    // رفع الصورة للمسار العام داخل bucket
+    const { error } = await c.storage.from('products').upload(fileName, file);
+    if (error) { 
+      console.warn("[SB] uploadImage:", error); 
+      return null; 
+    }
+    
+    // استرجاع الرابط المباشر
+    const { data } = c.storage.from('products').getPublicUrl(fileName);
     return data.publicUrl;
   };
 
