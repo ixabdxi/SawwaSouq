@@ -125,5 +125,18 @@ window.SB = (() => {
     });
   };
 
-  return { isEnabled, init, products, orders, subscribeOrders };
+  const uploadImage = async (file) => {
+    const c = await init(); if (!c) return null;
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    const filePath = `public/${fileName}`;
+
+    const { error } = await c.storage.from('products').upload(filePath, file);
+    if (error) { console.warn("[SB] uploadImage:", error); return null; }
+    
+    const { data } = c.storage.from('products').getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
+  return { isEnabled, init, products, orders, subscribeOrders, uploadImage };
 })();
