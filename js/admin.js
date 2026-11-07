@@ -424,11 +424,13 @@
   let editingProductId = null;
   let currentProductImage = "";
 
-  const uploadProductImage = async (file) => {
+    const uploadProductImage = async (file) => {
     if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
-      return await SB.uploadImage(file);
+      const url = await SB.uploadImage(file);
+      if (!url) throw new Error("فشل الرفع إلى السيرفر");
+      return url;
     }
-    // احتياطي في حال السيرفر فصل (بنرجع للطريقة القديمة)
+    // احتياطي
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target.result);
@@ -436,7 +438,6 @@
       reader.readAsDataURL(file);
     });
   };
-
   const renderImagePreview = () => {
     const preview = $("#pm_preview"), clearBtn = $("#pm_clear");
     if (!preview) return;
