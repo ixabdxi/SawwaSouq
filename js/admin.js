@@ -424,26 +424,18 @@
   let editingProductId = null;
   let currentProductImage = "";
 
-  const fileToCompressedBase64 = (file, maxSize = 800) => new Promise((resolve, reject) => {
-    if (!file.type.startsWith("image/")) return reject("not_image");
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
-        if (width > height && width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
-        else if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
-        canvas.width = width; canvas.height = height;
-        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", 0.85));
-      };
-      img.onerror = () => reject("load_error");
-      img.src = e.target.result;
-    };
-    reader.onerror = () => reject("read_error");
-    reader.readAsDataURL(file);
-  });
+  const uploadProductImage = async (file) => {
+    if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
+      return await SB.uploadImage(file);
+    }
+    // احتياطي في حال السيرفر فصل (بنرجع للطريقة القديمة)
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (e) => reject("read_error");
+      reader.readAsDataURL(file);
+    });
+  };
 
   const renderImagePreview = () => {
     const preview = $("#pm_preview"), clearBtn = $("#pm_clear");
@@ -461,7 +453,12 @@
     const drop = $("#pm_drop"), fileInput = $("#pm_file"), chooseBtn = $("#pm_choose"), clearBtn = $("#pm_clear");
     if (!drop || !fileInput) return;
     const handleFile = async (file) => {
-      try { currentProductImage = await fileToCompressedBase64(file); renderImagePreview(); }
+      try { 
+        UI.toast("جاري رفع الصورة...", "info");
+        currentProductImage = await uploadProductImage(file); 
+        renderImagePreview(); 
+        UI.toast("تم رفع الصورة بنجاح", "success");
+      }
       catch (e) { alert("تعذّر تحميل الصورة: " + e); }
     };
     if (chooseBtn) chooseBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); fileInput.click(); };
