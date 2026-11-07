@@ -11,7 +11,7 @@
     points: "sawwa_points", customers: "sawwa_customers", coupons: "sawwa_coupons",
     loyaltyLedger: "sawwa_loyalty_ledger", notifications: "sawwa_notifications",
     messages: "sawwa_messages", announce: "sawwa_announce", settings: "sawwa_settings",
-    adminPwd: "sawwa_admin_pwd", loginAttempts: "sawwa_login_attempts", sessionExpires: "sawwa_admin_expires"
+    adminPwd: "sawwa_admin_pwd", sessionExpires: "sawwa_admin_expires"
   };
   const read = (k, fallback) => { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? fallback : v; } catch { return fallback; } };
   const write = (k, v) => localStorage.setItem(k, JSON.stringify(v));
@@ -19,7 +19,6 @@
   const getPwd = () => localStorage.getItem(K.adminPwd) || "sawwa2026";
   const setPwd = (v) => localStorage.setItem(K.adminPwd, v);
 
-  /* ============ SESSION ============ */
   const sessionValid = () => {
     const exp = parseInt(sessionStorage.getItem(K.sessionExpires) || "0", 10);
     return sessionStorage.getItem("sawwa_admin") === "1" && exp > Date.now();
@@ -29,7 +28,6 @@
     sessionStorage.setItem(K.sessionExpires, String(Date.now() + 60 * 60 * 1000));
   };
 
-  /* ============ LOGIN ============ */
   const loginScreen = $("#loginScreen");
   const adminApp = $("#adminApp");
   const loginBtn = $("#loginBtn");
@@ -66,7 +64,6 @@
     location.reload();
   });
 
-  /* ============ NAV ============ */
   const TITLES = {
     dash: "نظرة عامة", orders: "الطلبات", products: "المنتجات", inventory: "المخزون",
     customers: "العملاء", reviews: "المراجعات", messages: "الرسائل", coupons: "الكوبونات",
@@ -106,7 +103,6 @@
     });
   };
 
-  /* ============ HELPERS ============ */
   const fmtJOD = (cents) => ((cents || 0) / 100).toFixed(2) + " JOD";
   const fmtDate = (ts) => new Date(ts).toLocaleString("ar-JO");
   const newId = (p) => p + "-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 6).toUpperCase();
@@ -119,7 +115,6 @@
     setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 100);
   };
 
-  /* ============ DASH ============ */
   const renderDash = () => {
     const orders = read(K.orders, []);
     const products = read(K.products, []);
@@ -153,7 +148,6 @@
     renderSmartAlerts(orders, products);
   };
 
-  /* ============ FIXED CHART FUNCTION (ResizeObserver) ============ */
   const drawSalesChart = (orders) => {
     const canvas = $("#chartSales");
     const container = $("#chartContainer");
@@ -278,7 +272,6 @@
       <div class="admin-list-item" style="border-inline-start:4px solid ${a.type === "danger" ? "#C03030" : a.type === "warn" ? "#E8A33D" : "#1565C0"}"><span class="label">${esc(a.text)}</span></div>`).join("")}</div>`;
   };
 
-  /* ============ ORDERS ============ */
   let orderSearchQ = "", orderFilterStatus = "", orderFilterPay = "";
   const oSearch = $("#orderSearch"), oFS = $("#orderFilterStatus"), oFP = $("#orderFilterPay"), oExp = $("#exportOrders");
   if (oSearch) oSearch.oninput = (e) => { orderSearchQ = e.target.value.toLowerCase(); renderOrders(); };
@@ -414,7 +407,6 @@
     }
   };
 
-  /* ============ PRODUCTS ============ */
   let prodSearchQ = "", prodFilterType = "";
   const pSearch = $("#prodSearch"), pFT = $("#prodFilterType");
   if (pSearch) pSearch.oninput = (e) => { prodSearchQ = e.target.value.toLowerCase(); renderProducts(); };
@@ -424,13 +416,16 @@
   let editingProductId = null;
   let currentProductImage = "";
 
-    const uploadProductImage = async (file) => {
+  const uploadProductImage = async (file) => {
     if (window.SB && typeof SB !== 'undefined' && SB.isEnabled()) {
-      const url = await SB.uploadImage(file);
-      if (!url) throw new Error("فشل الرفع إلى السيرفر");
-      return url;
+      try {
+        const url = await SB.uploadImage(file);
+        if (!url) throw new Error("فشل الرفع (تأكد من إعدادات Bucket في Supabase)");
+        return url;
+      } catch (err) {
+        throw new Error(err.message || "فشل الرفع");
+      }
     }
-    // احتياطي
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target.result);
@@ -438,11 +433,12 @@
       reader.readAsDataURL(file);
     });
   };
+
   const renderImagePreview = () => {
     const preview = $("#pm_preview"), clearBtn = $("#pm_clear");
     if (!preview) return;
     if (currentProductImage) {
-      preview.innerHTML = `<img src="${currentProductImage}" alt="preview" />`;
+      preview.innerHTML = `<img src="${currentProductImage}" alt="preview" style="width:100%; height:100%; object-fit:cover;" />`;
       if (clearBtn) clearBtn.style.display = "inline-flex";
     } else {
       preview.innerHTML = `<div class="iu-empty"><div class="iu-icon">📷</div><div class="iu-text">اسحب الصورة هنا</div></div>`;
@@ -460,7 +456,7 @@
         renderImagePreview(); 
         UI.toast("تم رفع الصورة بنجاح", "success");
       }
-      catch (e) { alert("تعذّر تحميل الصورة: " + e); }
+      catch (e) { alert("تعذّر تحميل الصورة: " + e.message); }
     };
     if (chooseBtn) chooseBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); fileInput.click(); };
     drop.onclick = (e) => { if (e.target.closest("button")) return; fileInput.click(); };
@@ -592,7 +588,6 @@
     });
   };
 
-  /* ============ INVENTORY ============ */
   const iExp = $("#exportInventory");
   if (iExp) iExp.onclick = () => {
     const list = read(K.products, []);
@@ -615,7 +610,7 @@
           <td><strong class="font-en" style="color:${p.stock <= 10 ? '#C03030' : 'inherit'}">${p.stock}</strong></td>
           <td class="actions-cell">
             <button class="btn xs" data-inc="${p.id}">+1</button>
-            <button class="btn xs" data-dec="${p.id}">−1</button>
+            <button class="btn xs" data-dec="${p.id}">-1</button>
             <button class="btn xs" data-set="${p.id}">تعيين</button>
           </td>
         </tr>`).join("")}</tbody></table>`;
@@ -661,7 +656,6 @@
     renderInventory();
   };
 
-  /* ============ CUSTOMERS ============ */
   let custSearchQ = "";
   const cSearch = $("#custSearch");
   if (cSearch) cSearch.oninput = (e) => { custSearchQ = e.target.value.toLowerCase(); renderCustomers(); };
@@ -705,7 +699,6 @@
     });
   };
 
-  /* ============ REVIEWS ============ */
   let reviewFilter = "pending";
   const rF = $("#reviewFilter");
   if (rF) rF.onchange = (e) => { reviewFilter = e.target.value; renderReviews(); };
@@ -749,7 +742,6 @@
     });
   };
 
-  /* ============ MESSAGES ============ */
   let msgFilter = "all";
   const mF = $("#msgFilter");
   if (mF) mF.onchange = (e) => { msgFilter = e.target.value; renderMessages(); };
@@ -799,7 +791,6 @@
     });
   };
 
-  /* ============ COUPONS ============ */
   const couponModal = $("#couponModal");
   const ncBtn = $("#newCouponBtn");
   if (ncBtn) ncBtn.onclick = () => {
@@ -864,7 +855,6 @@
     });
   };
 
-  /* ============ LOYALTY ============ */
   const renderLoyalty = () => {
     const s = window.SAWWA?.loyalty || {};
     const le = $("#loyEarn"); if (le) le.value = s.earnPerJOD ?? 1;
@@ -892,7 +882,6 @@
     alert("تم");
   };
 
-  /* ============ ANALYTICS ============ */
   const renderAnalytics = () => {
     const orders = read(K.orders, []);
     const paid = orders.filter((o) => o.paymentStatus === "PAID" || o.paymentMethod === "COD");
@@ -918,7 +907,6 @@
       : `<p class="empty-state">لا بيانات</p>`;
   };
 
-  /* ============ NOTIFICATIONS ============ */
   const renderNotifications = () => {
     const list = read(K.notifications, []);
     const el = $("#sysNotifications");
@@ -942,7 +930,6 @@
     if (window.UI?.toast) UI.toast("تم الإرسال", "success");
   };
 
-  /* ============ ANNOUNCE ============ */
   const renderAnnounce = () => {
     const a = read(K.announce, { ar: "شحن 3 دنانير", en: "3 JOD shipping", enabled: 1 });
     const aa = $("#annAr"); if (aa) aa.value = a.ar || "";
@@ -956,7 +943,6 @@
     alert("تم");
   };
 
-  /* ============ SETTINGS ============ */
   const renderSettings = () => {
     const s = read(K.settings, {});
     const sna = $("#setNameAr"); if (sna) sna.value = s.nameAr || window.SAWWA?.name?.ar || "سوّا سوق";
@@ -983,7 +969,6 @@
     alert("تم تحديث كلمة المرور");
   };
 
-  /* ============ BACKUP ============ */
   const eAll = $("#exportAll");
   if (eAll) eAll.onclick = () => {
     const data = {
@@ -1029,14 +1014,12 @@
     location.reload();
   };
 
-  /* ============ CLOCK ============ */
   setInterval(() => {
     const d = new Date();
     const el = $("#currentTime");
     if (el) el.textContent = d.toLocaleTimeString("ar-JO");
   }, 1000);
 
-  /* ============ AUTO REFRESH & REALTIME ============ */
   let refreshInterval = null;
   const startAutoRefresh = () => {
     if (refreshInterval) clearInterval(refreshInterval);
