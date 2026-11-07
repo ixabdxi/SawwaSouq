@@ -381,7 +381,7 @@
     else if (window.UI && UI.toast) UI.toast("فشل تحديث الطلب", "error");
   };
 
-  /* ============ PRODUCTS (النظام الجديد) ============ */
+  /* ============ PRODUCTS ============ */
   let prodSearchQ = "", prodFilterType = "";
   const pSearch = $("#prodSearch"), pFT = $("#prodFilterType");
   if (pSearch) pSearch.oninput = (e) => { prodSearchQ = e.target.value.toLowerCase(); renderProducts(); };
@@ -389,7 +389,7 @@
 
   const productModal = $("#productModal");
   let editingProductId = null;
-  let currentImages = []; // مصفوفة الصور المتعددة
+  let currentImages = []; 
 
   const renderGalleryPreview = () => {
     const preview = $("#pm_gallery_preview");
