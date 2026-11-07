@@ -155,6 +155,15 @@
 <script>
 UI.init({
   after: async () => {
+    // 1. إجبار المتجر على جلب أحدث البيانات من السيرفر وتجاهل الكاش القديم
+    if (window.SB && SB.isEnabled()) {
+      const freshProducts = await SB.products.list();
+      if (freshProducts) {
+        localStorage.setItem("sawwa_products_cache", JSON.stringify(freshProducts));
+      }
+    }
+    
+    // 2. نكمل باقي الكود العادي
     await Store.init();
     const lang = window.SAWWA.lang;
 
@@ -205,12 +214,16 @@ UI.init({
       const onSale = p.compareAtPrice && p.compareAtPrice > p.price;
       const discount = onSale ? Math.round((1 - p.price / p.compareAtPrice) * 100) : 0;
       const img = (p.images && p.images[0]) || "assets/placeholder.png";
+      
+      // هون ضفنا ?v=Date.now() عشان نكسر الكاش تبعت الصورة بالمتصفح
+      const imgUrl = img.startsWith('http') ? `${img}?v=${Date.now()}` : img;
+
       return `
       <div class="card reveal">
         <a href="product.html?id=${p.id}" class="card-link">
           <div class="card-img">
             ${onSale ? `<span class="sale-badge">-${discount}%</span>` : ""}
-            <img src="${img}" alt="${lang === 'ar' ? p.nameAr : p.nameEn}" loading="lazy" />
+            <img src="${imgUrl}" alt="${lang === 'ar' ? p.nameAr : p.nameEn}" loading="lazy" />
           </div>
           <div class="card-body">
             <h3>${lang === 'ar' ? p.nameAr : p.nameEn}</h3>
